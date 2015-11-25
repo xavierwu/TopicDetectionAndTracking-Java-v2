@@ -534,7 +534,9 @@ public class DataPreprocessor {
 		try {
 			writer = new BufferedWriter(new FileWriter(tfFile));
 			for (int i = 0; i < sgmFiles.length; i++) {
-				System.out.println(sgmFiles[i].getName() + "\tfound!");
+				// System.out.println(sgmFiles[i].getName() + "\tfound!");
+				if (i % 100 == 0)
+					System.out.println(i + "/" + sgmFiles.length);
 
 				File sgmFile = new File(sgmFiles[i].getAbsolutePath());
 				assert(sgmFile.exists());
@@ -561,19 +563,19 @@ public class DataPreprocessor {
 							String wordsInALine[] = newLine.split(" ");
 							for (String word : wordsInALine) {
 								word = processWord(word);
-								if (glossary.containsWord(word))
-									glossary.raiseIDF(glossary.getWordID(word));
-								else
-									glossary.insertWord(word);
+								glossary.insertWord(word);
 								int wordID = glossary.getWordID(word);
 								temp.addWord(wordID);
 							}
 						}
 						writer.append(src + timestamp + " ");
 						temp.initTermFrequency();
-						for (Entry<Integer, Double> entry : temp.getTermFrequency().entrySet())
-							writer.append(
-									entry.getKey().toString() + ":" + String.format("%.2f", entry.getValue()) + " ");
+						for (Entry<Integer, Double> entry : temp.getTermFrequency().entrySet()) {
+							int wordID = entry.getKey();
+							double tf = entry.getValue();
+							writer.append(wordID + ":" + String.format("%.2f", tf) + " ");
+							glossary.raiseDocumentCount(wordID);
+						}
 						writer.append("\n");
 					}
 				}

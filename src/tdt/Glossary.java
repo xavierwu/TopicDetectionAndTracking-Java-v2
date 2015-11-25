@@ -36,12 +36,16 @@ public class Glossary {
 		return glossaryStringToInt.get(word);
 	}
 
-	public int getIDF(int wordID) {
-		return idf.get(wordID);
+	public int getDocumentCount(int wordID) {
+		return documentCount.get(wordID);
 	}
 
-	public void raiseIDF(int wordID) {
-		idf.put(wordID, idf.get(wordID) + 1);
+	public void raiseDocumentCount(int wordID) {
+		if (documentCount.containsKey(wordID)) {
+			documentCount.put(wordID, documentCount.get(wordID) + 1);
+		} else {
+			documentCount.put(wordID, 1);
+		}
 	}
 
 	public void insertWord(String word) {
@@ -49,7 +53,7 @@ public class Glossary {
 			int index = size();
 			glossaryIntToString.put(index, word);
 			glossaryStringToInt.put(word, index);
-			idf.put(index, 1);
+			documentCount.put(index, 0);
 		}
 	}
 
@@ -59,7 +63,8 @@ public class Glossary {
 		try {
 			writer = new BufferedWriter(new FileWriter(glossaryFile));
 			for (Integer wordID : glossaryIntToString.keySet())
-				writer.append(wordID.toString() + " " + idf.get(wordID) + " " + glossaryIntToString.get(wordID) + "\n");
+				writer.append(wordID.toString() + " " + documentCount.get(wordID) + " "
+						+ glossaryIntToString.get(wordID) + "\n");
 			writer.close();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -69,5 +74,5 @@ public class Glossary {
 
 	private HashMap<Integer, String> glossaryIntToString = new HashMap<Integer, String>();
 	private HashMap<String, Integer> glossaryStringToInt = new HashMap<String, Integer>();
-	private HashMap<Integer, Integer> idf = new HashMap<Integer, Integer>();
+	private HashMap<Integer, Integer> documentCount = new HashMap<Integer, Integer>();
 }
