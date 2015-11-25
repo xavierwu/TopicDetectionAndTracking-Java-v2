@@ -530,6 +530,7 @@ public class DataPreprocessor {
 		BufferedReader reader = null;
 		BufferedWriter writer = null;
 		String newLine = null;
+		int storyCount = 0;
 
 		try {
 			writer = new BufferedWriter(new FileWriter(tfFile));
@@ -575,6 +576,7 @@ public class DataPreprocessor {
 							double tf = entry.getValue();
 							writer.append(wordID + ":" + String.format("%.2f", tf) + " ");
 							glossary.raiseDocumentCount(wordID);
+							storyCount++;
 						}
 						writer.append("\n");
 					}
@@ -587,7 +589,7 @@ public class DataPreprocessor {
 
 		// the glossary is already generated.
 		glossary.save(glossaryFile);
-
+		System.out.println("storyCount= " + storyCount);
 		System.out.println("Done!!!");
 	}
 
