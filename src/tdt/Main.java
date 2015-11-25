@@ -259,9 +259,10 @@ public class Main {
 		String datasetDir = "D:/Jee_workspace/TopicDetectionAndTracking/Dataset/";
 		String tfidfFile = datasetDir + "tfidf.dat";
 
-		System.out.println("=== Story Link Detection Start");
-		StoryLinkDetector.doStoryLinkDetection(corpus, wordIDToStoryIndices, tfidfFile, false, methodID);
-		System.out.println("=== Story Link Detection End");
+		// TODO
+//		System.out.println("=== Story Link Detection Start");
+//		StoryLinkDetector.doStoryLinkDetection(corpus, wordIDToStoryIndices, tfidfFile, false, methodID);
+//		System.out.println("=== Story Link Detection End");
 
 		System.out.println("=== Topic Detection Start");
 		TopicDetector topicDetector = new TopicDetector();

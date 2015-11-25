@@ -4,17 +4,20 @@
 package tdt;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map.Entry;
 import java.util.Scanner;
 import java.util.Vector;
 
 /**
- * @author Zitong Wang
+ * @author Zitong Wang, Zewei Wu
  */
 public class DataPreprocessor {
 
@@ -505,5 +508,93 @@ public class DataPreprocessor {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	/**
+	 * Generate tfidfFile, using files from the sgmDir.
+	 * 
+	 * @param sgmDir
+	 * @param tfidfFile
+	 */
+	public static void generateTF(String sgmDir, String tfFile, String tfidfFile, String glossaryFile) {
+		System.out.println("Generating tfFile and glossaryFile using sgm files ...");
+
+		File directorySgm = new File(sgmDir);
+		File[] sgmFiles = directorySgm.listFiles();
+		if (sgmFiles.length == 0) {
+			System.out.println("No sgm file found!");
+			return;
+		}
+
+		Glossary glossary = new Glossary();
+		BufferedReader reader = null;
+		BufferedWriter writer = null;
+		String newLine = null;
+
+		try {
+			writer = new BufferedWriter(new FileWriter(tfFile));
+			for (int i = 0; i < sgmFiles.length; i++) {
+				System.out.println(sgmFiles[i].getName() + "\tfound!");
+
+				File sgmFile = new File(sgmFiles[i].getAbsolutePath());
+				assert(sgmFile.exists());
+				reader = new BufferedReader(new FileReader(sgmFile));
+
+				// for a certain sgm file.
+				while ((newLine = reader.readLine()) != null) {
+					// A new text found
+					if (newLine.equals("<DOC>")) {
+						newLine = reader.readLine();
+
+						// e.g. <DOCNO> AFE20030401.0000.0001 </DOCNO>
+						String src = newLine.split(" ")[1].substring(0, 2);
+						String timestamp = newLine.split(" ")[1].substring(3);
+						Story temp = new Story(src, timestamp);
+
+						while (!(newLine = reader.readLine()).equals("<TEXT>"))
+							;
+
+						while ((newLine = reader.readLine()) != null) {
+							if (newLine.equals("</TEXT>"))
+								break;
+
+							String wordsInALine[] = newLine.split(" ");
+							for (String word : wordsInALine) {
+								word = processWord(word);
+								if (glossary.containsWord(word))
+									glossary.raiseIDF(glossary.getWordID(word));
+								else
+									glossary.insertWord(word);
+								int wordID = glossary.getWordID(word);
+								temp.addWord(wordID);
+							}
+						}
+						writer.append(src + timestamp + " ");
+						temp.initTermFrequency();
+						for (Entry<Integer, Double> entry : temp.getTermFrequency().entrySet())
+							writer.append(
+									entry.getKey().toString() + ":" + String.format("%.2f", entry.getValue()) + " ");
+						writer.append("\n");
+					}
+				}
+			}
+			writer.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		// the glossary is already generated.
+		glossary.save(glossaryFile);
+
+		System.out.println("Done!!!");
+	}
+
+	public static void main(String[] args) {
+		String datasetDir = "D:/Jee_workspace/TopicDetectionAndTracking/Dataset/";
+		String sgmDir = datasetDir + "sgm/";
+		String tfFile = datasetDir + "tf.dat";
+		String tfidfFile = datasetDir + "tfidf.dat";
+		String glossaryFile = datasetDir + "glossary.dat";
+		generateTF(sgmDir, tfFile, tfidfFile, glossaryFile);
 	}
 }
