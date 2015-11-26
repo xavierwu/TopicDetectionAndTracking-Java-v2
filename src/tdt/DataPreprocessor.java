@@ -516,7 +516,7 @@ public class DataPreprocessor {
 	 * @param sgmDir
 	 * @param tfidfFile
 	 */
-	public static void generateTF(String sgmDir, String tfFile, String tfidfFile, String glossaryFile) {
+	public static void generateTFIDF(String sgmDir, String tfFile, String tfidfFile, String glossaryFile) {
 		System.out.println("Generating tfFile and glossaryFile using sgm files ...");
 
 		File directorySgm = new File(sgmDir);
@@ -574,23 +574,50 @@ public class DataPreprocessor {
 						for (Entry<Integer, Double> entry : temp.getTermFrequency().entrySet()) {
 							int wordID = entry.getKey();
 							double tf = entry.getValue();
-							writer.append(wordID + ":" + String.format("%.2f", tf) + " ");
+							writer.append(wordID + ":" + String.format("%.4f", tf) + " ");
 							glossary.raiseDocumentCount(wordID);
-							storyCount++;
 						}
+						storyCount++;
 						writer.append("\n");
 					}
 				}
 			}
 			writer.close();
+			reader.close();
+			System.out.println("storyCount= " + storyCount);
+			System.out.println("tf.dat is generated!");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-
-		// the glossary is already generated.
+		glossary.calculateIDF(storyCount);
 		glossary.save(glossaryFile);
-		System.out.println("storyCount= " + storyCount);
-		System.out.println("Done!!!");
+
+		try {
+			reader = new BufferedReader(new FileReader(tfFile));
+			writer = new BufferedWriter(new FileWriter(tfidfFile));
+			System.out.println("Start generating tfidf.dat");
+			int counter = 0;
+			while ((newLine = reader.readLine()) != null) {
+				if (counter % 10000 == 0)
+					System.out.println(counter);
+				counter++;
+				String[] pairs = newLine.split(" ");
+				writer.append(pairs[0] + " ");
+				for (int i = 1; i < pairs.length; ++i) {
+					String[] pairs2 = pairs[i].split(":");
+					int wordID = Integer.parseInt(pairs2[0]);
+					double tf = Double.parseDouble(pairs2[1]);
+					double tfidf = tf * glossary.getIDF(wordID);
+					writer.append(pairs2[0] + ":" + String.format("%.4f", tfidf) + " ");
+				}
+				writer.append("\n");
+			}
+			writer.close();
+			reader.close();
+			System.out.println("Done!!!");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public static void main(String[] args) {
@@ -599,6 +626,6 @@ public class DataPreprocessor {
 		String tfFile = datasetDir + "tf.dat";
 		String tfidfFile = datasetDir + "tfidf.dat";
 		String glossaryFile = datasetDir + "glossary.dat";
-		generateTF(sgmDir, tfFile, tfidfFile, glossaryFile);
+		generateTFIDF(sgmDir, tfFile, tfidfFile, glossaryFile);
 	}
 }

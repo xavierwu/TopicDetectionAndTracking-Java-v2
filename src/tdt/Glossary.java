@@ -63,7 +63,7 @@ public class Glossary {
 		try {
 			writer = new BufferedWriter(new FileWriter(glossaryFile));
 			for (Integer wordID : glossaryIntToString.keySet())
-				writer.append(wordID.toString() + " " + documentCount.get(wordID) + " "
+				writer.append(wordID.toString() + " " + String.format("%.4f", idf.get(wordID)) + " "
 						+ glossaryIntToString.get(wordID) + "\n");
 			writer.close();
 		} catch (IOException e) {
@@ -72,7 +72,19 @@ public class Glossary {
 		System.out.println("Done!");
 	}
 
+	public void calculateIDF(int numOfDocuments) {
+		double tmp = Math.log(2);
+		for (int wordID : documentCount.keySet()) {
+			idf.put(wordID, Math.log(numOfDocuments / (double) documentCount.get(wordID)) / tmp);
+		}
+	}
+	
+	public double getIDF(int wordID){
+		return idf.get(wordID);
+	}
+
 	private HashMap<Integer, String> glossaryIntToString = new HashMap<Integer, String>();
 	private HashMap<String, Integer> glossaryStringToInt = new HashMap<String, Integer>();
 	private HashMap<Integer, Integer> documentCount = new HashMap<Integer, Integer>();
+	private HashMap<Integer, Double> idf = new HashMap<Integer, Double>();
 }

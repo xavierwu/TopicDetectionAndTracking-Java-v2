@@ -181,6 +181,64 @@ public class Main {
 		JSONObject tmp = null;
 		if ("getEvaluation".equalsIgnoreCase(action)) {
 			responseJSONObject = getEvaluation();
+		} else if ("setParameters".equalsIgnoreCase(action)) {
+			int methodID = Integer.parseInt(request.getParameter("methodID"));
+			System.out.println("methodID = " + methodID);
+			responseJSONObject = do_setParameters(methodID);
+		} else if ("commitParameters".equalsIgnoreCase(action)) {
+			int methodID = Integer.parseInt(request.getParameter("methodID"));
+			System.out.println("methodID = " + methodID);
+			
+			String datasetDir = "D:/Jee_workspace/TopicDetectionAndTracking/Dataset/";
+			String tfidfFile = datasetDir + "tfidf.dat";
+			System.out.println("=== Story Link Detection Start");
+			StoryLinkDetector.doStoryLinkDetection(corpus, wordIDToStoryIndices, tfidfFile, true, methodID);
+			System.out.println("=== Story Link Detection End");
+			
+			System.out.println("=== Topic Detection Start");
+			TopicDetector topicDetector = new TopicDetector();
+			switch (methodID) {
+			case 0:
+				int numOfTopics = Integer.parseInt(request.getParameter("numOfTopics"));
+				int numOfLoops = Integer.parseInt(request.getParameter("numOfLoops"));
+				System.out.println("Parameters: ");
+				System.out.println("> numOfTopics = " + numOfTopics);
+				System.out.println("> numOfLoops = " + numOfLoops);
+				topicDetector.KMeans(corpus, numOfTopics, numOfLoops);
+				break;
+			case 1:
+				double minSimilarity = Double.parseDouble(request.getParameter("minSimilarity"));
+				int minPts = Integer.parseInt(request.getParameter("minPts"));
+				System.out.println("Parameters: ");
+				System.out.println("> minSimilarity = " + minSimilarity);
+				System.out.println("> minPts = " + minPts);
+				topicDetector.DBSCAN(corpus, minSimilarity, minPts);
+				break;
+			default:
+				break;
+			}
+			System.out.println("=== Topic Detection End");
+
+			System.out.println("numOfTopics = " + numOfTopics);
+			assert(numOfTopics > 0);
+
+			System.out.println("=== First Story Detection Start");
+			firstStories.clear();
+			firstStories = FirstStoryDetector.doFirstStoryDetection(corpus, numOfTopics);
+			System.out.println("=== First Story Detection End");
+
+			System.out.println("firstStories.size() = " + firstStories.size());
+			assert(firstStories.size() == numOfTopics);
+
+			System.out.println("=== Evaluation Start");
+			normCdet = Evaluator.getNormCdet(corpus, actualFirstStories, firstStories);
+			PMiss = Evaluator.getPMiss(corpus, actualFirstStories, firstStories);
+			PFa = Evaluator.getPFa(corpus, actualFirstStories, firstStories);
+			System.out.println("normCdet = " + normCdet);
+			System.out.println("PMiss = " + PMiss);
+			System.out.println("PFa = " + PFa);
+			System.out.println("=== Evaluation End");
+			
 		} else if ("getTopics".equalsIgnoreCase(action)) {
 			// client choose a topic, response with a cluster of stroies of a
 			// certain topic
@@ -249,6 +307,46 @@ public class Main {
 		}
 	}
 
+	private JSONObject do_setParameters(int methodID) {
+		// {numOfParameters:, 0:{parameter:, value:}, ...}
+		JSONObject responseJSONObject = new JSONObject();
+		JSONObject tmp = null;
+		int numOfParameters = 0;
+		switch (methodID) {
+		case 0:
+			numOfParameters = 2;
+			responseJSONObject.put("numOfParameters", numOfParameters);
+
+			tmp = new JSONObject();
+			tmp.put("parameter", "numOfTopics");
+			tmp.put("value", 250);
+			responseJSONObject.put(0, tmp);
+
+			tmp = new JSONObject();
+			tmp.put("parameter", "numOfLoops");
+			tmp.put("value", 10);
+			responseJSONObject.put(1, tmp);
+			break;
+		case 1:
+			numOfParameters = 2;
+			responseJSONObject.put("numOfParameters", numOfParameters);
+
+			tmp = new JSONObject();
+			tmp.put("parameter", "minSimilarity");
+			tmp.put("value", 0.98);
+			responseJSONObject.put(0, tmp);
+
+			tmp = new JSONObject();
+			tmp.put("parameter", "minPts");
+			tmp.put("value", 5);
+			responseJSONObject.put(1, tmp);
+			break;
+		default:
+			break;
+		}
+		return responseJSONObject;
+	}
+
 	/**
 	 * Choose an algorithm of certain methodID, and use it to get a
 	 * corresponding result.
@@ -257,12 +355,13 @@ public class Main {
 	 */
 	private void chooseAlgorithm(int methodID) {
 		String datasetDir = "D:/Jee_workspace/TopicDetectionAndTracking/Dataset/";
-		String tfidfFile = datasetDir + "tfidf.dat";
+		// String tfidfFile = datasetDir + "tfidf.dat";
 
 		// TODO
-//		System.out.println("=== Story Link Detection Start");
-//		StoryLinkDetector.doStoryLinkDetection(corpus, wordIDToStoryIndices, tfidfFile, false, methodID);
-//		System.out.println("=== Story Link Detection End");
+		// System.out.println("=== Story Link Detection Start");
+		// StoryLinkDetector.doStoryLinkDetection(corpus, wordIDToStoryIndices,
+		// tfidfFile, false, methodID);
+		// System.out.println("=== Story Link Detection End");
 
 		System.out.println("=== Topic Detection Start");
 		TopicDetector topicDetector = new TopicDetector();

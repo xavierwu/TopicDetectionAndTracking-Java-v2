@@ -1,6 +1,9 @@
 /**
  * Created on: Jul 29, 2015
  */
+/**
+ * Created on: Jul 29, 2015
+ */
 package tdt;
 
 import java.util.HashMap;
@@ -37,7 +40,7 @@ class TopicDetector {
 		switch (methodID) {
 		case 0:
 			int numOfTopics = 7;
-			KMeans(corpus, numOfTopics);
+			KMeans(corpus, numOfTopics, 10);
 			return numOfTopics;
 		case 1:
 			return DBSCAN(corpus, 0.98, 5);
@@ -61,7 +64,7 @@ class TopicDetector {
 		 * be set automatically.
 		 */
 		int numOfTopics = 7;
-		KMeans(corpus, numOfTopics);
+		KMeans(corpus, numOfTopics, 10);
 		return numOfTopics;
 
 		// return DBSCAN(corpus, 0.98, 5);
@@ -75,12 +78,12 @@ class TopicDetector {
 	 * @param corpus
 	 * @param numOfTopics
 	 */
-	private void KMeans(Vector<Story> corpus, int numOfTopics) {
+	public void KMeans(Vector<Story> corpus, int numOfTopics, int numOfLoops) {
 		Vector<Story> means = new Vector<Story>(); // Collection of centroids.
 
 		initMeans(means, corpus, numOfTopics);
 
-		int loopCnt = 10; // Iteration counter of k-means.
+		int loopCnt = numOfLoops; // Iteration counter of k-means.
 
 		while (loopCnt > 0) {
 			/* Assignment step. */
