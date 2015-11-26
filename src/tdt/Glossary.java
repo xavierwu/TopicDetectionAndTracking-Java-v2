@@ -86,12 +86,14 @@ public class Glossary {
 			idf.clear();
 			while ((line = reader.readLine()) != null) {
 				String[] parts = line.split(" ");
-				int wordID = Integer.parseInt(parts[0]);
-				double tmpIdf = Double.parseDouble(parts[1]);
-				String word = parts[2];
-				glossaryIntToString.put(wordID, word);
-				glossaryStringToInt.put(word, wordID);
-				idf.put(wordID, tmpIdf);
+				if (parts.length == 3) {
+					int wordID = Integer.parseInt(parts[0]);
+					double tmpIdf = Double.parseDouble(parts[1]);
+					String word = parts[2];
+					glossaryIntToString.put(wordID, word);
+					glossaryStringToInt.put(word, wordID);
+					idf.put(wordID, tmpIdf);
+				}
 			}
 			reader.close();
 		} catch (IOException e) {

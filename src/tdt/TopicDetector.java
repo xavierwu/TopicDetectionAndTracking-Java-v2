@@ -79,24 +79,56 @@ class TopicDetector {
 	 * @param numOfTopics
 	 */
 	public void KMeans(Vector<Story> corpus, int numOfTopics, int numOfLoops) {
-		Vector<Story> means = new Vector<Story>(); // Collection of centroids.
+		Vector<Story> centroids = new Vector<Story>();
+		Story tmp = null;
+		HashMap<Integer, Double> tfidf = null;
+		/* Initialization */
+		for (int i = 0; i < numOfTopics; i++) {
+			tmp = new Story();
+			tmp.setTfidf(corpus.get(i).getTfidf());
+			tmp.setTopicID(i);
+			centroids.addElement(tmp);
+		}
 
-		initMeans(means, corpus, numOfTopics);
-
-		int loopCnt = numOfLoops; // Iteration counter of k-means.
-
-		while (loopCnt > 0) {
+		for (int loopCnt = 0; loopCnt < numOfLoops; ++loopCnt) {
 			/* Assignment step. */
-			for (int i = 0; i < corpus.size(); i++) {
-				cluster(corpus.get(i), means, numOfTopics);
+			for (Story curStory : corpus) {
+				double maxSimilarity = 0;
+				for (Story curCentroid : centroids) {
+					double similarity = StoryLinkDetector.getSimilarity(curStory, curCentroid);
+					if (similarity > maxSimilarity) {
+						maxSimilarity = similarity;
+						curStory.setTopicID(curCentroid.getTopicID());
+					}
+				}
 			}
 
 			/* Update step. */
-			for (int i = 0; i < numOfTopics; i++) {
-				means.set(i, getMean(corpus, i));
+			centroids.clear();
+			for (int curTopic = 0; curTopic < numOfTopics; curTopic++) {
+				tmp = new Story();
+				tmp.setTopicID(curTopic);
+				tfidf = new HashMap<Integer, Double>();
+				int cnt = 0;
+				for (Story story : corpus) {
+					if (story.getTopicID() == curTopic) {
+						cnt++;
+						for (Entry<Integer, Double> entry : story.getTfidf().entrySet()) {
+							int wordID = entry.getKey();
+							double tmpTfidf = entry.getValue();
+							if (tfidf.containsKey(wordID)) {
+								tfidf.put(wordID, tfidf.get(wordID) + tmpTfidf);
+							} else {
+								tfidf.put(wordID, tmpTfidf);
+							}
+						}
+					}
+				}
+				for (int wordID : tfidf.keySet())
+					tfidf.put(wordID, tfidf.get(wordID) / cnt);
+				tmp.setTfidf(tfidf);
+				centroids.addElement(tmp);
 			}
-
-			loopCnt--;
 		}
 	}
 
@@ -165,16 +197,7 @@ class TopicDetector {
 	 */
 	private void cluster(Story story, Vector<Story> means, int numOfTopics) {
 		/* max similarity between this piece of story and means. */
-		double maxSimilarity = 0;
 
-		for (int i = 0; i < numOfTopics; i++) {
-			double similarity = StoryLinkDetector.getSimilarity(story, means.get(i));
-
-			if (similarity > maxSimilarity) {
-				maxSimilarity = similarity;
-				story.setTopicID(i);
-			}
-		}
 	}
 
 	/**
@@ -185,10 +208,9 @@ class TopicDetector {
 	 * @param corpus
 	 * @param numOfTopics
 	 */
-	private void initMeans(Vector<Story> means, Vector<Story> corpus, int numOfTopics) {
-		for (int i = 0; i < numOfTopics; i++) {
-			means.add(corpus.get(i));
-		}
+	private void initMeans(Vector<Story> centroids, Vector<Story> corpus, int numOfTopics) {
+		for (int i = 0; i < numOfTopics; i++)
+			centroids.add(corpus.get(i));
 	}
 
 	/**

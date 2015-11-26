@@ -49,7 +49,8 @@ public class Evaluator {
 	private static ArrayList<Double> doEvaluation_v3(Vector<Story> corpus, Vector<Story> actualFirstStories,
 			Vector<Story> firstStories) {
 		ArrayList<Double> arr = new ArrayList<Double>();
-		
+		firstStories.trimToSize();
+		actualFirstStories.trimToSize();
 		int numOfHits = 0;
 		for (int i = 0; i < actualFirstStories.size(); ++i) {
 			for (int j = 0; j < firstStories.size(); ++j) {

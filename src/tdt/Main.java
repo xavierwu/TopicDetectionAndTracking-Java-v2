@@ -277,7 +277,7 @@ public class Main {
 		TopicDetector topicDetector = new TopicDetector();
 		switch (methodID) {
 		case 0:
-			int numOfTopics = Integer.parseInt(request.getParameter("numOfTopics"));
+			numOfTopics = Integer.parseInt(request.getParameter("numOfTopics"));
 			int numOfLoops = Integer.parseInt(request.getParameter("numOfLoops"));
 			System.out.println("Parameters: ");
 			System.out.println("> numOfTopics = " + numOfTopics);
@@ -350,12 +350,12 @@ public class Main {
 
 			tmp = new JSONObject();
 			tmp.put("parameter", "numOfTopics");
-			tmp.put("value", 250);
+			tmp.put("value", 36);
 			responseJSONObject.put(0, tmp);
 
 			tmp = new JSONObject();
 			tmp.put("parameter", "numOfLoops");
-			tmp.put("value", 10);
+			tmp.put("value", 5);
 			responseJSONObject.put(1, tmp);
 			break;
 		case 1:

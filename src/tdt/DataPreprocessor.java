@@ -731,8 +731,9 @@ public class DataPreprocessor {
 			while ((line = reader.readLine()) != null) {
 				tmp = new Story();
 				tmp.setTimeStamp(line);
+				actualFirstStories.addElement(tmp);
 			}
-			actualFirstStories.addElement(tmp);
+
 			reader.close();
 			System.out.println("Done!");
 		} catch (IOException e) {

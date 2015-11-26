@@ -12,10 +12,10 @@
 	}%>
 
 <%
-	String dataFilesDir = "D:/Jee_workspace/TopicDetectionAndTracking/Dataset/stemData_4076";
-	String glossaryFile = dataFilesDir + "../4076_glossary.dat";
-	String tfidfFile = dataFilesDir + "../4076_tfidf.dat";
-	String ansFile = dataFilesDir + "../answer4076.dat";
+	String dataFilesDir = "D:/Jee_workspace/TopicDetectionAndTracking/Dataset/stemData_4076/";
+	String glossaryFile = "D:/Jee_workspace/TopicDetectionAndTracking/Dataset/4076_glossary.dat";
+	String tfidfFile = "D:/Jee_workspace/TopicDetectionAndTracking/Dataset/4076_tfidf.dat";
+	String ansFile = "D:/Jee_workspace/TopicDetectionAndTracking/Dataset/answer4076.txt";
 	main.initialize(dataFilesDir, glossaryFile, tfidfFile, ansFile);
 	if (request.getMethod().equalsIgnoreCase("POST")) {
 		main.doPost(request, response);
