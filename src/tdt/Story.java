@@ -4,6 +4,9 @@
 
 package tdt;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map.Entry;
@@ -31,7 +34,7 @@ public class Story {
 	 * the index of each plain word, refer to the glossary
 	 */
 	private Vector<Integer> words;
-	private String source;
+	private String source = "unknown";
 	/**
 	 * yyyymmdd.hhmm.XXXX
 	 */
@@ -70,7 +73,7 @@ public class Story {
 		this.words = new Vector<Integer>();
 		this.timeStamp = timestamp;
 	}
-	
+
 	public Story(String source, String timestamp) {
 		this.words = new Vector<Integer>();
 		this.source = source;
@@ -126,10 +129,10 @@ public class Story {
 		return this.words.get(index);
 	}
 
-	public String getSource(){
+	public String getSource() {
 		return source;
 	}
-	
+
 	/**
 	 * Set a word in words
 	 * 
@@ -325,6 +328,26 @@ public class Story {
 			int wordID = this.words.get(i);
 			if (glossary.containsWordID(wordID))
 				result += " " + glossary.getWord(wordID);
+		}
+		return result;
+	}
+
+	public String getTitle(String dataFilesDir) {
+		String result = "";
+		String file = dataFilesDir + this.getTimeStamp();
+		try {
+			BufferedReader reader = new BufferedReader(new FileReader(file));
+			String line = null;
+			int counter = 0;
+			while ((line = reader.readLine()) != null) {
+				result += line + " ";
+				counter++;
+				if (counter == 15)
+					break;
+			}
+			reader.close();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 		return result;
 	}

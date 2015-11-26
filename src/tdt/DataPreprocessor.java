@@ -620,12 +620,134 @@ public class DataPreprocessor {
 		}
 	}
 
+	public static void generateTFIDF_v2(String stemDir, String tfFile, String tfidfFile, String glossaryFile) {
+		File directoryStem = new File(stemDir);
+		File[] stemFiles = directoryStem.listFiles();
+		if (stemFiles.length == 0) {
+			System.out.println("No stemData file found!");
+			return;
+		}
+
+		BufferedReader reader = null;
+		BufferedWriter writer = null;
+		String line = null;
+		Story tmp = null;
+		int storyCount = 0;
+		Glossary glossary = new Glossary();
+		try {
+			writer = new BufferedWriter(new FileWriter(tfFile));
+			for (int i = 0; i < stemFiles.length; ++i) {
+				File stemDataFile = new File(stemFiles[i].getAbsolutePath());
+				assert(stemDataFile.exists());
+				reader = new BufferedReader(new FileReader(stemDataFile));
+				tmp = new Story();
+				while ((line = reader.readLine()) != null) {
+					glossary.insertWord(line);
+					tmp.addWord(glossary.getWordID(line));
+				}
+				reader.close();
+				storyCount++;
+				writer.append(stemDataFile.getName() + " ");
+				tmp.initTermFrequency();
+				for (Entry<Integer, Double> entry : tmp.getTermFrequency().entrySet()) {
+					writer.append(entry.getKey() + ":" + String.format("%.4f", entry.getValue()) + " ");
+					glossary.raiseDocumentCount(entry.getKey());
+				}
+				writer.append("\n");
+			}
+			writer.close();
+			System.out.println("Done generating " + tfFile);
+			System.out.println("storyCount = " + storyCount);
+			glossary.calculateIDF(storyCount);
+			glossary.save(glossaryFile);
+
+			reader = new BufferedReader(new FileReader(tfFile));
+			writer = new BufferedWriter(new FileWriter(tfidfFile));
+			System.out.println("Start generating " + tfidfFile);
+			int counter = 0;
+			while ((line = reader.readLine()) != null) {
+				if (counter % 10000 == 0)
+					System.out.println(counter);
+				counter++;
+				String[] pairs = line.split(" ");
+				writer.append(pairs[0] + " ");
+				for (int i = 1; i < pairs.length; ++i) {
+					String[] pairs2 = pairs[i].split(":");
+					int wordID = Integer.parseInt(pairs2[0]);
+					double tf = Double.parseDouble(pairs2[1]);
+					double tfidf = tf * glossary.getIDF(wordID);
+					writer.append(pairs2[0] + ":" + String.format("%.4f", tfidf) + " ");
+				}
+				writer.append("\n");
+			}
+			writer.close();
+			reader.close();
+			System.out.println("Done!!!");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static void recoverCorpusFromTFIDF(Vector<Story> corpus, String tfidfFile) {
+		try {
+			BufferedReader reader = new BufferedReader(new FileReader(tfidfFile));
+			String line = null;
+			Story tmp = null;
+			HashMap<Integer, Double> tmpTfidf = null;
+			System.out.println("Start recovering corpus from: " + tfidfFile);
+			while ((line = reader.readLine()) != null) {
+				String[] parts = line.split(" ");
+				tmp = new Story();
+				tmp.setTimeStamp(parts[0]);
+				tmpTfidf = new HashMap<Integer, Double>();
+				for (int i = 1; i < parts.length; ++i) {
+					int wordID = Integer.parseInt(parts[i].split(":")[0]);
+					double tfidf = Double.parseDouble(parts[i].split(":")[1]);
+					tmpTfidf.put(wordID, tfidf);
+				}
+				tmp.setTfidf(tmpTfidf);
+				corpus.addElement(tmp);
+			}
+			reader.close();
+			System.out.println("Done!");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * 
+	 * @param actualFirstStories
+	 *            it contains only timestamp!!!
+	 * @param ansFile
+	 */
+	public static void readAnswer_v2(Vector<Story> actualFirstStories, String ansFile) {
+
+		try {
+			BufferedReader reader = new BufferedReader(new FileReader(ansFile));
+			System.out.println("Start reading answer from: " + ansFile);
+			String line = null;
+			Story tmp = null;
+			while ((line = reader.readLine()) != null) {
+				tmp = new Story();
+				tmp.setTimeStamp(line);
+			}
+			actualFirstStories.addElement(tmp);
+			reader.close();
+			System.out.println("Done!");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
 	public static void main(String[] args) {
 		String datasetDir = "D:/Jee_workspace/TopicDetectionAndTracking/Dataset/";
-		String sgmDir = datasetDir + "sgm/";
-		String tfFile = datasetDir + "tf.dat";
-		String tfidfFile = datasetDir + "tfidf.dat";
-		String glossaryFile = datasetDir + "glossary.dat";
-		generateTFIDF(sgmDir, tfFile, tfidfFile, glossaryFile);
+		// String sgmDir = datasetDir + "sgm/";
+		String stemDir = datasetDir + "stemData_4076/";
+		String tfFile = datasetDir + "4076_tf.dat";
+		String tfidfFile = datasetDir + "4076_tfidf.dat";
+		String glossaryFile = datasetDir + "4076_glossary.dat";
+		// generateTFIDF(sgmDir, tfFile, tfidfFile, glossaryFile);
+		generateTFIDF_v2(stemDir, tfFile, tfidfFile, glossaryFile);
 	}
 }

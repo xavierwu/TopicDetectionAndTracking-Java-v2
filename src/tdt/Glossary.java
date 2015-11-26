@@ -3,7 +3,9 @@
  */
 package tdt;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
@@ -72,14 +74,40 @@ public class Glossary {
 		System.out.println("Done!");
 	}
 
+	public void load(String glossaryFile) {
+		System.out.println("Loading glossary from: " + glossaryFile);
+		BufferedReader reader = null;
+		String line = null;
+		try {
+			reader = new BufferedReader(new FileReader(glossaryFile));
+			glossaryIntToString.clear();
+			glossaryStringToInt.clear();
+			documentCount.clear();
+			idf.clear();
+			while ((line = reader.readLine()) != null) {
+				String[] parts = line.split(" ");
+				int wordID = Integer.parseInt(parts[0]);
+				double tmpIdf = Double.parseDouble(parts[1]);
+				String word = parts[2];
+				glossaryIntToString.put(wordID, word);
+				glossaryStringToInt.put(word, wordID);
+				idf.put(wordID, tmpIdf);
+			}
+			reader.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		System.out.println("Done!");
+	}
+
 	public void calculateIDF(int numOfDocuments) {
 		double tmp = Math.log(2);
 		for (int wordID : documentCount.keySet()) {
 			idf.put(wordID, Math.log(numOfDocuments / (double) documentCount.get(wordID)) / tmp);
 		}
 	}
-	
-	public double getIDF(int wordID){
+
+	public double getIDF(int wordID) {
 		return idf.get(wordID);
 	}
 

@@ -12,7 +12,11 @@
 	}%>
 
 <%
-	main.initialize();
+	String dataFilesDir = "D:/Jee_workspace/TopicDetectionAndTracking/Dataset/stemData_4076";
+	String glossaryFile = dataFilesDir + "../4076_glossary.dat";
+	String tfidfFile = dataFilesDir + "../4076_tfidf.dat";
+	String ansFile = dataFilesDir + "../answer4076.dat";
+	main.initialize(dataFilesDir, glossaryFile, tfidfFile, ansFile);
 	if (request.getMethod().equalsIgnoreCase("POST")) {
 		main.doPost(request, response);
 	} else if (request.getMethod().equalsIgnoreCase("GET")) {
