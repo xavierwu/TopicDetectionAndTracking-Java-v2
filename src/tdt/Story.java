@@ -374,4 +374,8 @@ public class Story {
 		return result;
 	}
 
+	public static void sort(Vector<Story> corpus) {
+		StoryComparator comparator = new StoryComparator();
+		corpus.sort(comparator);
+	}
 }

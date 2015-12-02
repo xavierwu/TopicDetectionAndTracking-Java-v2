@@ -7,7 +7,6 @@
 package tdt;
 
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Vector;
 
@@ -16,7 +15,7 @@ import java.util.Vector;
  * ID. This is the core step of the whole project. We will try to find the best
  * algorithm for the purpose of classification.
  * 
- * @author Zhaoqi Wang
+ * @author Zhaoqi Wang, Zewei Wu
  */
 class TopicDetector {
 
@@ -24,7 +23,6 @@ class TopicDetector {
 	 * Constructor. Nothing to be initialized for the time being.
 	 */
 	TopicDetector() {
-
 	}
 
 	/**
@@ -33,6 +31,7 @@ class TopicDetector {
 	 * an unique topic ID. After the function being called, the whole corpus
 	 * will be classified.
 	 * 
+	 * @deprecated
 	 * @param corpus
 	 * @return topic number, which is set by certain method.
 	 */
@@ -54,7 +53,8 @@ class TopicDetector {
 	 * It uses certain methods to label these stories, make these stories have
 	 * an unique topic ID. After the function being called, the whole corpus
 	 * will be classified.
-	 * 
+	 *
+	 * @deprecated
 	 * @param corpus
 	 * @return topic number, which is set by certain method.
 	 */
@@ -130,87 +130,6 @@ class TopicDetector {
 				centroids.addElement(tmp);
 			}
 		}
-	}
-
-	/**
-	 * Update step of k-means clustering. Function to get the mean of stories
-	 * who have the same topic ID. The new centroid may be used in the
-	 * assignment step. Notice: topicID must be provided.
-	 * 
-	 * @param corpus
-	 * @param topicID
-	 * @return a new centroid of a certain topic.
-	 */
-	private Story getMean(Vector<Story> corpus, int topicID) {
-		Story mean = new Story(); // Centroid of this topic.
-		int storyNumOfTopic = 0; // story number of this topic.
-
-		/* TF-IDF of this centroid. */
-		HashMap<Integer, Double> tfidfOfMean = new HashMap<Integer, Double>();
-
-		/*
-		 * For every story in this corpus, we have to check if it has the same
-		 * topic ID as we want. If do, we add it to the mean of the cluster.
-		 */
-		for (int i = 0; i < corpus.size(); i++) {
-			if (corpus.get(i).getTopicID() == topicID) {
-				storyNumOfTopic++;
-
-				HashMap<Integer, Double> tfidf = corpus.get(i).getTfidf();
-
-				/* Every entry has to be checked. */
-				for (Entry<Integer, Double> entry : tfidf.entrySet()) {
-					try {
-						if (tfidfOfMean.containsKey(entry.getKey())) {
-							tfidfOfMean.put(entry.getKey(), tfidfOfMean.get(entry.getKey()) + entry.getValue());
-						} else {
-							tfidfOfMean.put(entry.getKey(), entry.getValue());
-						}
-					} catch (NullPointerException e) {
-						tfidfOfMean.put(entry.getKey(), entry.getValue());
-					}
-					mean.setTfidf(tfidfOfMean);
-				}
-			}
-		}
-
-		/*
-		 * Cause we only did the addition before, so mean has to be calculated
-		 * here.
-		 */
-		for (Map.Entry<Integer, Double> entry : tfidfOfMean.entrySet()) {
-			tfidfOfMean.put(entry.getKey(), entry.getValue() / storyNumOfTopic);
-		}
-
-		mean.setTfidf(tfidfOfMean);
-
-		return mean;
-	}
-
-	/**
-	 * Assignment step of k-means clustering. It assigns each story an unique
-	 * topic ID, which may be used in the update step of the next loop.
-	 * 
-	 * @param story
-	 * @param means
-	 * @param numOfTopics
-	 */
-	private void cluster(Story story, Vector<Story> means, int numOfTopics) {
-		/* max similarity between this piece of story and means. */
-
-	}
-
-	/**
-	 * Initialization of means. Set to be the foremost stories, for the time
-	 * being.
-	 * 
-	 * @param means
-	 * @param corpus
-	 * @param numOfTopics
-	 */
-	private void initMeans(Vector<Story> centroids, Vector<Story> corpus, int numOfTopics) {
-		for (int i = 0; i < numOfTopics; i++)
-			centroids.add(corpus.get(i));
 	}
 
 	/**
@@ -313,6 +232,81 @@ class TopicDetector {
 			if (corpus.get(neighborIndex).getTopicID() == -1) {
 				corpus.get(neighborIndex).setTopicID(topicID);
 			}
+		}
+	}
+
+	/**
+	 * Sort the stories in the corpus. From the oldest to the newest, check if
+	 * current story is similar to any of the story before, assign the topicID
+	 * of the most similar story to the current story.
+	 * 
+	 * @param corpus
+	 * @param threshold
+	 * @return numOfTopics
+	 */
+	public int aggDetection(Vector<Story> corpus, double threshold) {
+		// sort the stories
+		Story.sort(corpus);
+
+		// iteration
+		int numOfTopics = 0;
+		Story curStory = null;
+		Story tmpStory = null;
+		double similarity = 0.0;
+		double tmpMaxSimilarity = 0.0;
+		for (int i = 0; i < corpus.size(); ++i) {
+			curStory = corpus.get(i);
+			tmpMaxSimilarity = -1.0;
+			for (int j = 0; j < i; ++j) {
+				tmpStory = corpus.get(i);
+				similarity = StoryLinkDetector.getSimilarity(curStory, tmpStory);
+				if (similarity >= threshold && similarity > tmpMaxSimilarity) {
+					curStory.setTopicID(tmpStory.getTopicID());
+					tmpMaxSimilarity = similarity;
+				}
+			}
+			if (tmpMaxSimilarity < 0) {
+				curStory.setTopicID(numOfTopics);
+				numOfTopics++;
+			}
+		}
+		return numOfTopics;
+	}
+
+	public static void main(String[] args) {
+		Vector<Story> v = new Vector<Story>();
+		Story tmp = null;
+
+		tmp = new Story();
+		tmp.setTimeStamp("20030401.0113.0007");
+		v.addElement(tmp);
+		System.out.println(tmp.getTimeStamp());
+
+		tmp = new Story();
+		tmp.setTimeStamp("20030402.0113.0007");
+		v.addElement(tmp);
+		System.out.println(tmp.getTimeStamp());
+
+		tmp = new Story();
+		tmp.setTimeStamp("20020401.0113.0007");
+		v.addElement(tmp);
+		System.out.println(tmp.getTimeStamp());
+
+		tmp = new Story();
+		tmp.setTimeStamp("20010401.0113.0007");
+		v.addElement(tmp);
+		System.out.println(tmp.getTimeStamp());
+
+		tmp = new Story();
+		tmp.setTimeStamp("20080401.0113.0007");
+		v.addElement(tmp);
+		System.out.println(tmp.getTimeStamp());
+
+		Story.sort(v);
+
+		System.out.println();
+		for (int i = 0; i < v.size(); ++i) {
+			System.out.println(v.get(i).getTimeStamp());
 		}
 	}
 }

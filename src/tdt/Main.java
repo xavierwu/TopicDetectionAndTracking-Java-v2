@@ -130,24 +130,7 @@ public class Main {
 	// return corpus;
 	// }
 
-	public void doGet(HttpServletRequest request, HttpServletResponse response) {
-		System.out.println("doGet");
-
-		response.setCharacterEncoding("UTF-8");
-		response.setContentType("application/json; charset=utf-8");
-		// response.setContentType("text/html; charset=utf-8");
-		PrintWriter out = null;
-		try {
-			out = response.getWriter();
-			out.println("doGet");
-		} catch (IOException e) {
-			e.printStackTrace();
-		} finally {
-			if (out != null)
-				out.close();
-		}
-	}
-
+	// TODO move the initialize to the constructor?
 	public void initialize(String dataFilesdir, String glossaryFile, String tfidfFile, String ansFile) {
 		if (isInitialized)
 			return;
@@ -172,6 +155,24 @@ public class Main {
 		isInitialized = true;
 	}
 
+	public void doGet(HttpServletRequest request, HttpServletResponse response) {
+		System.out.println("doGet");
+
+		response.setCharacterEncoding("UTF-8");
+		response.setContentType("application/json; charset=utf-8");
+		// response.setContentType("text/html; charset=utf-8");
+		PrintWriter out = null;
+		try {
+			out = response.getWriter();
+			out.println("doGet");
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			if (out != null)
+				out.close();
+		}
+	}
+
 	public void doPost(HttpServletRequest request, HttpServletResponse response) {
 		String action = request.getParameter("action");
 		System.out.println("doPost: " + action);
@@ -183,7 +184,7 @@ public class Main {
 			responseJSONObject = do_setParameters(request);
 		} else if ("commitParameters".equalsIgnoreCase(action)) {
 			responseJSONObject = do_commitParameters(request);
-		} else if ("getTopics".equalsIgnoreCase(action)) {
+		} else if ("getTopics".equalsIgnoreCase(action)) {// deprecated
 			responseJSONObject = do_getTopics(request);
 		} else if ("getStories".equalsIgnoreCase(action)) {
 			responseJSONObject = do_getStories(request);
@@ -246,6 +247,11 @@ public class Main {
 		return responseJSONObject;
 	}
 
+	/**
+	 * @deprecated
+	 * @param request
+	 * @return
+	 */
 	private JSONObject do_getTopics(HttpServletRequest request) {
 		JSONObject responseJSONObject = new JSONObject();
 		JSONObject tmp = null;
@@ -268,6 +274,57 @@ public class Main {
 		return responseJSONObject;
 	}
 
+	private JSONObject do_setParameters(HttpServletRequest request) {
+		int methodID = Integer.parseInt(request.getParameter("methodID"));
+		System.out.println("methodID = " + methodID);
+		// {numOfParameters:, 0:{parameter:, value:}, ...}
+		JSONObject responseJSONObject = new JSONObject();
+		JSONObject tmp = null;
+		int numOfParameters = 0;
+		switch (methodID) {
+		case 0: // tfidf_KMeans
+			numOfParameters = 2;
+			responseJSONObject.put("numOfParameters", numOfParameters);
+
+			tmp = new JSONObject();
+			tmp.put("parameter", "numOfTopics");
+			tmp.put("value", 36);
+			responseJSONObject.put(0, tmp);
+
+			tmp = new JSONObject();
+			tmp.put("parameter", "numOfLoops");
+			tmp.put("value", 5);
+			responseJSONObject.put(1, tmp);
+			break;
+		case 1: // tfidf_DBSCAN
+			numOfParameters = 2;
+			responseJSONObject.put("numOfParameters", numOfParameters);
+
+			tmp = new JSONObject();
+			tmp.put("parameter", "minSimilarity");
+			tmp.put("value", 0.98);
+			responseJSONObject.put(0, tmp);
+
+			tmp = new JSONObject();
+			tmp.put("parameter", "minPts");
+			tmp.put("value", 5);
+			responseJSONObject.put(1, tmp);
+			break;
+		case 2: // tfidf_aggDetection
+			numOfParameters = 1;
+			responseJSONObject.put("numOfParameters", numOfParameters);
+
+			tmp = new JSONObject();
+			tmp.put("parameter", "threshold");
+			tmp.put("value", 0.5);
+			responseJSONObject.put(0, tmp);
+			break;
+		default:
+			break;
+		}
+		return responseJSONObject;
+	}
+
 	private JSONObject do_commitParameters(HttpServletRequest request) {
 		JSONObject responseJSONObject = new JSONObject();
 		int methodID = Integer.parseInt(request.getParameter("methodID"));
@@ -276,7 +333,7 @@ public class Main {
 		System.out.println("=== Topic Detection Start");
 		TopicDetector topicDetector = new TopicDetector();
 		switch (methodID) {
-		case 0:
+		case 0:// tfidf_KMeans
 			numOfTopics = Integer.parseInt(request.getParameter("numOfTopics"));
 			int numOfLoops = Integer.parseInt(request.getParameter("numOfLoops"));
 			System.out.println("Parameters: ");
@@ -284,13 +341,19 @@ public class Main {
 			System.out.println("> numOfLoops = " + numOfLoops);
 			topicDetector.KMeans(corpus, numOfTopics, numOfLoops);
 			break;
-		case 1:
+		case 1: // tfidf_DBSCAN
 			double minSimilarity = Double.parseDouble(request.getParameter("minSimilarity"));
 			int minPts = Integer.parseInt(request.getParameter("minPts"));
 			System.out.println("Parameters: ");
 			System.out.println("> minSimilarity = " + minSimilarity);
 			System.out.println("> minPts = " + minPts);
 			topicDetector.DBSCAN(corpus, minSimilarity, minPts);
+			break;
+		case 2: // tfidf_aggDetection
+			double threshold = Double.parseDouble(request.getParameter("threshold"));
+			System.out.println("Parameters: ");
+			System.out.println("> threshold = " + threshold);
+			topicDetector.aggDetection(corpus, threshold);
 			break;
 		default:
 			break;
@@ -336,52 +399,11 @@ public class Main {
 		return responseJSONObject;
 	}
 
-	private JSONObject do_setParameters(HttpServletRequest request) {
-		int methodID = Integer.parseInt(request.getParameter("methodID"));
-		System.out.println("methodID = " + methodID);
-		// {numOfParameters:, 0:{parameter:, value:}, ...}
-		JSONObject responseJSONObject = new JSONObject();
-		JSONObject tmp = null;
-		int numOfParameters = 0;
-		switch (methodID) {
-		case 0:
-			numOfParameters = 2;
-			responseJSONObject.put("numOfParameters", numOfParameters);
-
-			tmp = new JSONObject();
-			tmp.put("parameter", "numOfTopics");
-			tmp.put("value", 36);
-			responseJSONObject.put(0, tmp);
-
-			tmp = new JSONObject();
-			tmp.put("parameter", "numOfLoops");
-			tmp.put("value", 5);
-			responseJSONObject.put(1, tmp);
-			break;
-		case 1:
-			numOfParameters = 2;
-			responseJSONObject.put("numOfParameters", numOfParameters);
-
-			tmp = new JSONObject();
-			tmp.put("parameter", "minSimilarity");
-			tmp.put("value", 0.98);
-			responseJSONObject.put(0, tmp);
-
-			tmp = new JSONObject();
-			tmp.put("parameter", "minPts");
-			tmp.put("value", 5);
-			responseJSONObject.put(1, tmp);
-			break;
-		default:
-			break;
-		}
-		return responseJSONObject;
-	}
-
 	/**
 	 * Choose an algorithm of certain methodID, and use it to get a
 	 * corresponding result.
 	 * 
+	 * @deprecated
 	 * @param methodID
 	 */
 	private void chooseAlgorithm(int methodID) {
@@ -419,8 +441,7 @@ public class Main {
 	}
 
 	/**
-	 * Response with the evaluations of different algorithms TODO is it
-	 * reasonable???
+	 * Response with the evaluations of different algorithms
 	 * 
 	 * @return {algorithmCount:, 0:{methodID:, algorithm:, overall:,
 	 *         falsePositive:, falseNegative:}, ...}
@@ -447,6 +468,14 @@ public class Main {
 		tmp.put("PMiss", 1.0);
 		tmp.put("PFa", 1.0);
 		responseJSONObject.put(1, tmp);
+
+		tmp = new JSONObject();
+		tmp.put("methodID", 2);
+		tmp.put("algorithm", "tfidf_aggDetection");
+		tmp.put("normCdet", 5.9);
+		tmp.put("PMiss", 1.0);
+		tmp.put("PFa", 1.0);
+		responseJSONObject.put(2, tmp);
 
 		return responseJSONObject;
 	}
