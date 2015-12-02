@@ -133,6 +133,10 @@ public class Story {
 		return source;
 	}
 
+	public void setSource(String source) {
+		this.source = source;
+	}
+
 	/**
 	 * Set a word in words
 	 * 
@@ -334,7 +338,7 @@ public class Story {
 
 	public String getTitle(String dataFilesDir) {
 		String result = "";
-		String file = dataFilesDir + this.getTimeStamp();
+		String file = dataFilesDir + this.getTimeStamp() + "_" + this.getSource();
 		try {
 			BufferedReader reader = new BufferedReader(new FileReader(file));
 			String line = null;

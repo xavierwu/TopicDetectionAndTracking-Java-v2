@@ -316,7 +316,7 @@ public class Main {
 
 			tmp = new JSONObject();
 			tmp.put("parameter", "threshold");
-			tmp.put("value", 0.5);
+			tmp.put("value", 0.1);
 			responseJSONObject.put(0, tmp);
 			break;
 		default:
@@ -347,13 +347,13 @@ public class Main {
 			System.out.println("Parameters: ");
 			System.out.println("> minSimilarity = " + minSimilarity);
 			System.out.println("> minPts = " + minPts);
-			topicDetector.DBSCAN(corpus, minSimilarity, minPts);
+			numOfTopics = topicDetector.DBSCAN(corpus, minSimilarity, minPts);
 			break;
 		case 2: // tfidf_aggDetection
 			double threshold = Double.parseDouble(request.getParameter("threshold"));
 			System.out.println("Parameters: ");
 			System.out.println("> threshold = " + threshold);
-			topicDetector.aggDetection(corpus, threshold);
+			numOfTopics = topicDetector.aggDetection(corpus, threshold);
 			break;
 		default:
 			break;
@@ -450,7 +450,7 @@ public class Main {
 		JSONObject responseJSONObject = new JSONObject();
 		JSONObject tmp = null;
 
-		int algorithmNum = 2;
+		int algorithmNum = 3;
 		responseJSONObject.put("algorithmCount", algorithmNum);
 
 		tmp = new JSONObject();

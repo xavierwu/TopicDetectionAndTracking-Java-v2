@@ -91,18 +91,22 @@ public class StoryLinkDetector {
 		for (Entry<Integer, Double> entry : tfidf1.entrySet()) {
 			int key = entry.getKey();
 			double value = entry.getValue();
-			if (tfidf2.containsKey(key)) {
+			if (tfidf2.containsKey(key))
 				innerProduct += value * tfidf2.get(key);
-				squareSum1 += value * value;
-				squareSum2 += tfidf2.get(key) * tfidf2.get(key);
-			}
+			squareSum1 += value * value;
 		}
-		similarity = innerProduct / Math.sqrt(squareSum1 * squareSum2);
+		for (Entry<Integer, Double> entry : tfidf2.entrySet())
+			squareSum2 += entry.getValue() * entry.getValue();
+
+		if (Double.compare(innerProduct, 0.0) == 0)
+			return 0.0;
+		double tmp1 = Math.sqrt(squareSum1 * squareSum2);
+		similarity = innerProduct / tmp1;
 
 		// WARNING: the 0.0001 was set manually here.
-		if (similarity > 1 && similarity - 1 <= 0.0001) {
-			similarity = 1;
-		}
+		// if (similarity > 1 && similarity - 1 <= 0.0001) {
+		// similarity = 1;
+		// }
 
 		return similarity;
 	}

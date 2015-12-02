@@ -251,20 +251,21 @@ class TopicDetector {
 		// iteration
 		int numOfTopics = 0;
 		Story curStory = null;
-		Story tmpStory = null;
+		Story prevStory = null;
 		double similarity = 0.0;
 		double tmpMaxSimilarity = 0.0;
 		for (int i = 0; i < corpus.size(); ++i) {
 			curStory = corpus.get(i);
 			tmpMaxSimilarity = -1.0;
 			for (int j = 0; j < i; ++j) {
-				tmpStory = corpus.get(i);
-				similarity = StoryLinkDetector.getSimilarity(curStory, tmpStory);
+				prevStory = corpus.get(j);
+				similarity = StoryLinkDetector.getSimilarity(curStory, prevStory);
 				if (similarity >= threshold && similarity > tmpMaxSimilarity) {
-					curStory.setTopicID(tmpStory.getTopicID());
+					curStory.setTopicID(prevStory.getTopicID());
 					tmpMaxSimilarity = similarity;
 				}
 			}
+
 			if (tmpMaxSimilarity < 0) {
 				curStory.setTopicID(numOfTopics);
 				numOfTopics++;
