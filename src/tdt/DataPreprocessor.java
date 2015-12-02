@@ -698,7 +698,7 @@ public class DataPreprocessor {
 			while ((line = reader.readLine()) != null) {
 				String[] parts = line.split(" ");
 				tmp = new Story();
-				tmp.setTimeStamp(parts[0]);
+				tmp.setTimeStamp(parts[0].split("_")[0]);
 				tmpTfidf = new HashMap<Integer, Double>();
 				for (int i = 1; i < parts.length; ++i) {
 					int wordID = Integer.parseInt(parts[i].split(":")[0]);
