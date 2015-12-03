@@ -283,6 +283,7 @@ public class Main {
 		int numOfParameters = 0;
 		switch (methodID) {
 		case 0: // tfidf_KMeans
+		case 1: // plsa_KMeans
 			numOfParameters = 2;
 			responseJSONObject.put("numOfParameters", numOfParameters);
 
@@ -296,7 +297,8 @@ public class Main {
 			tmp.put("value", 5);
 			responseJSONObject.put(1, tmp);
 			break;
-		case 1: // tfidf_DBSCAN
+		case 2: // tfidf_DBSCAN
+		case 3: // plsa_DBSCAN
 			numOfParameters = 2;
 			responseJSONObject.put("numOfParameters", numOfParameters);
 
@@ -310,7 +312,8 @@ public class Main {
 			tmp.put("value", 5);
 			responseJSONObject.put(1, tmp);
 			break;
-		case 2: // tfidf_aggDetection
+		case 4: // tfidf_aggDetection
+		case 5: // plsa_aggDetection
 			numOfParameters = 1;
 			responseJSONObject.put("numOfParameters", numOfParameters);
 
@@ -332,28 +335,54 @@ public class Main {
 
 		System.out.println("=== Topic Detection Start");
 		TopicDetector topicDetector = new TopicDetector();
+		int numOfLoops = 0;
+		double minSimilarity = 0.0;
+		int minPts = 0;
+		double threshold = 0.0;
 		switch (methodID) {
 		case 0:// tfidf_KMeans
 			numOfTopics = Integer.parseInt(request.getParameter("numOfTopics"));
-			int numOfLoops = Integer.parseInt(request.getParameter("numOfLoops"));
+			numOfLoops = Integer.parseInt(request.getParameter("numOfLoops"));
 			System.out.println("Parameters: ");
 			System.out.println("> numOfTopics = " + numOfTopics);
 			System.out.println("> numOfLoops = " + numOfLoops);
-			topicDetector.KMeans(corpus, numOfTopics, numOfLoops);
+			topicDetector.KMeans(corpus, 0, numOfTopics, numOfLoops);
 			break;
-		case 1: // tfidf_DBSCAN
-			double minSimilarity = Double.parseDouble(request.getParameter("minSimilarity"));
-			int minPts = Integer.parseInt(request.getParameter("minPts"));
+		case 1: // plsa_KMeans
+			numOfTopics = Integer.parseInt(request.getParameter("numOfTopics"));
+			numOfLoops = Integer.parseInt(request.getParameter("numOfLoops"));
+			System.out.println("Parameters: ");
+			System.out.println("> numOfTopics = " + numOfTopics);
+			System.out.println("> numOfLoops = " + numOfLoops);
+			topicDetector.KMeans(corpus, 1, numOfTopics, numOfLoops);
+			break;
+		case 2: // tfidf_DBSCAN
+			minSimilarity = Double.parseDouble(request.getParameter("minSimilarity"));
+			minPts = Integer.parseInt(request.getParameter("minPts"));
 			System.out.println("Parameters: ");
 			System.out.println("> minSimilarity = " + minSimilarity);
 			System.out.println("> minPts = " + minPts);
-			numOfTopics = topicDetector.DBSCAN(corpus, minSimilarity, minPts);
+			numOfTopics = topicDetector.DBSCAN(corpus, 0, minSimilarity, minPts);
 			break;
-		case 2: // tfidf_aggDetection
-			double threshold = Double.parseDouble(request.getParameter("threshold"));
+		case 3: // plsa_DBSCAN
+			minSimilarity = Double.parseDouble(request.getParameter("minSimilarity"));
+			minPts = Integer.parseInt(request.getParameter("minPts"));
+			System.out.println("Parameters: ");
+			System.out.println("> minSimilarity = " + minSimilarity);
+			System.out.println("> minPts = " + minPts);
+			numOfTopics = topicDetector.DBSCAN(corpus, 1, minSimilarity, minPts);
+			break;
+		case 4: // tfidf_aggDetection
+			threshold = Double.parseDouble(request.getParameter("threshold"));
 			System.out.println("Parameters: ");
 			System.out.println("> threshold = " + threshold);
-			numOfTopics = topicDetector.aggDetection(corpus, threshold);
+			numOfTopics = topicDetector.aggDetection(corpus, 0, threshold);
+			break;
+		case 5:// plsa_aggDetection
+			threshold = Double.parseDouble(request.getParameter("threshold"));
+			System.out.println("Parameters: ");
+			System.out.println("> threshold = " + threshold);
+			numOfTopics = topicDetector.aggDetection(corpus, 1, threshold);
 			break;
 		default:
 			break;
@@ -450,32 +479,66 @@ public class Main {
 		JSONObject responseJSONObject = new JSONObject();
 		JSONObject tmp = null;
 
-		int algorithmNum = 3;
+		int algorithmNum = 6;
 		responseJSONObject.put("algorithmCount", algorithmNum);
 
+		int methodID = 0;
+		// tfidf_KMeans
 		tmp = new JSONObject();
-		tmp.put("methodID", 0);
+		methodID = 0;
+		tmp.put("methodID", methodID);
 		tmp.put("algorithm", "tfidf_KMeans");
 		tmp.put("normCdet", 5.9);
 		tmp.put("PMiss", 1.0);
 		tmp.put("PFa", 1.0);
-		responseJSONObject.put(0, tmp);
-
+		responseJSONObject.put(methodID, tmp);
+		// plsa_KMeans
 		tmp = new JSONObject();
-		tmp.put("methodID", 1);
+		methodID = 1;
+		tmp.put("methodID", methodID);
+		tmp.put("algorithm", "plsa_KMeans");
+		tmp.put("normCdet", 5.9);
+		tmp.put("PMiss", 1.0);
+		tmp.put("PFa", 1.0);
+		responseJSONObject.put(methodID, tmp);
+
+		// tfidf_DBSCAN
+		tmp = new JSONObject();
+		methodID = 2;
+		tmp.put("methodID", methodID);
 		tmp.put("algorithm", "tfidf_DBSCAN");
 		tmp.put("normCdet", 5.9);
 		tmp.put("PMiss", 1.0);
 		tmp.put("PFa", 1.0);
-		responseJSONObject.put(1, tmp);
-
+		responseJSONObject.put(methodID, tmp);
+		// plsa_DBSCAN
 		tmp = new JSONObject();
-		tmp.put("methodID", 2);
+		methodID = 3;
+		tmp.put("methodID", methodID);
+		tmp.put("algorithm", "plsa_DBSCAN");
+		tmp.put("normCdet", 5.9);
+		tmp.put("PMiss", 1.0);
+		tmp.put("PFa", 1.0);
+		responseJSONObject.put(methodID, tmp);
+
+		// tfidf_aggDetection
+		tmp = new JSONObject();
+		methodID = 4;
+		tmp.put("methodID", methodID);
 		tmp.put("algorithm", "tfidf_aggDetection");
 		tmp.put("normCdet", 5.9);
 		tmp.put("PMiss", 1.0);
 		tmp.put("PFa", 1.0);
-		responseJSONObject.put(2, tmp);
+		responseJSONObject.put(methodID, tmp);
+		// plsa_aggDetection
+		tmp = new JSONObject();
+		methodID = 5;
+		tmp.put("methodID", methodID);
+		tmp.put("algorithm", "plsa_aggDetection");
+		tmp.put("normCdet", 5.9);
+		tmp.put("PMiss", 1.0);
+		tmp.put("PFa", 1.0);
+		responseJSONObject.put(methodID, tmp);
 
 		return responseJSONObject;
 	}

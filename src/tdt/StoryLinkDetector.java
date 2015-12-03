@@ -62,9 +62,19 @@ public class StoryLinkDetector {
 		return similarity >= threshold;
 	}
 
+	protected static double getSimilarity(Story story1, Story story2, int simMeasure) {
+		if (simMeasure == 1) {
+			// TODO plsa
+			return 0;
+		} else {
+			return getCosineSimilarity(story1, story2);
+		}
+	}
+
 	/**
 	 * For now, it simply calls the getCosineSimilarity(...)
 	 * 
+	 * @deprecated
 	 * @param story1
 	 * @param story2
 	 * @return the similarity between this two stories.
