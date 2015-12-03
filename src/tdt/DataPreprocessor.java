@@ -731,7 +731,8 @@ public class DataPreprocessor {
 			Story tmp = null;
 			while ((line = reader.readLine()) != null) {
 				tmp = new Story();
-				tmp.setTimeStamp(line);
+				tmp.setTimeStamp(line.split("_")[0]);
+				tmp.setSource(line.split("_")[1]);
 				actualFirstStories.addElement(tmp);
 			}
 

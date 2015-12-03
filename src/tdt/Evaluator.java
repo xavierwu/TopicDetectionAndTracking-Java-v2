@@ -13,6 +13,7 @@ import java.util.Vector;
  * @author Peng Kang, Zewei Wu.
  */
 public class Evaluator {
+	ArrayList<Double> arr = null;
 
 	/**
 	 * @param corpus
@@ -24,21 +25,55 @@ public class Evaluator {
 			Vector<Story> firstStories) {
 		return doEvaluation_v2(corpus, actualFirstStories, firstStories);
 	}
-	protected static double getPMiss(Vector<Story> corpus, Vector<Story> actualFirstStories,
-			Vector<Story> firstStories){
-		ArrayList<Double> arr = doEvaluation_v3(corpus, actualFirstStories, firstStories);
+
+	public double getPMiss() {
 		return arr.get(0);
 	}
-	protected static double getPFa(Vector<Story> corpus, Vector<Story> actualFirstStories,
-			Vector<Story> firstStories){
-		ArrayList<Double> arr = doEvaluation_v3(corpus, actualFirstStories, firstStories);
+
+	public double getPFa() {
 		return arr.get(1);
 	}
-	protected static double getNormCdet(Vector<Story> corpus, Vector<Story> actualFirstStories,
-			Vector<Story> firstStories){
-		ArrayList<Double> arr = doEvaluation_v3(corpus, actualFirstStories, firstStories);
+
+	public double getNormCdet() {
 		return arr.get(2);
 	}
+
+	/**
+	 * @deprecated
+	 * @param corpus
+	 * @param actualFirstStories
+	 * @param firstStories
+	 * @return
+	 */
+	protected double getPMiss(Vector<Story> corpus, Vector<Story> actualFirstStories, Vector<Story> firstStories) {
+		// ArrayList<Double> arr = doEvaluation_v3(corpus, actualFirstStories,
+		// firstStories);
+		return arr.get(0);
+	}
+
+	/**
+	 * @deprecated
+	 */
+	protected double getPFa(Vector<Story> corpus, Vector<Story> actualFirstStories, Vector<Story> firstStories) {
+		// ArrayList<Double> arr = doEvaluation_v3(corpus, actualFirstStories,
+		// firstStories);
+		return arr.get(1);
+	}
+
+	/**
+	 * deprecated
+	 * 
+	 * @param corpus
+	 * @param actualFirstStories
+	 * @param firstStories
+	 * @return
+	 */
+	protected double getNormCdet(Vector<Story> corpus, Vector<Story> actualFirstStories, Vector<Story> firstStories) {
+		// ArrayList<Double> arr = doEvaluation_v3(corpus, actualFirstStories,
+		// firstStories);
+		return arr.get(2);
+	}
+
 	/**
 	 * @author Zewei Wu
 	 * @param corpus
@@ -46,11 +81,9 @@ public class Evaluator {
 	 * @param firstStories
 	 * @return
 	 */
-	private static ArrayList<Double> doEvaluation_v3(Vector<Story> corpus, Vector<Story> actualFirstStories,
+	public ArrayList<Double> doEvaluation_v3(Vector<Story> corpus, Vector<Story> actualFirstStories,
 			Vector<Story> firstStories) {
-		ArrayList<Double> arr = new ArrayList<Double>();
-		firstStories.trimToSize();
-		actualFirstStories.trimToSize();
+		arr = new ArrayList<Double>();
 		int numOfHits = 0;
 		for (int i = 0; i < actualFirstStories.size(); ++i) {
 			for (int j = 0; j < firstStories.size(); ++j) {
@@ -62,6 +95,7 @@ public class Evaluator {
 				}
 			}
 		}
+		System.out.println("numOfHits = " + numOfHits);
 
 		double PMiss = (actualFirstStories.size() - numOfHits) / Double.valueOf(actualFirstStories.size());
 		double CMiss = 1.0;

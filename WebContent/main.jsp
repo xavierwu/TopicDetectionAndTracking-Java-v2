@@ -4,7 +4,7 @@
 <%@ page import="tdt.*"%>
 <%@page import="servlet.*"%>
 
-<%!Vector<tdt.Story> corpus = tdt.Main.getCorpus("D:/Jee_workspace/TopicDetectionAndTracking/Dataset/");%>
+<%!Vector<tdt.Story> corpus = null;%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>

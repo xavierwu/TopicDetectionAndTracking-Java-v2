@@ -46,11 +46,11 @@ public class Main {
 		DataPreprocessor.recoverCorpusFromTFIDF(corpus, tfidfFile);
 		DataPreprocessor.readAnswer_v2(actualFirstStories, ansFile);
 
-		System.out.println("corpus.size() = " + corpus.size());
+		System.out.println("corpus: " + corpus.size());
 		assert(corpus.size() > 0);
-		System.out.println("glossary.size() = " + glossary.size());
+		System.out.println("glossary: " + glossary.size());
 		assert(glossary.size() > 0);
-		System.out.println("actualFirstStories.size() = " + actualFirstStories.size());
+		System.out.println("actualFirstStories: " + actualFirstStories.size());
 		assert(actualFirstStories.size() > 0);
 
 		System.out.println("====== Done initializing ======");
@@ -346,7 +346,7 @@ public class Main {
 
 			tmp = new JSONObject();
 			tmp.put("parameter", "threshold");
-			tmp.put("value", 0.1);
+			tmp.put("value", 0.144);
 			responseJSONObject.put(0, tmp);
 			break;
 		default:
@@ -424,13 +424,19 @@ public class Main {
 		firstStories = FirstStoryDetector.doFirstStoryDetection(corpus, numOfTopics);
 		System.out.println("=== First Story Detection End");
 
-		System.out.println("firstStories.size() = " + firstStories.size());
-		assert(firstStories.size() == numOfTopics);
+		System.out.println("firstStories: " + firstStories.size());
+		// for (Story story : firstStories)
+		// System.out.println(story.getTimeStamp());
+		System.out.println("actualFirstStories: " + actualFirstStories.size());
+		// for (Story story : actualFirstStories)
+		// System.out.println(story.getTimeStamp());
 
 		System.out.println("=== Evaluation Start");
-		normCdet = Evaluator.getNormCdet(corpus, actualFirstStories, firstStories);
-		PMiss = Evaluator.getPMiss(corpus, actualFirstStories, firstStories);
-		PFa = Evaluator.getPFa(corpus, actualFirstStories, firstStories);
+		Evaluator evaluator = new Evaluator();
+		evaluator.doEvaluation_v3(corpus, actualFirstStories, firstStories);
+		normCdet = evaluator.getNormCdet();
+		PMiss = evaluator.getPMiss();
+		PFa = evaluator.getPFa();
 		System.out.println("normCdet = " + normCdet);
 		System.out.println("PMiss = " + PMiss);
 		System.out.println("PFa = " + PFa);
@@ -487,9 +493,10 @@ public class Main {
 		assert(firstStories.size() == numOfTopics);
 
 		System.out.println("=== Evaluation Start");
-		normCdet = Evaluator.getNormCdet(corpus, actualFirstStories, firstStories);
-		PMiss = Evaluator.getPMiss(corpus, actualFirstStories, firstStories);
-		PFa = Evaluator.getPFa(corpus, actualFirstStories, firstStories);
+		// normCdet = Evaluator.getNormCdet(corpus, actualFirstStories,
+		// firstStories);
+		// PMiss = Evaluator.getPMiss(corpus, actualFirstStories, firstStories);
+		// PFa = Evaluator.getPFa(corpus, actualFirstStories, firstStories);
 		System.out.println("normCdet = " + normCdet);
 		System.out.println("PMiss = " + PMiss);
 		System.out.println("PFa = " + PFa);
@@ -553,9 +560,9 @@ public class Main {
 		methodID = 4;
 		tmp.put("methodID", methodID);
 		tmp.put("algorithm", "tfidf_aggDetection");
-		tmp.put("normCdet", 5.9);
-		tmp.put("PMiss", 1.0);
-		tmp.put("PFa", 1.0);
+		tmp.put("normCdet", 3.7694);
+		tmp.put("PMiss", 0.6389);
+		tmp.put("PFa", 0.6389);
 		responseJSONObject.put(methodID, tmp);
 		// plsa_aggDetection
 		tmp = new JSONObject();

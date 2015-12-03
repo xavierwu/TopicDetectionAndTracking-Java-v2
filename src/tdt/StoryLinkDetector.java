@@ -64,7 +64,7 @@ public class StoryLinkDetector {
 
 	protected static double getSimilarity(Story story1, Story story2, int simMeasure) {
 		if (simMeasure == 1) {
-			// TODO plsa
+			// TODO the default numOfTopics in plsa is 100, for now.
 			return 0;
 		} else {
 			return getCosineSimilarity(story1, story2);
