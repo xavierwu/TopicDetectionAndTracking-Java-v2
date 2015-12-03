@@ -35,6 +35,27 @@ public class Main {
 	double PMiss = 0.0;
 	double PFa = 0.0;
 
+	public Main(String dataFilesdir, String glossaryFile, String tfidfFile, String ansFile) {
+		this.dataFilesdir = dataFilesdir;
+		this.glossaryFile = glossaryFile;
+		this.tfidfFile = tfidfFile;
+		this.ansFile = ansFile;
+		System.out.println("====== Start initializing ======");
+
+		glossary.load(glossaryFile);
+		DataPreprocessor.recoverCorpusFromTFIDF(corpus, tfidfFile);
+		DataPreprocessor.readAnswer_v2(actualFirstStories, ansFile);
+
+		System.out.println("corpus.size() = " + corpus.size());
+		assert(corpus.size() > 0);
+		System.out.println("glossary.size() = " + glossary.size());
+		assert(glossary.size() > 0);
+		System.out.println("actualFirstStories.size() = " + actualFirstStories.size());
+		assert(actualFirstStories.size() > 0);
+
+		System.out.println("====== Done initializing ======");
+	}
+
 	/**
 	 * @param args
 	 *            Unused.
@@ -130,7 +151,13 @@ public class Main {
 	// return corpus;
 	// }
 
-	// TODO move the initialize to the constructor?
+	/**
+	 * @deprecated
+	 * @param dataFilesdir
+	 * @param glossaryFile
+	 * @param tfidfFile
+	 * @param ansFile
+	 */
 	public void initialize(String dataFilesdir, String glossaryFile, String tfidfFile, String ansFile) {
 		if (isInitialized)
 			return;

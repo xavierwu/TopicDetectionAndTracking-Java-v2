@@ -2,7 +2,12 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
 	pageEncoding="ISO-8859-1"%>
 
-<%!private tdt.Main main = new tdt.Main();%>
+<%!private static String dataFilesDir = "D:/Jee_workspace/TopicDetectionAndTracking/Dataset/stemData_4076/";
+	private static String glossaryFile = "D:/Jee_workspace/TopicDetectionAndTracking/Dataset/4076_glossary.dat";
+	private static String tfidfFile = "D:/Jee_workspace/TopicDetectionAndTracking/Dataset/4076_tfidf.dat";
+	private static String ansFile = "D:/Jee_workspace/TopicDetectionAndTracking/Dataset/answer4076.txt";
+	private tdt.Main main = new tdt.Main(dataFilesDir, glossaryFile, tfidfFile, ansFile);%>
+
 <%!public void jspInit() {
 		System.out.println("jspInit() is called.");
 	}
@@ -12,11 +17,6 @@
 	}%>
 
 <%
-	String dataFilesDir = "D:/Jee_workspace/TopicDetectionAndTracking/Dataset/stemData_4076/";
-	String glossaryFile = "D:/Jee_workspace/TopicDetectionAndTracking/Dataset/4076_glossary.dat";
-	String tfidfFile = "D:/Jee_workspace/TopicDetectionAndTracking/Dataset/4076_tfidf.dat";
-	String ansFile = "D:/Jee_workspace/TopicDetectionAndTracking/Dataset/answer4076.txt";
-	main.initialize(dataFilesDir, glossaryFile, tfidfFile, ansFile);
 	if (request.getMethod().equalsIgnoreCase("POST")) {
 		main.doPost(request, response);
 	} else if (request.getMethod().equalsIgnoreCase("GET")) {
