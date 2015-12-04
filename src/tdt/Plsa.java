@@ -37,6 +37,7 @@ public class Plsa {
 	}
 
 	/**
+	 * TODO train()
 	 * 
 	 * @param numOfTopics
 	 * @param maxIter
@@ -53,7 +54,8 @@ public class Plsa {
 	/**
 	 * Return the similarity between two stories, using the trained plsa model,
 	 * Please make sure the train() is already invoked, before using this
-	 * function. Similairty = sum_z (Similarity_z * P(z))
+	 * function. Similairty = sum_z (Similarity_z * P(z)) TODO
+	 * getSimilarity(Story, Story)
 	 * 
 	 * @see Plsa.getSimilarity(Story, Story, int)
 	 * @param story1
@@ -77,11 +79,11 @@ public class Plsa {
 	 * @param topic
 	 * @return
 	 */
-	public double getSimilarity(Story story1, Story story2, int topicID) {
+	private double getSimilarity(Story story1, Story story2, int topicID) {
 		double innerProduct = 0.0;
 		double squareSum1 = 0.0;
 		double squareSum2 = 0.0;
-		int i = 0; // TODO the id of story1 in the corpus
+		int i = 0; // TODO how to get the id of story1 in the corpus?
 		int j = 0; // the id of story2 in the corpus
 		for (int curTopic = 0; curTopic < numOfTopics; ++curTopic) {
 			innerProduct += docTopicPros[i][curTopic] * docTopicPros[j][curTopic];
@@ -91,6 +93,7 @@ public class Plsa {
 		double result = innerProduct / Math.sqrt(squareSum1 * squareSum2);
 		return result;
 	}
+	// ----------------- codes below are copied from somewhere...
 
 	/**
 	 * train plsa
