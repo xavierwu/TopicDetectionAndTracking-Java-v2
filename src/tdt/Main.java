@@ -135,72 +135,7 @@ public class Main {
 	 *         PMiss:, PFa:}, 1:{...}, ...}
 	 */
 	private JSONObject do_getEvaluation() {
-		// TODO This method should return the best results of all algorithms.
-
-		JSONObject responseJSONObject = new JSONObject();
-		JSONObject tmp = null;
-
-		int algorithmNum = 6;
-		responseJSONObject.put("algorithmCount", algorithmNum);
-
-		int methodID = 0;
-		// tfidf_KMeans
-		tmp = new JSONObject();
-		methodID = 0;
-		tmp.put("methodID", methodID);
-		tmp.put("algorithm", "tfidf_KMeans");
-		tmp.put("normCdet", 5.9);
-		tmp.put("PMiss", 1.0);
-		tmp.put("PFa", 1.0);
-		responseJSONObject.put(methodID, tmp);
-		// plsa_KMeans
-		tmp = new JSONObject();
-		methodID = 1;
-		tmp.put("methodID", methodID);
-		tmp.put("algorithm", "plsa_KMeans");
-		tmp.put("normCdet", 5.9);
-		tmp.put("PMiss", 1.0);
-		tmp.put("PFa", 1.0);
-		responseJSONObject.put(methodID, tmp);
-
-		// tfidf_DBSCAN
-		tmp = new JSONObject();
-		methodID = 2;
-		tmp.put("methodID", methodID);
-		tmp.put("algorithm", "tfidf_DBSCAN");
-		tmp.put("normCdet", 5.9);
-		tmp.put("PMiss", 1.0);
-		tmp.put("PFa", 1.0);
-		responseJSONObject.put(methodID, tmp);
-		// plsa_DBSCAN
-		tmp = new JSONObject();
-		methodID = 3;
-		tmp.put("methodID", methodID);
-		tmp.put("algorithm", "plsa_DBSCAN");
-		tmp.put("normCdet", 5.9);
-		tmp.put("PMiss", 1.0);
-		tmp.put("PFa", 1.0);
-		responseJSONObject.put(methodID, tmp);
-
-		// tfidf_aggDetection
-		tmp = new JSONObject();
-		methodID = 4;
-		tmp.put("methodID", methodID);
-		tmp.put("algorithm", "tfidf_aggDetection");
-		tmp.put("normCdet", 3.7694);
-		tmp.put("PMiss", 0.6389);
-		tmp.put("PFa", 0.6389);
-		responseJSONObject.put(methodID, tmp);
-		// plsa_aggDetection
-		tmp = new JSONObject();
-		methodID = 5;
-		tmp.put("methodID", methodID);
-		tmp.put("algorithm", "plsa_aggDetection");
-		tmp.put("normCdet", 5.9);
-		tmp.put("PMiss", 1.0);
-		tmp.put("PFa", 1.0);
-		responseJSONObject.put(methodID, tmp);
-
+		JSONObject responseJSONObject = topicDetector.getMethodList();
 		return responseJSONObject;
 	}
 
