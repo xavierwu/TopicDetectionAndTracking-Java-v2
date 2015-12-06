@@ -282,83 +282,19 @@ public class Main {
 	 */
 	private JSONObject do_commitParameters(HttpServletRequest request) {
 		JSONObject responseJSONObject = new JSONObject();
-		int methodID = Integer.parseInt(request.getParameter("methodID"));
-		System.out.println("methodID = " + methodID);
 
 		System.out.println("=== Topic Detection Start");
-		TopicDetector topicDetector = new TopicDetector();
-		int numOfLoops = 0;
-		double minSimilarity = 0.0;
-		int minPts = 0;
-		double threshold = 0.0;
-		switch (methodID) {
-		// TODO maybe i should throw a exception if the required parameters are
-		// not set?
-		case 0:// tfidf_KMeans
-			numOfTopics = Integer.parseInt(request.getParameter("numOfTopics"));
-			numOfLoops = Integer.parseInt(request.getParameter("numOfLoops"));
-			System.out.println("Parameters: ");
-			System.out.println("> numOfTopics = " + numOfTopics);
-			System.out.println("> numOfLoops = " + numOfLoops);
-			topicDetector.KMeans(corpus, 0, numOfTopics, numOfLoops);
-			break;
-		case 1: // plsa_KMeans
-			numOfTopics = Integer.parseInt(request.getParameter("numOfTopics"));
-			numOfLoops = Integer.parseInt(request.getParameter("numOfLoops"));
-			System.out.println("Parameters: ");
-			System.out.println("> numOfTopics = " + numOfTopics);
-			System.out.println("> numOfLoops = " + numOfLoops);
-			topicDetector.KMeans(corpus, 1, numOfTopics, numOfLoops);
-			break;
-		case 2: // tfidf_DBSCAN
-			minSimilarity = Double.parseDouble(request.getParameter("minSimilarity"));
-			minPts = Integer.parseInt(request.getParameter("minPts"));
-			System.out.println("Parameters: ");
-			System.out.println("> minSimilarity = " + minSimilarity);
-			System.out.println("> minPts = " + minPts);
-			numOfTopics = topicDetector.DBSCAN(corpus, 0, minSimilarity, minPts);
-			break;
-		case 3: // plsa_DBSCAN
-			minSimilarity = Double.parseDouble(request.getParameter("minSimilarity"));
-			minPts = Integer.parseInt(request.getParameter("minPts"));
-			System.out.println("Parameters: ");
-			System.out.println("> minSimilarity = " + minSimilarity);
-			System.out.println("> minPts = " + minPts);
-			numOfTopics = topicDetector.DBSCAN(corpus, 1, minSimilarity, minPts);
-			break;
-		case 4: // tfidf_aggDetection
-			threshold = Double.parseDouble(request.getParameter("threshold"));
-			System.out.println("Parameters: ");
-			System.out.println("> threshold = " + threshold);
-			numOfTopics = topicDetector.aggDetection(corpus, 0, threshold);
-			break;
-		case 5:// plsa_aggDetection
-			threshold = Double.parseDouble(request.getParameter("threshold"));
-			System.out.println("Parameters: ");
-			System.out.println("> threshold = " + threshold);
-			numOfTopics = topicDetector.aggDetection(corpus, 1, threshold);
-			break;
-		default:
-			break;
-		}
+		TopicDetector topicDetector = new TopicDetector(corpus);
+		numOfTopics = topicDetector.doTopicDetection(request);
+		System.out.println("numOfTopics = " + numOfTopics);
 		System.out.println("=== Topic Detection End");
 
-		// TODO this method seems to be too large?
-
-		System.out.println("numOfTopics = " + numOfTopics);
-		assert(numOfTopics > 0);
-
 		System.out.println("=== First Story Detection Start");
-		firstStories.clear();
-		firstStories = FirstStoryDetector.doFirstStoryDetection(corpus, numOfTopics);
-		System.out.println("=== First Story Detection End");
-
+		FirstStoryDetector firstStoryDetector = new FirstStoryDetector(corpus);
+		firstStories = firstStoryDetector.doFirstStoryDetection(numOfTopics);
 		System.out.println("firstStories: " + firstStories.size());
-		// for (Story story : firstStories)
-		// System.out.println(story.getTimeStamp());
 		System.out.println("actualFirstStories: " + actualFirstStories.size());
-		// for (Story story : actualFirstStories)
-		// System.out.println(story.getTimeStamp());
+		System.out.println("=== First Story Detection End");
 
 		System.out.println("=== Evaluation Start");
 		Evaluator evaluator = new Evaluator();
@@ -370,6 +306,7 @@ public class Main {
 		System.out.println("PMiss = " + PMiss);
 		System.out.println("PFa = " + PFa);
 		System.out.println("=== Evaluation End");
+
 		responseJSONObject.put("normCdet", normCdet);
 		responseJSONObject.put("PMiss", PMiss);
 		responseJSONObject.put("PFa", PFa);

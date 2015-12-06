@@ -9,7 +9,14 @@ import java.util.Vector;
  * @author Zewei Wu
  */
 public class FirstStoryDetector {
-	protected static Vector<Story> doFirstStoryDetection(Vector<Story> corpus, int numOfTopics) {
+	Vector<Story> corpus = null;
+
+	public FirstStoryDetector(Vector<Story> corpus) {
+		this.corpus = corpus;
+	}
+
+	// TODO is it reasonable???
+	public Vector<Story> doFirstStoryDetection(int numOfTopics) {
 		Vector<Story> firstStories = new Vector<Story>();
 		for (int curTopic = 0; curTopic < numOfTopics; ++curTopic) {
 			Story firstStoryOfCurTopic = null;
