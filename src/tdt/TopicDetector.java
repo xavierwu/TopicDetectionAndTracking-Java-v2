@@ -9,6 +9,8 @@ import java.util.Vector;
 
 import javax.servlet.http.HttpServletRequest;
 
+import net.sf.json.JSONObject;
+
 /**
  * This class is used to classify the corpus. Give every story an unique topic
  * ID. This is the core step of the whole project. We will try to find the best
@@ -21,6 +23,58 @@ class TopicDetector {
 
 	public TopicDetector(Vector<Story> corpus) {
 		this.corpus = corpus;
+	}
+
+	public JSONObject prepareTopicDetection(int methodID) {
+		JSONObject responseJSONObject = new JSONObject();
+		JSONObject tmp = null;
+		int numOfParameters = 0;
+		switch (methodID) {
+		// TODO how to set parameters for plsa?
+		case 0: // tfidf_KMeans
+		case 1: // plsa_KMeans
+			numOfParameters = 2;
+			responseJSONObject.put("numOfParameters", numOfParameters);
+
+			tmp = new JSONObject();
+			tmp.put("parameter", "numOfTopics");
+			tmp.put("value", 36);
+			responseJSONObject.put(0, tmp);
+
+			tmp = new JSONObject();
+			tmp.put("parameter", "numOfLoops");
+			tmp.put("value", 5);
+			responseJSONObject.put(1, tmp);
+			break;
+		case 2: // tfidf_DBSCAN
+		case 3: // plsa_DBSCAN
+			numOfParameters = 2;
+			responseJSONObject.put("numOfParameters", numOfParameters);
+
+			tmp = new JSONObject();
+			tmp.put("parameter", "minSimilarity");
+			tmp.put("value", 0.98);
+			responseJSONObject.put(0, tmp);
+
+			tmp = new JSONObject();
+			tmp.put("parameter", "minPts");
+			tmp.put("value", 5);
+			responseJSONObject.put(1, tmp);
+			break;
+		case 4: // tfidf_aggDetection
+		case 5: // plsa_aggDetection
+			numOfParameters = 1;
+			responseJSONObject.put("numOfParameters", numOfParameters);
+
+			tmp = new JSONObject();
+			tmp.put("parameter", "threshold");
+			tmp.put("value", 0.144);
+			responseJSONObject.put(0, tmp);
+			break;
+		default:
+			break;
+		}
+		return responseJSONObject;
 	}
 
 	public int doTopicDetection(HttpServletRequest request) {
@@ -84,55 +138,6 @@ class TopicDetector {
 	}
 
 	/**
-	 * Function to be called by other class, for the purpose of encapsulation.
-	 * It uses certain methods to label these stories, make these stories have
-	 * an unique topic ID. After the function being called, the whole corpus
-	 * will be classified.
-	 * 
-	 * @deprecated
-	 * @param corpus
-	 * @return topic number, which is set by certain method.
-	 */
-	int doTopicDetection(Vector<Story> corpus, int methodID) {
-		switch (methodID) {
-		case 0:
-			int numOfTopics = 7;
-			KMeans(corpus, numOfTopics, 10);
-			return numOfTopics;
-		case 1:
-			return DBSCAN(corpus, 0.98, 5);
-		default:
-			return -1;
-		}
-	}
-
-	/**
-	 * Function to be called by other class, for the purpose of encapsulation.
-	 * It uses certain methods to label these stories, make these stories have
-	 * an unique topic ID. After the function being called, the whole corpus
-	 * will be classified.
-	 *
-	 * @deprecated
-	 * @param corpus
-	 * @return topic number, which is set by certain method.
-	 */
-	int doTopicDetection(Vector<Story> corpus) {
-		/*
-		 * Topic number, set to 7 for the time being. We will try to make it can
-		 * be set automatically.
-		 */
-		int numOfTopics = 7;
-		KMeans(corpus, numOfTopics, 10);
-		return numOfTopics;
-
-		// return DBSCAN(corpus, 0.98, 5);
-	}
-
-	public void KMeans(Vector<Story> corpus, int numOfTopics, int numOfLoops) {
-		KMeans(corpus, 0, numOfTopics, numOfLoops);
-	}
-
-	/**
 	 * K-means clustering. It aims to partition n stories into k clusters, in
 	 * which each story belongs to the the cluster with nearest mean. Special
 	 * Notice: the second parameter numOfTopics can't be zero.
@@ -143,7 +148,7 @@ class TopicDetector {
 	 * @param numOfTopics
 	 * @param numOfLoops
 	 */
-	public void KMeans(Vector<Story> corpus, int simMeasure, int numOfTopics, int numOfLoops) {
+	private void KMeans(Vector<Story> corpus, int simMeasure, int numOfTopics, int numOfLoops) {
 		Vector<Story> centroids = new Vector<Story>();
 		Story tmp = null;
 		HashMap<Integer, Double> tfidf = null;
@@ -197,10 +202,6 @@ class TopicDetector {
 		}
 	}
 
-	public int DBSCAN(Vector<Story> corpus, double minSimilarity, int minPts) {
-		return DBSCAN(corpus, 0, minSimilarity, minPts);
-	}
-
 	/**
 	 * DBSCAN clustering. DBSCAN requires two parameters: ep(eps, similarity
 	 * here) and the minimum number of points required to form a dense region[a]
@@ -224,7 +225,7 @@ class TopicDetector {
 	 * @param minSimilarity
 	 * @param minPts
 	 */
-	public int DBSCAN(Vector<Story> corpus, int simMeasure, double minSimilarity, int minPts) {
+	private int DBSCAN(Vector<Story> corpus, int simMeasure, double minSimilarity, int minPts) {
 		boolean[] isVisited = new boolean[corpus.size() + 1];
 		int topicID = 0;
 
@@ -309,17 +310,6 @@ class TopicDetector {
 	}
 
 	/**
-	 * TODO voting-k-means
-	 * 
-	 * @param corpus
-	 * @param numOfTopics
-	 * @param numOfClusterings
-	 */
-	public void votingKMeans(Vector<Story> corpus, int numOfTopics, int numOfClusterings) {
-
-	}
-
-	/**
 	 * Sort the stories in the corpus. From the oldest to the newest, check if
 	 * current story is similar to any of the story before, assign the topicID
 	 * of the most similar story to the current story.
@@ -330,7 +320,7 @@ class TopicDetector {
 	 * @param threshold
 	 * @return numOfTopics
 	 */
-	public int aggDetection(Vector<Story> corpus, int simMeasure, double threshold) {
+	private int aggDetection(Vector<Story> corpus, int simMeasure, double threshold) {
 		// sort the stories
 		Story.sort(corpus);
 
@@ -358,43 +348,6 @@ class TopicDetector {
 			}
 		}
 		return numOfTopics;
-	}
-
-	public static void main(String[] args) {
-		Vector<Story> v = new Vector<Story>();
-		Story tmp = null;
-
-		tmp = new Story();
-		tmp.setTimeStamp("20030401.0113.0007");
-		v.addElement(tmp);
-		System.out.println(tmp.getTimeStamp());
-
-		tmp = new Story();
-		tmp.setTimeStamp("20030402.0113.0007");
-		v.addElement(tmp);
-		System.out.println(tmp.getTimeStamp());
-
-		tmp = new Story();
-		tmp.setTimeStamp("20020401.0113.0007");
-		v.addElement(tmp);
-		System.out.println(tmp.getTimeStamp());
-
-		tmp = new Story();
-		tmp.setTimeStamp("20010401.0113.0007");
-		v.addElement(tmp);
-		System.out.println(tmp.getTimeStamp());
-
-		tmp = new Story();
-		tmp.setTimeStamp("20080401.0113.0007");
-		v.addElement(tmp);
-		System.out.println(tmp.getTimeStamp());
-
-		Story.sort(v);
-
-		System.out.println();
-		for (int i = 0; i < v.size(); ++i) {
-			System.out.println(v.get(i).getTimeStamp());
-		}
 	}
 
 }

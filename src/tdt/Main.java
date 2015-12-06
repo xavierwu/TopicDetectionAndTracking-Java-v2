@@ -26,6 +26,7 @@ public class Main {
 	private Glossary glossary = new Glossary();
 	private Vector<Story> actualFirstStories = new Vector<Story>();
 	private Vector<Story> firstStories = new Vector<Story>();
+	TopicDetector topicDetector = new TopicDetector(corpus);
 	// Results
 	private int numOfTopics = 0;
 	private double normCdet = 0.0;
@@ -60,6 +61,7 @@ public class Main {
 		assert(actualFirstStories.size() > 0);
 
 		System.out.println("====== Done initializing ======");
+		System.out.println();
 	}
 
 	/**
@@ -112,13 +114,8 @@ public class Main {
 			return;
 		}
 
-		// String[] datasetDir = new String[] {
-		// "D:/Jee_workspace/TopicDetectionAndTracking/Dataset/" };
-		// tdt.Main.main(datasetDir);
-
 		response.setCharacterEncoding("UTF-8");
 		response.setContentType("application/json; charset=utf-8");
-		// response.setContentType("text/html; charset=utf-8");
 		PrintWriter out = null;
 		try {
 			out = response.getWriter();
@@ -219,55 +216,7 @@ public class Main {
 	private JSONObject do_setParameters(HttpServletRequest request) {
 		int methodID = Integer.parseInt(request.getParameter("methodID"));
 		System.out.println("methodID = " + methodID);
-		// {numOfParameters:, 0:{parameter:, value:}, ...}
-		JSONObject responseJSONObject = new JSONObject();
-		JSONObject tmp = null;
-		int numOfParameters = 0;
-		switch (methodID) {
-		// TODO how to set parameters for plsa?
-		case 0: // tfidf_KMeans
-		case 1: // plsa_KMeans
-			numOfParameters = 2;
-			responseJSONObject.put("numOfParameters", numOfParameters);
-
-			tmp = new JSONObject();
-			tmp.put("parameter", "numOfTopics");
-			tmp.put("value", 36);
-			responseJSONObject.put(0, tmp);
-
-			tmp = new JSONObject();
-			tmp.put("parameter", "numOfLoops");
-			tmp.put("value", 5);
-			responseJSONObject.put(1, tmp);
-			break;
-		case 2: // tfidf_DBSCAN
-		case 3: // plsa_DBSCAN
-			numOfParameters = 2;
-			responseJSONObject.put("numOfParameters", numOfParameters);
-
-			tmp = new JSONObject();
-			tmp.put("parameter", "minSimilarity");
-			tmp.put("value", 0.98);
-			responseJSONObject.put(0, tmp);
-
-			tmp = new JSONObject();
-			tmp.put("parameter", "minPts");
-			tmp.put("value", 5);
-			responseJSONObject.put(1, tmp);
-			break;
-		case 4: // tfidf_aggDetection
-		case 5: // plsa_aggDetection
-			numOfParameters = 1;
-			responseJSONObject.put("numOfParameters", numOfParameters);
-
-			tmp = new JSONObject();
-			tmp.put("parameter", "threshold");
-			tmp.put("value", 0.144);
-			responseJSONObject.put(0, tmp);
-			break;
-		default:
-			break;
-		}
+		JSONObject responseJSONObject = topicDetector.prepareTopicDetection(methodID);
 		return responseJSONObject;
 	}
 
@@ -284,10 +233,10 @@ public class Main {
 		JSONObject responseJSONObject = new JSONObject();
 
 		System.out.println("=== Topic Detection Start");
-		TopicDetector topicDetector = new TopicDetector(corpus);
 		numOfTopics = topicDetector.doTopicDetection(request);
 		System.out.println("numOfTopics = " + numOfTopics);
 		System.out.println("=== Topic Detection End");
+		System.out.println();
 
 		System.out.println("=== First Story Detection Start");
 		FirstStoryDetector firstStoryDetector = new FirstStoryDetector(corpus);
@@ -295,6 +244,7 @@ public class Main {
 		System.out.println("firstStories: " + firstStories.size());
 		System.out.println("actualFirstStories: " + actualFirstStories.size());
 		System.out.println("=== First Story Detection End");
+		System.out.println();
 
 		System.out.println("=== Evaluation Start");
 		Evaluator evaluator = new Evaluator();
@@ -306,6 +256,7 @@ public class Main {
 		System.out.println("PMiss = " + PMiss);
 		System.out.println("PFa = " + PFa);
 		System.out.println("=== Evaluation End");
+		System.out.println();
 
 		responseJSONObject.put("normCdet", normCdet);
 		responseJSONObject.put("PMiss", PMiss);
