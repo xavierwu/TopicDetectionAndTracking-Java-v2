@@ -251,6 +251,17 @@ class TopicDetector {
 	}
 
 	/**
+	 * TODO voting-k-means
+	 * 
+	 * @param corpus
+	 * @param numOfTopics
+	 * @param numOfClusterings
+	 */
+	public void votingKMeans(Vector<Story> corpus, int numOfTopics, int numOfClusterings) {
+
+	}
+
+	/**
 	 * Sort the stories in the corpus. From the oldest to the newest, check if
 	 * current story is similar to any of the story before, assign the topicID
 	 * of the most similar story to the current story.

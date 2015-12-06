@@ -5,8 +5,6 @@ package tdt;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Vector;
 
 import javax.servlet.http.HttpServletRequest;
@@ -18,23 +16,31 @@ import net.sf.json.JSONObject;
  * @author Zewei Wu
  */
 public class Main {
-	Vector<Story> corpus = new Vector<Story>();
-	Glossary glossary = new Glossary();
-	Vector<Story> actualFirstStories = new Vector<Story>();
-	boolean isInitialized = false;
-	String dataFilesdir;
-	String glossaryFile;
-	String tfidfFile;
-	String ansFile;
+	// Set by parameters of constructor.
+	private String dataFilesdir = null;
+	private String glossaryFile = null;
+	private String tfidfFile = null;
+	private String ansFile = null;
+	// Important data structures.
+	private Vector<Story> corpus = new Vector<Story>();
+	private Glossary glossary = new Glossary();
+	private Vector<Story> actualFirstStories = new Vector<Story>();
+	private Vector<Story> firstStories = new Vector<Story>();
+	// Results
+	private int numOfTopics = 0;
+	private double normCdet = 0.0;
+	private double PMiss = 0.0;
+	private double PFa = 0.0;
 
-	// Used to record the files list containing a certain word.
-	HashMap<Integer, HashSet<Integer>> wordIDToStoryIndices = new HashMap<Integer, HashSet<Integer>>();
-	int numOfTopics = 0;
-	Vector<Story> firstStories = new Vector<Story>();
-	double normCdet = 0.0;
-	double PMiss = 0.0;
-	double PFa = 0.0;
-
+	/**
+	 * Initialization of our program, everything about data pre-processing
+	 * should be put here.
+	 * 
+	 * @param dataFilesdir
+	 * @param glossaryFile
+	 * @param tfidfFile
+	 * @param ansFile
+	 */
 	public Main(String dataFilesdir, String glossaryFile, String tfidfFile, String ansFile) {
 		this.dataFilesdir = dataFilesdir;
 		this.glossaryFile = glossaryFile;
@@ -57,131 +63,11 @@ public class Main {
 	}
 
 	/**
-	 * @param args
-	 *            Unused.
+	 * Deal with a get request. Currently, it just print a short message.
+	 * 
+	 * @param request
+	 * @param response
 	 */
-	// public static void main(String[] args) {
-	//
-	// // String tknDir = "Dataset/mttkn/";
-	// // String bndDir = "Dataset/mttkn_bnd/";
-	// // String sgmDir = "Dataset/sgm/";
-	// // String ansFile = "Dataset/answer.txt";
-	//
-	// // String datasetDir = args[0];
-	// String datasetDir =
-	// "D:/Jee_workspace/TopicDetectionAndTracking/Dataset/";
-	// String sgmDir = datasetDir + "sgm/";
-	// String ansFile = datasetDir + "answer.txt";
-	// String tfidfFile = datasetDir + "tfidf.dat";
-	// String resultFile = datasetDir + "result.dat";
-	//
-	// System.out.println("====== Data Preprocessing Start ======");
-	// DataPreprocessor dataPreprocessor = new DataPreprocessor();
-	// // dataPreprocessor.doDataPreprocessing(corpus, glossary,
-	// // wordIDToStoryIndices, actualFirstStories, tknDir, bndDir, ansFile);
-	// dataPreprocessor.doDataPreprocessing(corpus, glossary,
-	// wordIDToStoryIndices, actualFirstStories, sgmDir,
-	// ansFile);
-	// System.out.println("====== Data Preprocessing End ======");
-	//
-	// System.out.println();
-	// System.out.println("corpus.size() = " + corpus.size());
-	// assert(corpus.size() > 0);
-	// System.out.println("glossary.size() = " + glossary.size());
-	// assert(glossary.size() > 0);
-	// System.out.println("wordIDToStoryIndices.size() = " +
-	// wordIDToStoryIndices.size());
-	// assert(wordIDToStoryIndices.size() > 0);
-	// System.out.println("actualFirstStories.size() = " +
-	// actualFirstStories.size());
-	// assert(actualFirstStories.size() > 0);
-	// System.out.println();
-	//
-	// System.out.println("====== Story Link Detection Start ======");
-	// StoryLinkDetector.doStoryLinkDetection(corpus, wordIDToStoryIndices,
-	// tfidfFile, false);
-	// System.out.println("====== Story Link Detection End ======");
-	//
-	// System.out.println("====== Topic Detection Start ======");
-	// TopicDetector topicDetector = new TopicDetector();
-	// int numOfTopics = topicDetector.doTopicDetection(corpus);
-	// System.out.println("====== Topic Detection End ======");
-	//
-	// System.out.println();
-	// System.out.println("numOfTopics = " + numOfTopics);
-	// assert(numOfTopics > 0);
-	// System.out.println();
-	//
-	// System.out.println("====== First Story Detection Start ======");
-	// Vector<Story> firstStories =
-	// FirstStoryDetector.doFirstStoryDetection(corpus, numOfTopics);
-	// System.out.println("====== First Story Detection End ======");
-	//
-	// System.out.println();
-	// System.out.println("firstStories.size() = " + firstStories.size());
-	// assert(firstStories.size() == numOfTopics);
-	// System.out.println();
-	//
-	// System.out.println("====== Presentation Start ======");
-	// Presentator.doPresentation(firstStories, corpus, glossary, numOfTopics,
-	// resultFile);
-	// System.out.println("====== Presentation End ======");
-	//
-	// System.out.println("====== Evaluation Start ======");
-	// double normCdet = Evaluator.doEvaluation(corpus, actualFirstStories,
-	// firstStories);
-	// System.out.println("normCdet = " + normCdet);
-	// System.out.println("====== Evaluation End ======");
-	// }
-
-	// <%!Vector<tdt.Story> corpus =
-	// Main.getCorpus("D:/Jee_workspace/TopicDetectionAndTracking/Dataset/");%>
-	// public static Vector<Story> getCorpus(String datasetDir) {
-	// String sgmDir = datasetDir + "sgm/";
-	// String ansFile = datasetDir + "answer.txt";
-	//
-	// System.out.println("====== Data Preprocessing Start ======");
-	// DataPreprocessor dataPreprocessor = new DataPreprocessor();
-	// // dataPreprocessor.doDataPreprocessing(corpus, glossary,
-	// // wordIDToStoryIndices, actualFirstStories, tknDir, bndDir, ansFile);
-	// dataPreprocessor.doDataPreprocessing(corpus, glossary,
-	// wordIDToStoryIndices, actualFirstStories, sgmDir,
-	// ansFile);
-	// System.out.println("====== Data Preprocessing End ======");
-	// return corpus;
-	// }
-
-	/**
-	 * @deprecated
-	 * @param dataFilesdir
-	 * @param glossaryFile
-	 * @param tfidfFile
-	 * @param ansFile
-	 */
-	public void initialize(String dataFilesdir, String glossaryFile, String tfidfFile, String ansFile) {
-		if (isInitialized)
-			return;
-		this.dataFilesdir = dataFilesdir;
-		this.glossaryFile = glossaryFile;
-		this.tfidfFile = tfidfFile;
-		this.ansFile = ansFile;
-		System.out.println("====== Start initializing ======");
-
-		glossary.load(glossaryFile);
-		DataPreprocessor.recoverCorpusFromTFIDF(corpus, tfidfFile);
-		DataPreprocessor.readAnswer_v2(actualFirstStories, ansFile);
-
-		System.out.println("corpus.size() = " + corpus.size());
-		assert(corpus.size() > 0);
-		System.out.println("glossary.size() = " + glossary.size());
-		assert(glossary.size() > 0);
-		System.out.println("actualFirstStories.size() = " + actualFirstStories.size());
-		assert(actualFirstStories.size() > 0);
-
-		System.out.println("====== Done initializing ======");
-		isInitialized = true;
-	}
-
 	public void doGet(HttpServletRequest request, HttpServletResponse response) {
 		System.out.println("doGet");
 
@@ -200,6 +86,12 @@ public class Main {
 		}
 	}
 
+	/**
+	 * Deal with a post request.
+	 * 
+	 * @param request
+	 * @param response
+	 */
 	public void doPost(HttpServletRequest request, HttpServletResponse response) {
 		String action = request.getParameter("action");
 		System.out.println("doPost: " + action);
@@ -211,8 +103,6 @@ public class Main {
 			responseJSONObject = do_setParameters(request);
 		} else if ("commitParameters".equalsIgnoreCase(action)) {
 			responseJSONObject = do_commitParameters(request);
-		} else if ("getTopics".equalsIgnoreCase(action)) {// deprecated
-			responseJSONObject = do_getTopics(request);
 		} else if ("getStories".equalsIgnoreCase(action)) {
 			responseJSONObject = do_getStories(request);
 		} else if ("getContent".equalsIgnoreCase(action)) {
@@ -241,275 +131,15 @@ public class Main {
 		}
 	}
 
-	private JSONObject do_getContent(HttpServletRequest request) {
-		JSONObject responseJSONObject = new JSONObject();
-		int storyID = Integer.parseInt(request.getParameter("storyID"));
-		responseJSONObject.put("content", corpus.get(storyID).getContent(glossary));
-		return responseJSONObject;
-	}
-
-	private JSONObject do_getStories(HttpServletRequest request) {
-		JSONObject responseJSONObject = new JSONObject();
-		JSONObject tmp = null;
-		// client send a story id, response with the content of the story
-		// {storyNum:, 0:{title:, source:, date:}, ...}
-
-		int topicID = Integer.parseInt(request.getParameter("topicID"));
-
-		Vector<Integer> stories = new Vector<Integer>();
-		for (int i = 0; i < corpus.size(); ++i)
-			if (corpus.get(i).getTopicID() == topicID)
-				stories.add(i);
-
-		int storyNum = stories.size();
-		responseJSONObject.put("storyNum", storyNum);
-		for (int i = 0; i < storyNum; ++i) {
-			tmp = new JSONObject();
-			tmp.put("storyID", stories.get(i)); // the story id in corpus
-			tmp.put("title", corpus.get(stories.get(i)).getTitle(dataFilesdir));
-			tmp.put("source", corpus.get(stories.get(i)).getSource());
-			tmp.put("date", corpus.get(stories.get(i)).getTimeStamp());
-			responseJSONObject.put(i, tmp);
-		}
-		return responseJSONObject;
-	}
-
 	/**
-	 * @deprecated
-	 * @param request
-	 * @return
-	 */
-	private JSONObject do_getTopics(HttpServletRequest request) {
-		JSONObject responseJSONObject = new JSONObject();
-		JSONObject tmp = null;
-		int methodID = Integer.parseInt(request.getParameter("methodID"));
-		System.out.println("methodID = " + methodID);
-		chooseAlgorithm(methodID);
-
-		// {topicNum:, 0:{title:, source:, date:}, 1:{title:, source:,
-		// date:}, ...}
-		int topicNum = firstStories.size();
-		responseJSONObject.put("topicNum", topicNum);
-		for (int i = 0; i < topicNum; ++i) {
-			tmp = new JSONObject();
-			tmp.put("topicID", firstStories.get(i).getTopicID());
-			tmp.put("title", firstStories.get(i).getTitle(dataFilesdir));
-			tmp.put("source", firstStories.get(i).getSource());
-			tmp.put("date", firstStories.get(i).getTimeStamp());
-			responseJSONObject.put(i, tmp);
-		}
-		return responseJSONObject;
-	}
-
-	private JSONObject do_setParameters(HttpServletRequest request) {
-		int methodID = Integer.parseInt(request.getParameter("methodID"));
-		System.out.println("methodID = " + methodID);
-		// {numOfParameters:, 0:{parameter:, value:}, ...}
-		JSONObject responseJSONObject = new JSONObject();
-		JSONObject tmp = null;
-		int numOfParameters = 0;
-		switch (methodID) {
-		case 0: // tfidf_KMeans
-		case 1: // plsa_KMeans
-			numOfParameters = 2;
-			responseJSONObject.put("numOfParameters", numOfParameters);
-
-			tmp = new JSONObject();
-			tmp.put("parameter", "numOfTopics");
-			tmp.put("value", 36);
-			responseJSONObject.put(0, tmp);
-
-			tmp = new JSONObject();
-			tmp.put("parameter", "numOfLoops");
-			tmp.put("value", 5);
-			responseJSONObject.put(1, tmp);
-			break;
-		case 2: // tfidf_DBSCAN
-		case 3: // plsa_DBSCAN
-			numOfParameters = 2;
-			responseJSONObject.put("numOfParameters", numOfParameters);
-
-			tmp = new JSONObject();
-			tmp.put("parameter", "minSimilarity");
-			tmp.put("value", 0.98);
-			responseJSONObject.put(0, tmp);
-
-			tmp = new JSONObject();
-			tmp.put("parameter", "minPts");
-			tmp.put("value", 5);
-			responseJSONObject.put(1, tmp);
-			break;
-		case 4: // tfidf_aggDetection
-		case 5: // plsa_aggDetection
-			numOfParameters = 1;
-			responseJSONObject.put("numOfParameters", numOfParameters);
-
-			tmp = new JSONObject();
-			tmp.put("parameter", "threshold");
-			tmp.put("value", 0.144);
-			responseJSONObject.put(0, tmp);
-			break;
-		default:
-			break;
-		}
-		return responseJSONObject;
-	}
-
-	private JSONObject do_commitParameters(HttpServletRequest request) {
-		JSONObject responseJSONObject = new JSONObject();
-		int methodID = Integer.parseInt(request.getParameter("methodID"));
-		System.out.println("methodID = " + methodID);
-
-		System.out.println("=== Topic Detection Start");
-		TopicDetector topicDetector = new TopicDetector();
-		int numOfLoops = 0;
-		double minSimilarity = 0.0;
-		int minPts = 0;
-		double threshold = 0.0;
-		switch (methodID) {
-		case 0:// tfidf_KMeans
-			numOfTopics = Integer.parseInt(request.getParameter("numOfTopics"));
-			numOfLoops = Integer.parseInt(request.getParameter("numOfLoops"));
-			System.out.println("Parameters: ");
-			System.out.println("> numOfTopics = " + numOfTopics);
-			System.out.println("> numOfLoops = " + numOfLoops);
-			topicDetector.KMeans(corpus, 0, numOfTopics, numOfLoops);
-			break;
-		case 1: // plsa_KMeans
-			numOfTopics = Integer.parseInt(request.getParameter("numOfTopics"));
-			numOfLoops = Integer.parseInt(request.getParameter("numOfLoops"));
-			System.out.println("Parameters: ");
-			System.out.println("> numOfTopics = " + numOfTopics);
-			System.out.println("> numOfLoops = " + numOfLoops);
-			topicDetector.KMeans(corpus, 1, numOfTopics, numOfLoops);
-			break;
-		case 2: // tfidf_DBSCAN
-			minSimilarity = Double.parseDouble(request.getParameter("minSimilarity"));
-			minPts = Integer.parseInt(request.getParameter("minPts"));
-			System.out.println("Parameters: ");
-			System.out.println("> minSimilarity = " + minSimilarity);
-			System.out.println("> minPts = " + minPts);
-			numOfTopics = topicDetector.DBSCAN(corpus, 0, minSimilarity, minPts);
-			break;
-		case 3: // plsa_DBSCAN
-			minSimilarity = Double.parseDouble(request.getParameter("minSimilarity"));
-			minPts = Integer.parseInt(request.getParameter("minPts"));
-			System.out.println("Parameters: ");
-			System.out.println("> minSimilarity = " + minSimilarity);
-			System.out.println("> minPts = " + minPts);
-			numOfTopics = topicDetector.DBSCAN(corpus, 1, minSimilarity, minPts);
-			break;
-		case 4: // tfidf_aggDetection
-			threshold = Double.parseDouble(request.getParameter("threshold"));
-			System.out.println("Parameters: ");
-			System.out.println("> threshold = " + threshold);
-			numOfTopics = topicDetector.aggDetection(corpus, 0, threshold);
-			break;
-		case 5:// plsa_aggDetection
-			threshold = Double.parseDouble(request.getParameter("threshold"));
-			System.out.println("Parameters: ");
-			System.out.println("> threshold = " + threshold);
-			numOfTopics = topicDetector.aggDetection(corpus, 1, threshold);
-			break;
-		default:
-			break;
-		}
-		System.out.println("=== Topic Detection End");
-
-		System.out.println("numOfTopics = " + numOfTopics);
-		assert(numOfTopics > 0);
-
-		System.out.println("=== First Story Detection Start");
-		firstStories.clear();
-		firstStories = FirstStoryDetector.doFirstStoryDetection(corpus, numOfTopics);
-		System.out.println("=== First Story Detection End");
-
-		System.out.println("firstStories: " + firstStories.size());
-		// for (Story story : firstStories)
-		// System.out.println(story.getTimeStamp());
-		System.out.println("actualFirstStories: " + actualFirstStories.size());
-		// for (Story story : actualFirstStories)
-		// System.out.println(story.getTimeStamp());
-
-		System.out.println("=== Evaluation Start");
-		Evaluator evaluator = new Evaluator();
-		evaluator.doEvaluation_v3(corpus, actualFirstStories, firstStories);
-		normCdet = evaluator.getNormCdet();
-		PMiss = evaluator.getPMiss();
-		PFa = evaluator.getPFa();
-		System.out.println("normCdet = " + normCdet);
-		System.out.println("PMiss = " + PMiss);
-		System.out.println("PFa = " + PFa);
-		System.out.println("=== Evaluation End");
-		responseJSONObject.put("normCdet", normCdet);
-		responseJSONObject.put("PMiss", PMiss);
-		responseJSONObject.put("PFa", PFa);
-
-		// {normCdet:, PMiss:, PFa:, topicNum:, 0:{topicID, title:, source:,
-		// date:}, ...}
-		int topicNum = firstStories.size();
-		JSONObject tmp = null;
-		responseJSONObject.put("topicNum", topicNum);
-		for (int i = 0; i < topicNum; ++i) {
-			tmp = new JSONObject();
-			tmp.put("topicID", firstStories.get(i).getTopicID());
-			tmp.put("title", firstStories.get(i).getTitle(dataFilesdir));
-			tmp.put("source", firstStories.get(i).getSource());
-			tmp.put("date", firstStories.get(i).getTimeStamp());
-			responseJSONObject.put(i, tmp);
-		}
-		return responseJSONObject;
-	}
-
-	/**
-	 * Choose an algorithm of certain methodID, and use it to get a
-	 * corresponding result.
+	 * Response with the evaluations of different algorithms.
 	 * 
-	 * @deprecated
-	 * @param methodID
-	 */
-	private void chooseAlgorithm(int methodID) {
-		String datasetDir = "D:/Jee_workspace/TopicDetectionAndTracking/Dataset/";
-		String tfidfFile = datasetDir + "tfidf.dat";
-
-		System.out.println("=== Story Link Detection Start");
-		StoryLinkDetector.doStoryLinkDetection(corpus, wordIDToStoryIndices, tfidfFile, false, methodID);
-		System.out.println("=== Story Link Detection End");
-
-		System.out.println("=== Topic Detection Start");
-		TopicDetector topicDetector = new TopicDetector();
-		numOfTopics = topicDetector.doTopicDetection(corpus, methodID);
-		System.out.println("=== Topic Detection End");
-
-		System.out.println("numOfTopics = " + numOfTopics);
-		assert(numOfTopics > 0);
-
-		System.out.println("=== First Story Detection Start");
-		firstStories.clear();
-		firstStories = FirstStoryDetector.doFirstStoryDetection(corpus, numOfTopics);
-		System.out.println("=== First Story Detection End");
-
-		System.out.println("firstStories.size() = " + firstStories.size());
-		assert(firstStories.size() == numOfTopics);
-
-		System.out.println("=== Evaluation Start");
-		// normCdet = Evaluator.getNormCdet(corpus, actualFirstStories,
-		// firstStories);
-		// PMiss = Evaluator.getPMiss(corpus, actualFirstStories, firstStories);
-		// PFa = Evaluator.getPFa(corpus, actualFirstStories, firstStories);
-		System.out.println("normCdet = " + normCdet);
-		System.out.println("PMiss = " + PMiss);
-		System.out.println("PFa = " + PFa);
-		System.out.println("=== Evaluation End");
-	}
-
-	/**
-	 * Response with the evaluations of different algorithms
-	 * 
-	 * @return {algorithmCount:, 0:{methodID:, algorithm:, overall:,
-	 *         falsePositive:, falseNegative:}, ...}
+	 * @return {algorithmCount:, 0:{methodID:, algorithm:, overall:, normCdet:,
+	 *         PMiss:, PFa:}, 1:{...}, ...}
 	 */
 	private JSONObject do_getEvaluation() {
+		// TODO This method should return the best results of all algorithms.
+
 		JSONObject responseJSONObject = new JSONObject();
 		JSONObject tmp = null;
 
@@ -574,6 +204,238 @@ public class Main {
 		tmp.put("PFa", 1.0);
 		responseJSONObject.put(methodID, tmp);
 
+		return responseJSONObject;
+	}
+
+	/**
+	 * Help doPost() to deal with the "setParameters" request.
+	 * 
+	 * @param request
+	 *            It should contain a JSON with a key "methodID". And it should
+	 *            have a key-value pair <"action":"setParameters">, though in
+	 *            this method we don't check it.
+	 * @return {numOfParameters:, 0:{parameter:, value:}, 1{...}, ...}
+	 */
+	private JSONObject do_setParameters(HttpServletRequest request) {
+		int methodID = Integer.parseInt(request.getParameter("methodID"));
+		System.out.println("methodID = " + methodID);
+		// {numOfParameters:, 0:{parameter:, value:}, ...}
+		JSONObject responseJSONObject = new JSONObject();
+		JSONObject tmp = null;
+		int numOfParameters = 0;
+		switch (methodID) {
+		// TODO how to set parameters for plsa?
+		case 0: // tfidf_KMeans
+		case 1: // plsa_KMeans
+			numOfParameters = 2;
+			responseJSONObject.put("numOfParameters", numOfParameters);
+
+			tmp = new JSONObject();
+			tmp.put("parameter", "numOfTopics");
+			tmp.put("value", 36);
+			responseJSONObject.put(0, tmp);
+
+			tmp = new JSONObject();
+			tmp.put("parameter", "numOfLoops");
+			tmp.put("value", 5);
+			responseJSONObject.put(1, tmp);
+			break;
+		case 2: // tfidf_DBSCAN
+		case 3: // plsa_DBSCAN
+			numOfParameters = 2;
+			responseJSONObject.put("numOfParameters", numOfParameters);
+
+			tmp = new JSONObject();
+			tmp.put("parameter", "minSimilarity");
+			tmp.put("value", 0.98);
+			responseJSONObject.put(0, tmp);
+
+			tmp = new JSONObject();
+			tmp.put("parameter", "minPts");
+			tmp.put("value", 5);
+			responseJSONObject.put(1, tmp);
+			break;
+		case 4: // tfidf_aggDetection
+		case 5: // plsa_aggDetection
+			numOfParameters = 1;
+			responseJSONObject.put("numOfParameters", numOfParameters);
+
+			tmp = new JSONObject();
+			tmp.put("parameter", "threshold");
+			tmp.put("value", 0.144);
+			responseJSONObject.put(0, tmp);
+			break;
+		default:
+			break;
+		}
+		return responseJSONObject;
+	}
+
+	/**
+	 * Help doPost() to deal with the "commitParameters" request.
+	 * 
+	 * @param request
+	 *            It's required to have a JSON with a key "methodID", and
+	 *            expected parameters for a certain method.
+	 * @return {normCdet:, PMiss:, PFa:, topicNum:, 0:{topicID, title:, source:,
+	 *         date:}, 1:{...}, ...}
+	 */
+	private JSONObject do_commitParameters(HttpServletRequest request) {
+		JSONObject responseJSONObject = new JSONObject();
+		int methodID = Integer.parseInt(request.getParameter("methodID"));
+		System.out.println("methodID = " + methodID);
+
+		System.out.println("=== Topic Detection Start");
+		TopicDetector topicDetector = new TopicDetector();
+		int numOfLoops = 0;
+		double minSimilarity = 0.0;
+		int minPts = 0;
+		double threshold = 0.0;
+		switch (methodID) {
+		// TODO maybe i should throw a exception if the required parameters are
+		// not set?
+		case 0:// tfidf_KMeans
+			numOfTopics = Integer.parseInt(request.getParameter("numOfTopics"));
+			numOfLoops = Integer.parseInt(request.getParameter("numOfLoops"));
+			System.out.println("Parameters: ");
+			System.out.println("> numOfTopics = " + numOfTopics);
+			System.out.println("> numOfLoops = " + numOfLoops);
+			topicDetector.KMeans(corpus, 0, numOfTopics, numOfLoops);
+			break;
+		case 1: // plsa_KMeans
+			numOfTopics = Integer.parseInt(request.getParameter("numOfTopics"));
+			numOfLoops = Integer.parseInt(request.getParameter("numOfLoops"));
+			System.out.println("Parameters: ");
+			System.out.println("> numOfTopics = " + numOfTopics);
+			System.out.println("> numOfLoops = " + numOfLoops);
+			topicDetector.KMeans(corpus, 1, numOfTopics, numOfLoops);
+			break;
+		case 2: // tfidf_DBSCAN
+			minSimilarity = Double.parseDouble(request.getParameter("minSimilarity"));
+			minPts = Integer.parseInt(request.getParameter("minPts"));
+			System.out.println("Parameters: ");
+			System.out.println("> minSimilarity = " + minSimilarity);
+			System.out.println("> minPts = " + minPts);
+			numOfTopics = topicDetector.DBSCAN(corpus, 0, minSimilarity, minPts);
+			break;
+		case 3: // plsa_DBSCAN
+			minSimilarity = Double.parseDouble(request.getParameter("minSimilarity"));
+			minPts = Integer.parseInt(request.getParameter("minPts"));
+			System.out.println("Parameters: ");
+			System.out.println("> minSimilarity = " + minSimilarity);
+			System.out.println("> minPts = " + minPts);
+			numOfTopics = topicDetector.DBSCAN(corpus, 1, minSimilarity, minPts);
+			break;
+		case 4: // tfidf_aggDetection
+			threshold = Double.parseDouble(request.getParameter("threshold"));
+			System.out.println("Parameters: ");
+			System.out.println("> threshold = " + threshold);
+			numOfTopics = topicDetector.aggDetection(corpus, 0, threshold);
+			break;
+		case 5:// plsa_aggDetection
+			threshold = Double.parseDouble(request.getParameter("threshold"));
+			System.out.println("Parameters: ");
+			System.out.println("> threshold = " + threshold);
+			numOfTopics = topicDetector.aggDetection(corpus, 1, threshold);
+			break;
+		default:
+			break;
+		}
+		System.out.println("=== Topic Detection End");
+
+		// TODO this method seems to be too large?
+
+		System.out.println("numOfTopics = " + numOfTopics);
+		assert(numOfTopics > 0);
+
+		System.out.println("=== First Story Detection Start");
+		firstStories.clear();
+		firstStories = FirstStoryDetector.doFirstStoryDetection(corpus, numOfTopics);
+		System.out.println("=== First Story Detection End");
+
+		System.out.println("firstStories: " + firstStories.size());
+		// for (Story story : firstStories)
+		// System.out.println(story.getTimeStamp());
+		System.out.println("actualFirstStories: " + actualFirstStories.size());
+		// for (Story story : actualFirstStories)
+		// System.out.println(story.getTimeStamp());
+
+		System.out.println("=== Evaluation Start");
+		Evaluator evaluator = new Evaluator();
+		evaluator.doEvaluation_v3(corpus, actualFirstStories, firstStories);
+		normCdet = evaluator.getNormCdet();
+		PMiss = evaluator.getPMiss();
+		PFa = evaluator.getPFa();
+		System.out.println("normCdet = " + normCdet);
+		System.out.println("PMiss = " + PMiss);
+		System.out.println("PFa = " + PFa);
+		System.out.println("=== Evaluation End");
+		responseJSONObject.put("normCdet", normCdet);
+		responseJSONObject.put("PMiss", PMiss);
+		responseJSONObject.put("PFa", PFa);
+
+		// {normCdet:, PMiss:, PFa:, topicNum:, 0:{topicID, title:, source:,
+		// date:}, ...}
+		int topicNum = firstStories.size();
+		JSONObject tmp = null;
+		responseJSONObject.put("topicNum", topicNum);
+		for (int i = 0; i < topicNum; ++i) {
+			tmp = new JSONObject();
+			tmp.put("topicID", firstStories.get(i).getTopicID());
+			tmp.put("title", firstStories.get(i).getTitle(dataFilesdir));
+			tmp.put("source", firstStories.get(i).getSource());
+			tmp.put("date", firstStories.get(i).getTimeStamp());
+			responseJSONObject.put(i, tmp);
+		}
+		return responseJSONObject;
+	}
+
+	/**
+	 * Help doPost() to deal with the "getStories" request.
+	 * 
+	 * @param request
+	 *            It's required to have a JSON with key "topicID"
+	 * @return {storyNum:, 0:{storyID:, title:, source:, date:}, 1:{...}, ...}
+	 */
+	private JSONObject do_getStories(HttpServletRequest request) {
+		JSONObject responseJSONObject = new JSONObject();
+		JSONObject tmp = null;
+		// client send a story id, response with the content of the story
+		// {storyNum:, 0:{title:, source:, date:}, ...}
+
+		int topicID = Integer.parseInt(request.getParameter("topicID"));
+
+		Vector<Integer> stories = new Vector<Integer>();
+		for (int i = 0; i < corpus.size(); ++i)
+			if (corpus.get(i).getTopicID() == topicID)
+				stories.add(i);
+
+		int storyNum = stories.size();
+		responseJSONObject.put("storyNum", storyNum);
+		for (int i = 0; i < storyNum; ++i) {
+			tmp = new JSONObject();
+			tmp.put("storyID", stories.get(i)); // the story id in corpus
+			// TODO how to get a reasonable title?
+			tmp.put("title", corpus.get(stories.get(i)).getTitle(dataFilesdir));
+			tmp.put("source", corpus.get(stories.get(i)).getSource());
+			tmp.put("date", corpus.get(stories.get(i)).getTimeStamp());
+			responseJSONObject.put(i, tmp);
+		}
+		return responseJSONObject;
+	}
+
+	/**
+	 * Help doPost() to deal with the "getContent" request.
+	 * 
+	 * @param request
+	 *            It's required to have a JSON with a key "storyID".
+	 * @return {content:}
+	 */
+	private JSONObject do_getContent(HttpServletRequest request) {
+		JSONObject responseJSONObject = new JSONObject();
+		int storyID = Integer.parseInt(request.getParameter("storyID"));
+		// TODO how to get a reasonable content, that is not stemmed?
+		responseJSONObject.put("content", corpus.get(storyID).getContent(glossary));
 		return responseJSONObject;
 	}
 
