@@ -31,6 +31,64 @@ public class DataPreprocessor {
 	public DataPreprocessor() {
 	}
 
+	public static void recoverCorpusFromTFIDF(Vector<Story> corpus, String tfidfFile) {
+		try {
+			BufferedReader reader = new BufferedReader(new FileReader(tfidfFile));
+			String line = null;
+			Story tmp = null;
+			HashMap<Integer, Double> tmpTfidf = null;
+			System.out.println("Start recovering corpus from: " + tfidfFile);
+			int counter = 0;
+			while ((line = reader.readLine()) != null) {
+				String[] parts = line.split(" ");
+				tmp = new Story();
+				tmp.setTimeStamp(parts[0].split("_")[0]);
+				tmp.setSource(parts[0].split("_")[1]);
+				tmpTfidf = new HashMap<Integer, Double>();
+				for (int i = 1; i < parts.length; ++i) {
+					int wordID = Integer.parseInt(parts[i].split(":")[0]);
+					double tfidf = Double.parseDouble(parts[i].split(":")[1]);
+					tmpTfidf.put(wordID, tfidf);
+				}
+				tmp.setTfidf(tmpTfidf);
+				tmp.setStoryID(counter);
+				++counter;
+				corpus.addElement(tmp);
+			}
+			reader.close();
+			System.out.println("Done!");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * 
+	 * @param actualFirstStories
+	 *            it contains only timestamp!!!
+	 * @param ansFile
+	 */
+	public static void readAnswer_v2(Vector<Story> actualFirstStories, String ansFile) {
+
+		try {
+			BufferedReader reader = new BufferedReader(new FileReader(ansFile));
+			System.out.println("Start reading answer from: " + ansFile);
+			String line = null;
+			Story tmp = null;
+			while ((line = reader.readLine()) != null) {
+				tmp = new Story();
+				tmp.setTimeStamp(line.split("_")[0]);
+				tmp.setSource(line.split("_")[1]);
+				actualFirstStories.addElement(tmp);
+			}
+
+			reader.close();
+			System.out.println("Done!");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
 	/**
 	 * Read from sgm files, set the 'corpus' and 'glossary', and do some other
 	 * preprocessing.
@@ -683,61 +741,6 @@ public class DataPreprocessor {
 			writer.close();
 			reader.close();
 			System.out.println("Done!!!");
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
-	public static void recoverCorpusFromTFIDF(Vector<Story> corpus, String tfidfFile) {
-		try {
-			BufferedReader reader = new BufferedReader(new FileReader(tfidfFile));
-			String line = null;
-			Story tmp = null;
-			HashMap<Integer, Double> tmpTfidf = null;
-			System.out.println("Start recovering corpus from: " + tfidfFile);
-			while ((line = reader.readLine()) != null) {
-				String[] parts = line.split(" ");
-				tmp = new Story();
-				tmp.setTimeStamp(parts[0].split("_")[0]);
-				tmp.setSource(parts[0].split("_")[1]);
-				tmpTfidf = new HashMap<Integer, Double>();
-				for (int i = 1; i < parts.length; ++i) {
-					int wordID = Integer.parseInt(parts[i].split(":")[0]);
-					double tfidf = Double.parseDouble(parts[i].split(":")[1]);
-					tmpTfidf.put(wordID, tfidf);
-				}
-				tmp.setTfidf(tmpTfidf);
-				corpus.addElement(tmp);
-			}
-			reader.close();
-			System.out.println("Done!");
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
-	/**
-	 * 
-	 * @param actualFirstStories
-	 *            it contains only timestamp!!!
-	 * @param ansFile
-	 */
-	public static void readAnswer_v2(Vector<Story> actualFirstStories, String ansFile) {
-
-		try {
-			BufferedReader reader = new BufferedReader(new FileReader(ansFile));
-			System.out.println("Start reading answer from: " + ansFile);
-			String line = null;
-			Story tmp = null;
-			while ((line = reader.readLine()) != null) {
-				tmp = new Story();
-				tmp.setTimeStamp(line.split("_")[0]);
-				tmp.setSource(line.split("_")[1]);
-				actualFirstStories.addElement(tmp);
-			}
-
-			reader.close();
-			System.out.println("Done!");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

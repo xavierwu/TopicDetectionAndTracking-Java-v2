@@ -24,12 +24,11 @@ public class Story {
 	/**
 	 * Default value of 'storyID', meaning the story is just a tmp story.
 	 */
-	// private final static int DEFAULT_STORY_ID = -1;
-
+	private final static int DEFAULT_STORY_ID = -1;
 	/**
-	 * It seems to be of no use?
+	 * The position of this story, in the corpus.
 	 */
-	// private int storyID = DEFAULT_STORY_ID;
+	private int storyID = DEFAULT_STORY_ID;
 	/**
 	 * the index of each plain word, refer to the glossary
 	 */
@@ -94,17 +93,17 @@ public class Story {
 	/**
 	 * @return the storyID
 	 */
-	// public int getStoryID() {
-	// return storyID;
-	// }
+	public int getStoryID() {
+		return storyID;
+	}
 
 	/**
 	 * @param storyID
 	 *            the storyID to set
 	 */
-	// public void setStoryID(int storyID) {
-	// this.storyID = storyID;
-	// }
+	public void setStoryID(int storyID) {
+		this.storyID = storyID;
+	}
 
 	/**
 	 * @return the words
