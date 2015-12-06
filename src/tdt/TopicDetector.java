@@ -20,9 +20,11 @@ import net.sf.json.JSONObject;
  */
 class TopicDetector {
 	private Vector<Story> corpus = null;
+	private Plsa plsa = null;
 
-	public TopicDetector(Vector<Story> corpus) {
+	public TopicDetector(Vector<Story> corpus, Glossary glossary) {
 		this.corpus = corpus;
+		this.plsa = new Plsa(corpus, glossary);
 	}
 
 	public JSONObject getMethodList() {
@@ -37,9 +39,9 @@ class TopicDetector {
 		methodID = 0;
 		tmp.put("methodID", methodID);
 		tmp.put("algorithm", "tfidf_KMeans");
-		tmp.put("normCdet", 5.9);
-		tmp.put("PMiss", 1.0);
-		tmp.put("PFa", 1.0);
+		tmp.put("normCdet", 4.5889);
+		tmp.put("PMiss", 0.7778);
+		tmp.put("PFa", 0.7778);
 		responseJSONObject.put(methodID, tmp);
 		// plsa_KMeans
 		tmp = new JSONObject();
@@ -96,9 +98,7 @@ class TopicDetector {
 		JSONObject tmp = null;
 		int numOfParameters = 0;
 		switch (methodID) {
-		// TODO how to set parameters for plsa?
 		case 0: // tfidf_KMeans
-		case 1: // plsa_KMeans
 			numOfParameters = 2;
 			responseJSONObject.put("numOfParameters", numOfParameters);
 
@@ -112,8 +112,31 @@ class TopicDetector {
 			tmp.put("value", 5);
 			responseJSONObject.put(1, tmp);
 			break;
+		case 1: // plsa_KMeans
+			numOfParameters = 4;
+			responseJSONObject.put("numOfParameters", numOfParameters);
+
+			tmp = new JSONObject();
+			tmp.put("parameter", "plsa.numOfTopics");
+			tmp.put("value", 36);
+			responseJSONObject.put(0, tmp);
+
+			tmp = new JSONObject();
+			tmp.put("parameter", "plsa.maxIter");
+			tmp.put("value", 5);
+			responseJSONObject.put(1, tmp);
+
+			tmp = new JSONObject();
+			tmp.put("parameter", "numOfTopics");
+			tmp.put("value", 36);
+			responseJSONObject.put(2, tmp);
+
+			tmp = new JSONObject();
+			tmp.put("parameter", "numOfLoops");
+			tmp.put("value", 5);
+			responseJSONObject.put(3, tmp);
+			break;
 		case 2: // tfidf_DBSCAN
-		case 3: // plsa_DBSCAN
 			numOfParameters = 2;
 			responseJSONObject.put("numOfParameters", numOfParameters);
 
@@ -127,8 +150,31 @@ class TopicDetector {
 			tmp.put("value", 5);
 			responseJSONObject.put(1, tmp);
 			break;
+		case 3: // plsa_DBSCAN
+			numOfParameters = 4;
+			responseJSONObject.put("numOfParameters", numOfParameters);
+
+			tmp = new JSONObject();
+			tmp.put("parameter", "plsa.numOfTopics");
+			tmp.put("value", 36);
+			responseJSONObject.put(0, tmp);
+
+			tmp = new JSONObject();
+			tmp.put("parameter", "plsa.maxIter");
+			tmp.put("value", 5);
+			responseJSONObject.put(1, tmp);
+
+			tmp = new JSONObject();
+			tmp.put("parameter", "minSimilarity");
+			tmp.put("value", 0.98);
+			responseJSONObject.put(2, tmp);
+
+			tmp = new JSONObject();
+			tmp.put("parameter", "minPts");
+			tmp.put("value", 5);
+			responseJSONObject.put(3, tmp);
+			break;
 		case 4: // tfidf_aggDetection
-		case 5: // plsa_aggDetection
 			numOfParameters = 1;
 			responseJSONObject.put("numOfParameters", numOfParameters);
 
@@ -136,6 +182,25 @@ class TopicDetector {
 			tmp.put("parameter", "threshold");
 			tmp.put("value", 0.144);
 			responseJSONObject.put(0, tmp);
+			break;
+		case 5: // plsa_aggDetection
+			numOfParameters = 3;
+			responseJSONObject.put("numOfParameters", numOfParameters);
+
+			tmp = new JSONObject();
+			tmp.put("parameter", "plsa.numOfTopics");
+			tmp.put("value", 36);
+			responseJSONObject.put(0, tmp);
+
+			tmp = new JSONObject();
+			tmp.put("parameter", "plsa.maxIter");
+			tmp.put("value", 5);
+			responseJSONObject.put(1, tmp);
+
+			tmp = new JSONObject();
+			tmp.put("parameter", "threshold");
+			tmp.put("value", 0.144);
+			responseJSONObject.put(2, tmp);
 			break;
 		default:
 			break;
@@ -146,10 +211,11 @@ class TopicDetector {
 	public int doTopicDetection(HttpServletRequest request) {
 		int numOfTopics = 0;
 		int numOfLoops = 0;
+		int plsaNumOfTopics = 0;
+		int plsaMaxIter = 0;
 		double minSimilarity = 0.0;
 		int minPts = 0;
 		double threshold = 0.0;
-
 		int methodID = Integer.parseInt(request.getParameter("methodID"));
 		System.out.println("methodID = " + methodID);
 		switch (methodID) {
@@ -162,6 +228,10 @@ class TopicDetector {
 			KMeans(corpus, 0, numOfTopics, numOfLoops);
 			break;
 		case 1: // plsa_KMeans
+			plsaNumOfTopics = Integer.parseInt(request.getParameter("plsa.numOfTopics"));
+			plsaMaxIter = Integer.parseInt(request.getParameter("plsa.maxIter"));
+			plsa.train(plsaNumOfTopics, plsaMaxIter);
+
 			numOfTopics = Integer.parseInt(request.getParameter("numOfTopics"));
 			numOfLoops = Integer.parseInt(request.getParameter("numOfLoops"));
 			System.out.println("Parameters: ");
@@ -178,6 +248,10 @@ class TopicDetector {
 			numOfTopics = DBSCAN(corpus, 0, minSimilarity, minPts);
 			break;
 		case 3: // plsa_DBSCAN
+			plsaNumOfTopics = Integer.parseInt(request.getParameter("plsa.numOfTopics"));
+			plsaMaxIter = Integer.parseInt(request.getParameter("plsa.maxIter"));
+			plsa.train(plsaNumOfTopics, plsaMaxIter);
+
 			minSimilarity = Double.parseDouble(request.getParameter("minSimilarity"));
 			minPts = Integer.parseInt(request.getParameter("minPts"));
 			System.out.println("Parameters: ");
@@ -192,6 +266,10 @@ class TopicDetector {
 			numOfTopics = aggDetection(corpus, 0, threshold);
 			break;
 		case 5:// plsa_aggDetection
+			plsaNumOfTopics = Integer.parseInt(request.getParameter("plsa.numOfTopics"));
+			plsaMaxIter = Integer.parseInt(request.getParameter("plsa.maxIter"));
+			plsa.train(plsaNumOfTopics, plsaMaxIter);
+
 			threshold = Double.parseDouble(request.getParameter("threshold"));
 			System.out.println("Parameters: ");
 			System.out.println("> threshold = " + threshold);
@@ -215,6 +293,7 @@ class TopicDetector {
 	 * @param numOfLoops
 	 */
 	private void KMeans(Vector<Story> corpus, int simMeasure, int numOfTopics, int numOfLoops) {
+		// TODO how to write plsa version of k-means???
 		Vector<Story> centroids = new Vector<Story>();
 		Story tmp = null;
 		HashMap<Integer, Double> tfidf = null;

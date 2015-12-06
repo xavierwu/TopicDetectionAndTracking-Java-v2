@@ -26,7 +26,7 @@ public class Main {
 	private Glossary glossary = new Glossary();
 	private Vector<Story> actualFirstStories = new Vector<Story>();
 	private Vector<Story> firstStories = new Vector<Story>();
-	TopicDetector topicDetector = new TopicDetector(corpus);
+	TopicDetector topicDetector = new TopicDetector(corpus, glossary);
 	// Results
 	private int numOfTopics = 0;
 	private double normCdet = 0.0;
