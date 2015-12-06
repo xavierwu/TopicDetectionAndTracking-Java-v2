@@ -20,11 +20,12 @@ import net.sf.json.JSONObject;
  */
 class TopicDetector {
 	private Vector<Story> corpus = null;
-	private Plsa plsa = null;
+	private StoryLinkDetector storyLinkDetector = null;
 
 	public TopicDetector(Vector<Story> corpus, Glossary glossary) {
 		this.corpus = corpus;
-		this.plsa = new Plsa(corpus, glossary);
+		this.storyLinkDetector = new StoryLinkDetector();
+		this.storyLinkDetector.enablePlsa(corpus, glossary);
 	}
 
 	public JSONObject getMethodList() {
@@ -218,66 +219,34 @@ class TopicDetector {
 		double threshold = 0.0;
 		int methodID = Integer.parseInt(request.getParameter("methodID"));
 		System.out.println("methodID = " + methodID);
-		switch (methodID) {
-		case 0:// tfidf_KMeans
-			numOfTopics = Integer.parseInt(request.getParameter("numOfTopics"));
-			numOfLoops = Integer.parseInt(request.getParameter("numOfLoops"));
-			System.out.println("Parameters: ");
-			System.out.println("> numOfTopics = " + numOfTopics);
-			System.out.println("> numOfLoops = " + numOfLoops);
-			KMeans(corpus, 0, numOfTopics, numOfLoops);
-			break;
-		case 1: // plsa_KMeans
+
+		if (methodID == 1 || methodID == 3 || methodID == 5) { // plsa
 			plsaNumOfTopics = Integer.parseInt(request.getParameter("plsa.numOfTopics"));
 			plsaMaxIter = Integer.parseInt(request.getParameter("plsa.maxIter"));
-			plsa.train(plsaNumOfTopics, plsaMaxIter);
-
-			numOfTopics = Integer.parseInt(request.getParameter("numOfTopics"));
-			numOfLoops = Integer.parseInt(request.getParameter("numOfLoops"));
-			System.out.println("Parameters: ");
-			System.out.println("> numOfTopics = " + numOfTopics);
-			System.out.println("> numOfLoops = " + numOfLoops);
-			KMeans(corpus, 1, numOfTopics, numOfLoops);
-			break;
-		case 2: // tfidf_DBSCAN
-			minSimilarity = Double.parseDouble(request.getParameter("minSimilarity"));
-			minPts = Integer.parseInt(request.getParameter("minPts"));
-			System.out.println("Parameters: ");
-			System.out.println("> minSimilarity = " + minSimilarity);
-			System.out.println("> minPts = " + minPts);
-			numOfTopics = DBSCAN(corpus, 0, minSimilarity, minPts);
-			break;
-		case 3: // plsa_DBSCAN
-			plsaNumOfTopics = Integer.parseInt(request.getParameter("plsa.numOfTopics"));
-			plsaMaxIter = Integer.parseInt(request.getParameter("plsa.maxIter"));
-			plsa.train(plsaNumOfTopics, plsaMaxIter);
-
-			minSimilarity = Double.parseDouble(request.getParameter("minSimilarity"));
-			minPts = Integer.parseInt(request.getParameter("minPts"));
-			System.out.println("Parameters: ");
-			System.out.println("> minSimilarity = " + minSimilarity);
-			System.out.println("> minPts = " + minPts);
-			numOfTopics = DBSCAN(corpus, 1, minSimilarity, minPts);
-			break;
-		case 4: // tfidf_aggDetection
-			threshold = Double.parseDouble(request.getParameter("threshold"));
-			System.out.println("Parameters: ");
-			System.out.println("> threshold = " + threshold);
-			numOfTopics = aggDetection(corpus, 0, threshold);
-			break;
-		case 5:// plsa_aggDetection
-			plsaNumOfTopics = Integer.parseInt(request.getParameter("plsa.numOfTopics"));
-			plsaMaxIter = Integer.parseInt(request.getParameter("plsa.maxIter"));
-			plsa.train(plsaNumOfTopics, plsaMaxIter);
-
-			threshold = Double.parseDouble(request.getParameter("threshold"));
-			System.out.println("Parameters: ");
-			System.out.println("> threshold = " + threshold);
-			numOfTopics = aggDetection(corpus, 1, threshold);
-			break;
-		default:
-			break;
+			storyLinkDetector.trainPlsa(plsaNumOfTopics, plsaMaxIter);
 		}
+
+		if (methodID == 0 || methodID == 1) { // k-means
+			numOfTopics = Integer.parseInt(request.getParameter("numOfTopics"));
+			numOfLoops = Integer.parseInt(request.getParameter("numOfLoops"));
+			System.out.println("Parameters: ");
+			System.out.println("> numOfTopics = " + numOfTopics);
+			System.out.println("> numOfLoops = " + numOfLoops);
+			KMeans(numOfTopics, numOfLoops);
+		} else if (methodID == 2 || methodID == 3) {// DBSCAN
+			minSimilarity = Double.parseDouble(request.getParameter("minSimilarity"));
+			minPts = Integer.parseInt(request.getParameter("minPts"));
+			System.out.println("Parameters: ");
+			System.out.println("> minSimilarity = " + minSimilarity);
+			System.out.println("> minPts = " + minPts);
+			numOfTopics = DBSCAN(minSimilarity, minPts);
+		} else if (methodID == 4 || methodID == 5) {// aggDetection
+			threshold = Double.parseDouble(request.getParameter("threshold"));
+			System.out.println("Parameters: ");
+			System.out.println("> threshold = " + threshold);
+			numOfTopics = aggDetection(threshold);
+		}
+
 		return numOfTopics;
 	}
 
@@ -286,14 +255,12 @@ class TopicDetector {
 	 * which each story belongs to the the cluster with nearest mean. Special
 	 * Notice: the second parameter numOfTopics can't be zero.
 	 * 
-	 * @param corpus
 	 * @param simMeasure
 	 *            The measurement of similarity, 0 for tfidf, 1 for plsa.
 	 * @param numOfTopics
 	 * @param numOfLoops
 	 */
-	private void KMeans(Vector<Story> corpus, int simMeasure, int numOfTopics, int numOfLoops) {
-		// TODO how to write plsa version of k-means???
+	private void KMeans(int numOfTopics, int numOfLoops) {
 		Vector<Story> centroids = new Vector<Story>();
 		Story tmp = null;
 		HashMap<Integer, Double> tfidf = null;
@@ -310,7 +277,7 @@ class TopicDetector {
 			for (Story curStory : corpus) {
 				double maxSimilarity = 0;
 				for (Story curCentroid : centroids) {
-					double similarity = StoryLinkDetector.getSimilarity(curStory, curCentroid, simMeasure);
+					double similarity = storyLinkDetector.getSimilarity(curStory, curCentroid);
 					if (similarity > maxSimilarity) {
 						maxSimilarity = similarity;
 						curStory.setTopicID(curCentroid.getTopicID());
@@ -364,13 +331,12 @@ class TopicDetector {
 	 * completely found. Then, a new unvisited point is retrieved and processed,
 	 * leading to the discovery of a further cluster or noise.
 	 * 
-	 * @param corpus
 	 * @param simMeasure
 	 *            0 for tfidf, 1 for plsa
 	 * @param minSimilarity
 	 * @param minPts
 	 */
-	private int DBSCAN(Vector<Story> corpus, int simMeasure, double minSimilarity, int minPts) {
+	private int DBSCAN(double minSimilarity, int minPts) {
 		boolean[] isVisited = new boolean[corpus.size() + 1];
 		int topicID = 0;
 
@@ -380,13 +346,12 @@ class TopicDetector {
 
 				Vector<Integer> neighborPts = new Vector<Integer>();
 
-				regionQuery(corpus, corpus.get(i), i, minSimilarity, neighborPts, simMeasure);
+				regionQuery(corpus, corpus.get(i), i, minSimilarity, neighborPts);
 
 				if (neighborPts.size() < minPts) {
 					corpus.get(i).setTopicID(-1);
 				} else {
-					expandCluster(corpus, corpus.get(i), neighborPts, topicID, minSimilarity, minPts, isVisited,
-							simMeasure);
+					expandCluster(corpus, corpus.get(i), neighborPts, topicID, minSimilarity, minPts, isVisited);
 					topicID++;
 				}
 			}
@@ -403,9 +368,9 @@ class TopicDetector {
 	 * @param neighborPts
 	 */
 	private void regionQuery(Vector<Story> corpus, Story currentStory, int currentIndex, double minSimilarity,
-			Vector<Integer> neighborPts, int simMeasure) {
+			Vector<Integer> neighborPts) {
 		for (int i = 0; i < corpus.size(); i++) {
-			double similarity = StoryLinkDetector.getSimilarity(currentStory, corpus.get(i), simMeasure);
+			double similarity = storyLinkDetector.getSimilarity(currentStory, corpus.get(i));
 
 			if (similarity > minSimilarity && i != currentIndex) {
 				neighborPts.add(i);
@@ -425,7 +390,7 @@ class TopicDetector {
 	 * @param isVisted
 	 */
 	private void expandCluster(Vector<Story> corpus, Story currentStory, Vector<Integer> neighborPts, int topicID,
-			double minSimilarity, int minPts, boolean[] isVisited, int simMeasure) {
+			double minSimilarity, int minPts, boolean[] isVisited) {
 		currentStory.setTopicID(topicID);
 
 		for (int i = 0; i < neighborPts.size(); i++) {
@@ -436,8 +401,7 @@ class TopicDetector {
 
 				Vector<Integer> tempNeighborPts = new Vector<Integer>();
 
-				regionQuery(corpus, corpus.get(neighborIndex), neighborIndex, minSimilarity, tempNeighborPts,
-						simMeasure);
+				regionQuery(corpus, corpus.get(neighborIndex), neighborIndex, minSimilarity, tempNeighborPts);
 
 				if (tempNeighborPts.size() >= minPts) {
 					for (int j = 0; j < tempNeighborPts.size(); j++) {
@@ -459,13 +423,12 @@ class TopicDetector {
 	 * current story is similar to any of the story before, assign the topicID
 	 * of the most similar story to the current story.
 	 * 
-	 * @param corpus
 	 * @param simMeasure
 	 *            0 for tfidf, 1 for plsa.
 	 * @param threshold
 	 * @return numOfTopics
 	 */
-	private int aggDetection(Vector<Story> corpus, int simMeasure, double threshold) {
+	private int aggDetection(double threshold) {
 		// sort the stories
 		Story.sort(corpus);
 
@@ -480,7 +443,7 @@ class TopicDetector {
 			tmpMaxSimilarity = -1.0;
 			for (int j = 0; j < i; ++j) {
 				prevStory = corpus.get(j);
-				similarity = StoryLinkDetector.getSimilarity(curStory, prevStory, simMeasure);
+				similarity = storyLinkDetector.getSimilarity(curStory, prevStory);
 				if (similarity >= threshold && similarity > tmpMaxSimilarity) {
 					curStory.setTopicID(prevStory.getTopicID());
 					tmpMaxSimilarity = similarity;

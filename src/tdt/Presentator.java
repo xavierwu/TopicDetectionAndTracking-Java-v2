@@ -10,6 +10,7 @@ import java.util.Vector;
 
 /**
  * @author Zewei Wu
+ * @deprecated
  */
 public class Presentator {
 	/**
@@ -18,8 +19,8 @@ public class Presentator {
 	 * @param glossary
 	 * @param numOfTopics
 	 */
-	protected static void doPresentation(Vector<Story> firstStories,
-		Vector<Story> corpus, Glossary glossary, int numOfTopics) {
+	protected static void doPresentation(Vector<Story> firstStories, Vector<Story> corpus, Glossary glossary,
+			int numOfTopics) {
 		printClusters(corpus, glossary, numOfTopics, false);
 	}
 
@@ -30,9 +31,8 @@ public class Presentator {
 	 * @param numOfTopics
 	 * @param resultFile
 	 */
-	protected static void doPresentation(Vector<Story> firstStories,
-		Vector<Story> corpus, Glossary glossary, int numOfTopics,
-		String resultFile) {
+	protected static void doPresentation(Vector<Story> firstStories, Vector<Story> corpus, Glossary glossary,
+			int numOfTopics, String resultFile) {
 		printClustersToFile(corpus, glossary, numOfTopics, false, resultFile);
 	}
 
@@ -41,8 +41,7 @@ public class Presentator {
 	 * @param glossary
 	 * @param isPrintItAll
 	 */
-	protected static void printFirstStories(Vector<Story> firstStories,
-		Glossary glossary, boolean isPrintItAll) {
+	protected static void printFirstStories(Vector<Story> firstStories, Glossary glossary, boolean isPrintItAll) {
 		for (Story curStory : firstStories) {
 			System.out.println(curStory.getTopicID());
 			if (isPrintItAll)
@@ -58,8 +57,8 @@ public class Presentator {
 	 * @param numOfTopics
 	 * @param isPrintItAll
 	 */
-	protected static void printClusters(Vector<Story> corpus,
-		Glossary glossary, int numOfTopics, boolean isPrintItAll) {
+	protected static void printClusters(Vector<Story> corpus, Glossary glossary, int numOfTopics,
+			boolean isPrintItAll) {
 		for (int curTopic = 0; curTopic < numOfTopics; ++curTopic) {
 			System.out.println(curTopic);
 			for (Story curStory : corpus) {
@@ -80,9 +79,8 @@ public class Presentator {
 	 * @param isPrintItAll
 	 * @param resultFile
 	 */
-	protected static void printClustersToFile(Vector<Story> corpus,
-		Glossary glossary, int numOfTopics, boolean isPrintItAll,
-		String resultFile) {
+	protected static void printClustersToFile(Vector<Story> corpus, Glossary glossary, int numOfTopics,
+			boolean isPrintItAll, String resultFile) {
 		try {
 			FileOutputStream fos = new FileOutputStream(resultFile);
 			OutputStreamWriter osw = new OutputStreamWriter(fos);

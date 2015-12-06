@@ -23,64 +23,27 @@ import java.util.Vector;
  * @author Zewei Wu
  */
 public class StoryLinkDetector {
-	// ---------- PROTECTED -------------------------------------------------
-	/**
-	 * Preparing for the similarity calculation, e.g., calculating tfidf's.
-	 * 
-	 * @param corpus
-	 *            The 'tfidf' member of the corpus would be set here.
-	 * @param wordIDToStoryIndices
-	 *            Used to help calculate the idf of 'tfidf'.
-	 */
-	protected static void doStoryLinkDetection(Vector<Story> corpus,
-			HashMap<Integer, HashSet<Integer>> wordIDToStoryIndices, String tfidfFile, boolean isToLoadTfidf,
-			int methodID) {
-		prepareTFIDF(corpus, wordIDToStoryIndices, tfidfFile, isToLoadTfidf);
+	private Plsa plsa = null;
+	private boolean isPlsaEnabled = false;
+	private boolean isPlsaTrained = false;
+
+	public StoryLinkDetector() {
 	}
 
-	/**
-	 * Preparing for the similarity calculation, e.g., calculating tfidf's.
-	 * 
-	 * @param corpus
-	 *            The 'tfidf' member of the corpus would be set here.
-	 * @param wordIDToStoryIndices
-	 *            Used to help calculate the idf of 'tfidf'.
-	 */
-	protected static void doStoryLinkDetection(Vector<Story> corpus,
-			HashMap<Integer, HashSet<Integer>> wordIDToStoryIndices, String tfidfFile, boolean isToLoadTfidf) {
-		prepareTFIDF(corpus, wordIDToStoryIndices, tfidfFile, isToLoadTfidf);
+	public void enablePlsa(Vector<Story> corpus, Glossary glossary) {
+		this.plsa = new Plsa(corpus, glossary);
+		this.isPlsaEnabled = true;
 	}
 
-	/**
-	 * @param story1
-	 * @param story2
-	 * @param threshold
-	 * @return true if the similarity is above the threshold.
-	 */
-	protected static boolean isTwoStoriesSimilar(Story story1, Story story2, double threshold) {
-		double similarity = getSimilarity(story1, story2);
-		return similarity >= threshold;
-	}
-
-	protected static double getSimilarity(Story story1, Story story2, int simMeasure) {
-		if (simMeasure == 1) {
-			// TODO the default numOfTopics in plsa is 100, for now.
-			return 0;
-		} else {
-			return getCosineSimilarity(story1, story2);
+	public void trainPlsa(int plsaNumOfTopics, int plsaMaxIter) {
+		if (isPlsaEnabled) {
+			plsa.train(plsaNumOfTopics, plsaMaxIter);
+			this.isPlsaTrained = true;
 		}
 	}
 
-	/**
-	 * For now, it simply calls the getCosineSimilarity(...)
-	 * 
-	 * @deprecated
-	 * @param story1
-	 * @param story2
-	 * @return the similarity between this two stories.
-	 */
-	protected static double getSimilarity(Story story1, Story story2) {
-		return getCosineSimilarity(story1, story2);
+	public double getSimilarity(Story story1, Story story2) {
+		return isPlsaTrained ? plsa.getSimilarity(story1, story2) : getCosineSimilarity(story1, story2);
 	}
 
 	/**
@@ -89,7 +52,7 @@ public class StoryLinkDetector {
 	 * @return the cosine similarity between two stories, using the tf-idf
 	 *         vectors in them.
 	 */
-	protected static double getCosineSimilarity(Story story1, Story story2) {
+	public static double getCosineSimilarity(Story story1, Story story2) {
 		double similarity = 0.0;
 		double innerProduct = 0.0;
 		double squareSum1 = 0.0;
@@ -113,18 +76,43 @@ public class StoryLinkDetector {
 		double tmp1 = Math.sqrt(squareSum1 * squareSum2);
 		similarity = innerProduct / tmp1;
 
-		// WARNING: the 0.0001 was set manually here.
-		// if (similarity > 1 && similarity - 1 <= 0.0001) {
-		// similarity = 1;
-		// }
-
 		return similarity;
+	}
+
+	/**
+	 * Preparing for the similarity calculation, e.g., calculating tfidf's.
+	 * 
+	 * @deprecated
+	 * @param corpus
+	 *            The 'tfidf' member of the corpus would be set here.
+	 * @param wordIDToStoryIndices
+	 *            Used to help calculate the idf of 'tfidf'.
+	 */
+	public static void doStoryLinkDetection(Vector<Story> corpus,
+			HashMap<Integer, HashSet<Integer>> wordIDToStoryIndices, String tfidfFile, boolean isToLoadTfidf,
+			int methodID) {
+		prepareTFIDF(corpus, wordIDToStoryIndices, tfidfFile, isToLoadTfidf);
+	}
+
+	/**
+	 * Preparing for the similarity calculation, e.g., calculating tfidf's.
+	 * 
+	 * @deprecated
+	 * @param corpus
+	 *            The 'tfidf' member of the corpus would be set here.
+	 * @param wordIDToStoryIndices
+	 *            Used to help calculate the idf of 'tfidf'.
+	 */
+	public static void doStoryLinkDetection(Vector<Story> corpus,
+			HashMap<Integer, HashSet<Integer>> wordIDToStoryIndices, String tfidfFile, boolean isToLoadTfidf) {
+		prepareTFIDF(corpus, wordIDToStoryIndices, tfidfFile, isToLoadTfidf);
 	}
 
 	// ---------- PRIVATE -------------------------------------------------
 	/**
 	 * Calculating tfidf's of stories in corpus
 	 * 
+	 * @deprecated
 	 * @param corpus
 	 * @param wordIDToStoryIndices
 	 * @throws IOException
@@ -142,6 +130,7 @@ public class StoryLinkDetector {
 	/**
 	 * Set 'tfidf' for all stories in corpus.
 	 * 
+	 * @deprecated
 	 * @param corpus
 	 * @param storiesIndexWithCertainWord
 	 */
@@ -160,6 +149,7 @@ public class StoryLinkDetector {
 	/**
 	 * Save the tfidf's of corpus to tfidfFile
 	 * 
+	 * @deprecated
 	 * @param corpus
 	 * @param tfidfFile
 	 */
@@ -186,6 +176,7 @@ public class StoryLinkDetector {
 	/**
 	 * Load the tfidf's of corpus from tfidfFile
 	 * 
+	 * @deprecated
 	 * @param corpus
 	 * @param tfidfFile
 	 * @throws IOException
@@ -213,5 +204,4 @@ public class StoryLinkDetector {
 			e.printStackTrace();
 		}
 	}
-
 }

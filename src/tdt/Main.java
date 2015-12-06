@@ -18,9 +18,6 @@ import net.sf.json.JSONObject;
 public class Main {
 	// Set by parameters of constructor.
 	private String dataFilesdir = null;
-	private String glossaryFile = null;
-	private String tfidfFile = null;
-	private String ansFile = null;
 	// Important data structures.
 	private Vector<Story> corpus = new Vector<Story>();
 	private Glossary glossary = new Glossary();
@@ -44,9 +41,7 @@ public class Main {
 	 */
 	public Main(String dataFilesdir, String glossaryFile, String tfidfFile, String ansFile) {
 		this.dataFilesdir = dataFilesdir;
-		this.glossaryFile = glossaryFile;
-		this.tfidfFile = tfidfFile;
-		this.ansFile = ansFile;
+		System.out.println();
 		System.out.println("====== Start initializing ======");
 
 		glossary.load(glossaryFile);
@@ -167,12 +162,14 @@ public class Main {
 	private JSONObject do_commitParameters(HttpServletRequest request) {
 		JSONObject responseJSONObject = new JSONObject();
 
+		System.out.println();
 		System.out.println("=== Topic Detection Start");
 		numOfTopics = topicDetector.doTopicDetection(request);
 		System.out.println("numOfTopics = " + numOfTopics);
 		System.out.println("=== Topic Detection End");
 		System.out.println();
 
+		System.out.println();
 		System.out.println("=== First Story Detection Start");
 		FirstStoryDetector firstStoryDetector = new FirstStoryDetector(corpus);
 		firstStories = firstStoryDetector.doFirstStoryDetection(numOfTopics);
@@ -181,6 +178,7 @@ public class Main {
 		System.out.println("=== First Story Detection End");
 		System.out.println();
 
+		System.out.println();
 		System.out.println("=== Evaluation Start");
 		Evaluator evaluator = new Evaluator();
 		evaluator.doEvaluation_v3(corpus, actualFirstStories, firstStories);
