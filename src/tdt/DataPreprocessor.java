@@ -31,6 +31,28 @@ public class DataPreprocessor {
 	public DataPreprocessor() {
 	}
 
+	public static void loadMatrix(Vector<Story> corpus, String matrixFile) {
+		int storyCount = 0;
+		try {
+			BufferedReader reader = new BufferedReader(new FileReader(matrixFile));
+			String line = null;
+
+			System.out.println("Start recovering corpus from: " + matrixFile);
+			while ((line = reader.readLine()) != null) {
+				String[] parts = line.split(" ");
+				for (int i = 1; i < parts.length; ++i) {
+					corpus.get(storyCount).addWord(Integer.parseInt(parts[i]));
+				}
+				storyCount++;
+			}
+			System.out.println("Done!");
+			reader.close();
+		} catch (Exception e) {
+			System.out.println(storyCount);
+			e.printStackTrace();
+		}
+	}
+
 	public static void recoverCorpusFromTFIDF(Vector<Story> corpus, String tfidfFile) {
 		try {
 			BufferedReader reader = new BufferedReader(new FileReader(tfidfFile));
@@ -746,14 +768,56 @@ public class DataPreprocessor {
 		}
 	}
 
+	private static void generateMatrix(String stemDir, String matrixFile, String glossaryFile) {
+		File directoryStem = new File(stemDir);
+		File[] stemFiles = directoryStem.listFiles();
+		if (stemFiles.length == 0) {
+			System.out.println("No stemData file found!");
+			return;
+		}
+
+		BufferedReader reader = null;
+		BufferedWriter writer = null;
+		String line = null;
+		Story tmp = null;
+		int storyCount = 0;
+		Glossary glossary = new Glossary();
+		glossary.load(glossaryFile);
+
+		try {
+			writer = new BufferedWriter(new FileWriter(matrixFile));
+			for (int i = 0; i < stemFiles.length; ++i) {
+				File stemDataFile = new File(stemFiles[i].getAbsolutePath());
+				reader = new BufferedReader(new FileReader(stemDataFile));
+				writer.append(stemDataFile.getName() + " ");
+				while ((line = reader.readLine()) != null) {
+					Integer tmp2 = glossary.getWordID(line);
+					if (tmp2 != null)
+						writer.append(tmp2 + " ");
+				}
+				reader.close();
+				storyCount++;
+				writer.append("\n");
+			}
+			writer.close();
+			System.out.println("Done generating " + matrixFile);
+			System.out.println("storyCount = " + storyCount);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
 	public static void main(String[] args) {
 		String datasetDir = "D:/Jee_workspace/TopicDetectionAndTracking/Dataset/";
 		// String sgmDir = datasetDir + "sgm/";
 		String stemDir = datasetDir + "stemData_4076/";
 		String tfFile = datasetDir + "4076_tf.dat";
 		String tfidfFile = datasetDir + "4076_tfidf.dat";
+		String matrixFile = datasetDir + "4076_matrix.dat";
 		String glossaryFile = datasetDir + "4076_glossary.dat";
 		// generateTFIDF(sgmDir, tfFile, tfidfFile, glossaryFile);
-		generateTFIDF_v2(stemDir, tfFile, tfidfFile, glossaryFile);
+		// generateTFIDF_v2(stemDir, tfFile, tfidfFile, glossaryFile);
+		generateMatrix(stemDir, matrixFile, glossaryFile);
 	}
+
 }

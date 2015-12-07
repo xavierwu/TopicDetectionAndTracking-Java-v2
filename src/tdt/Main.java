@@ -39,13 +39,14 @@ public class Main {
 	 * @param tfidfFile
 	 * @param ansFile
 	 */
-	public Main(String dataFilesdir, String glossaryFile, String tfidfFile, String ansFile) {
+	public Main(String dataFilesdir, String glossaryFile, String tfidfFile, String matrixFile, String ansFile) {
 		this.dataFilesdir = dataFilesdir;
 		System.out.println();
 		System.out.println("====== Start initializing ======");
 
 		glossary.load(glossaryFile);
 		DataPreprocessor.recoverCorpusFromTFIDF(corpus, tfidfFile);
+		DataPreprocessor.loadMatrix(corpus, matrixFile);
 		DataPreprocessor.readAnswer_v2(actualFirstStories, ansFile);
 
 		System.out.println("corpus: " + corpus.size());

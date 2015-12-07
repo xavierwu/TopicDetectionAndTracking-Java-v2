@@ -31,8 +31,6 @@ class TopicDetector {
 	public JSONObject getMethodList() {
 		JSONObject responseJSONObject = new JSONObject();
 		JSONObject tmp = null;
-		int algorithmNum = 6;
-		responseJSONObject.put("algorithmCount", algorithmNum);
 
 		int methodID = 0;
 		// tfidf_KMeans
@@ -91,6 +89,18 @@ class TopicDetector {
 		tmp.put("PMiss", 1.0);
 		tmp.put("PFa", 1.0);
 		responseJSONObject.put(methodID, tmp);
+
+		// tfidf_votingKMeans
+		tmp = new JSONObject();
+		methodID = 6;
+		tmp.put("methodID", methodID);
+		tmp.put("algorithm", "tfidf_votingKMeans");
+		tmp.put("normCdet", 5.9);
+		tmp.put("PMiss", 1.0);
+		tmp.put("PFa", 1.0);
+		responseJSONObject.put(methodID, tmp);
+
+		responseJSONObject.put("algorithmCount", methodID + 1);
 		return responseJSONObject;
 	}
 
@@ -203,6 +213,25 @@ class TopicDetector {
 			tmp.put("value", 0.144);
 			responseJSONObject.put(2, tmp);
 			break;
+		case 6: // tfidf_votingKMeans
+			numOfParameters = 3;
+			responseJSONObject.put("numOfParameters", numOfParameters);
+
+			tmp = new JSONObject();
+			tmp.put("parameter", "numOfPartitions");
+			tmp.put("value", 5);
+			responseJSONObject.put(0, tmp);
+
+			tmp = new JSONObject();
+			tmp.put("parameter", "numOfTopics");
+			tmp.put("value", 36);
+			responseJSONObject.put(1, tmp);
+
+			tmp = new JSONObject();
+			tmp.put("parameter", "numOfLoops");
+			tmp.put("value", 5);
+			responseJSONObject.put(2, tmp);
+			break;
 		default:
 			break;
 		}
@@ -211,40 +240,44 @@ class TopicDetector {
 
 	public int doTopicDetection(HttpServletRequest request) {
 		int numOfTopics = 0;
-		int numOfLoops = 0;
-		int plsaNumOfTopics = 0;
-		int plsaMaxIter = 0;
-		double minSimilarity = 0.0;
-		int minPts = 0;
-		double threshold = 0.0;
+
 		int methodID = Integer.parseInt(request.getParameter("methodID"));
 		System.out.println("methodID = " + methodID);
 
 		if (methodID == 1 || methodID == 3 || methodID == 5) { // plsa
-			plsaNumOfTopics = Integer.parseInt(request.getParameter("plsa.numOfTopics"));
-			plsaMaxIter = Integer.parseInt(request.getParameter("plsa.maxIter"));
+			int plsaNumOfTopics = Integer.parseInt(request.getParameter("plsa.numOfTopics"));
+			int plsaMaxIter = Integer.parseInt(request.getParameter("plsa.maxIter"));
 			storyLinkDetector.trainPlsa(plsaNumOfTopics, plsaMaxIter);
 		}
 
 		if (methodID == 0 || methodID == 1) { // k-means
 			numOfTopics = Integer.parseInt(request.getParameter("numOfTopics"));
-			numOfLoops = Integer.parseInt(request.getParameter("numOfLoops"));
+			int numOfLoops = Integer.parseInt(request.getParameter("numOfLoops"));
 			System.out.println("Parameters: ");
 			System.out.println("> numOfTopics = " + numOfTopics);
 			System.out.println("> numOfLoops = " + numOfLoops);
 			KMeans(numOfTopics, numOfLoops);
 		} else if (methodID == 2 || methodID == 3) {// DBSCAN
-			minSimilarity = Double.parseDouble(request.getParameter("minSimilarity"));
-			minPts = Integer.parseInt(request.getParameter("minPts"));
+			double minSimilarity = Double.parseDouble(request.getParameter("minSimilarity"));
+			int minPts = Integer.parseInt(request.getParameter("minPts"));
 			System.out.println("Parameters: ");
 			System.out.println("> minSimilarity = " + minSimilarity);
 			System.out.println("> minPts = " + minPts);
 			numOfTopics = DBSCAN(minSimilarity, minPts);
 		} else if (methodID == 4 || methodID == 5) {// aggDetection
-			threshold = Double.parseDouble(request.getParameter("threshold"));
+			double threshold = Double.parseDouble(request.getParameter("threshold"));
 			System.out.println("Parameters: ");
 			System.out.println("> threshold = " + threshold);
 			numOfTopics = aggDetection(threshold);
+		} else if (methodID == 6) { // votingKMeans
+			int numOfPartitions = Integer.parseInt(request.getParameter("numOfPartitions"));
+			numOfTopics = Integer.parseInt(request.getParameter("numOfTopics"));
+			int numOfLoops = Integer.parseInt(request.getParameter("numOfLoops"));
+			System.out.println("Parameters: ");
+			System.out.println("> numOfPartitions = " + numOfPartitions);
+			System.out.println("> numOfTopics = " + numOfTopics);
+			System.out.println("> numOfLoops = " + numOfLoops);
+			votingKMeans(numOfPartitions, numOfTopics, numOfLoops);
 		}
 
 		return numOfTopics;
@@ -458,4 +491,8 @@ class TopicDetector {
 		return numOfTopics;
 	}
 
+	private void votingKMeans(int numOfPartitions, int numOfTopics, int numOfLoops) {
+		// TODO Auto-generated method stub
+
+	}
 }
