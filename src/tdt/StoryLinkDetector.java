@@ -26,6 +26,9 @@ public class StoryLinkDetector {
 	private Plsa plsa = null;
 	private boolean isPlsaEnabled = false;
 	private boolean isPlsaTrained = false;
+	private LDA lda = null;
+	private boolean isLDAEnabled = false;
+	private boolean isLDATrained = false;
 
 	public StoryLinkDetector() {
 	}
@@ -42,8 +45,22 @@ public class StoryLinkDetector {
 		}
 	}
 
+	public void enableLDA(Vector<Story> corpus, Glossary glossary) {
+		this.lda = new LDA(corpus, glossary);
+		this.isLDAEnabled = true;
+	}
+
+	public void trainLDA(int ldaNumOfTopics, int ldaNumOfIterations, double ldaLAMBDA, double ldaALPHA, double ldaBETA) {
+		if (isLDAEnabled) {
+			lda.train(ldaNumOfTopics, ldaNumOfIterations, ldaLAMBDA, ldaALPHA, ldaBETA);
+			this.isLDATrained = true;
+		}
+	}
+
 	public double getSimilarity(Story story1, Story story2) {
-		return isPlsaTrained ? plsa.getSimilarity(story1, story2) : getCosineSimilarity(story1, story2);
+		return isLDATrained ? lda.getSimilarity(story1, story2) : getCosineSimilarity(story1, story2);
+		// return isPlsaTrained ? plsa.getSimilarity(story1, story2) :
+		// getCosineSimilarity(story1, story2);
 	}
 
 	/**
