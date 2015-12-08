@@ -93,6 +93,13 @@ public class Glossary {
 					glossaryIntToString.put(wordID, word);
 					glossaryStringToInt.put(word, wordID);
 					idf.put(wordID, tmpIdf);
+				}else if (parts.length == 2){
+					int wordID = Integer.parseInt(parts[0]);
+					double tmpIdf = Double.parseDouble(parts[1]);
+					String word = " ";
+					glossaryIntToString.put(wordID, word);
+					glossaryStringToInt.put(word, wordID);
+					idf.put(wordID, tmpIdf);
 				}
 			}
 			reader.close();
