@@ -25,7 +25,7 @@ public class Plsa {
 	// p(z|d,w), d * w * z
 	private double[][][] docTermTopicPros = null;
 	private double[] probOfTopic = null;//
-
+	
 	/**
 	 * 
 	 * @param corpus
