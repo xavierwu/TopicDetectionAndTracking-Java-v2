@@ -58,17 +58,17 @@ public class LDA {
 		System.out.println("Start extracting topics...");
 
 		System.out.println("Start setting matrix...");
-			for (int storyIndex = 0; storyIndex < corpus.size(); ++storyIndex) {
-				Vector<Integer> content = corpus.get(storyIndex).getWords();
-				System.out.println("# "+content.size());
-				words_of_matrix[storyIndex] = new int[content.size()];
-				topics_of_matrix[storyIndex] = new int[content.size()];
-				for (int wordIndex = 0; wordIndex < content.size(); ++wordIndex) {
-					System.out.println("## "+wordIndex);
-					words_of_matrix[storyIndex][wordIndex] = content.get(wordIndex);
-				}
+		for (int storyIndex = 0; storyIndex < corpus.size(); ++storyIndex) {
+			Vector<Integer> content = corpus.get(storyIndex).getWords();
+			// System.out.println("# "+content.size());
+			words_of_matrix[storyIndex] = new int[content.size()];
+			topics_of_matrix[storyIndex] = new int[content.size()];
+			for (int wordIndex = 0; wordIndex < content.size(); ++wordIndex) {
+				// System.out.println("## "+wordIndex);
+				words_of_matrix[storyIndex][wordIndex] = content.get(wordIndex);
 			}
-		
+		}
+
 		System.out.println("Setting matrix done.");
 
 		System.out.println("Start Gibbs sampling...");

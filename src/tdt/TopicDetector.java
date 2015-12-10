@@ -345,6 +345,7 @@ class TopicDetector {
 		Vector<Story> centroids = new Vector<Story>();
 		Story tmp = null;
 		HashMap<Integer, Double> tfidf = null;
+		System.out.println("=== KMeans start");
 		/* Initialization */
 		for (int i = 0; i < numOfTopics; i++) {
 			tmp = new Story();
@@ -354,6 +355,7 @@ class TopicDetector {
 		}
 
 		for (int loopCnt = 0; loopCnt < numOfLoops; ++loopCnt) {
+			System.out.println(loopCnt + "/" + numOfLoops);
 			/* Assignment step. */
 			for (Story curStory : corpus) {
 				double maxSimilarity = 0;
@@ -393,6 +395,7 @@ class TopicDetector {
 				centroids.addElement(tmp);
 			}
 		}
+		System.out.println("=== KMeans end");
 	}
 
 	/**
