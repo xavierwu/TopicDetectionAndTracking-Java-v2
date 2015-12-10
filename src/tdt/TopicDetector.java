@@ -522,7 +522,10 @@ class TopicDetector {
 		Story prevStory = null;
 		double similarity = 0.0;
 		double tmpMaxSimilarity = 0.0;
+		System.out.println("=== aggDetection start");
 		for (int i = 0; i < corpus.size(); ++i) {
+			if (i % 1000 == 0)
+				System.out.println(i + "/" + corpus.size());
 			curStory = corpus.get(i);
 			tmpMaxSimilarity = -1.0;
 			for (int j = 0; j < i; ++j) {
@@ -539,6 +542,7 @@ class TopicDetector {
 				numOfTopics++;
 			}
 		}
+		System.out.println("=== aggDetection end");
 		return numOfTopics;
 	}
 
