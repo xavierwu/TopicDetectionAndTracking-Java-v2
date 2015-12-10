@@ -10,7 +10,7 @@
 	private tdt.Main main = new tdt.Main(dataFilesDir, glossaryFile, tfidfFile, matrixFile, ansFile);%>
 
 <%!public void jspInit() {
-		System.out.println("jspInit() is called.");
+		System.out.println("jspInit() is called."   );
 	}
 
 	public void jspDestroy() {
