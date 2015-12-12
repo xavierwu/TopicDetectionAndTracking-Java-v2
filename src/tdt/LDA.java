@@ -1,5 +1,8 @@
 package tdt;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.Random;
 import java.util.Vector;
 
@@ -75,6 +78,14 @@ public class LDA {
 		GibbsSamplerLDA();
 		System.out.println("Gibbs Sampling done.");
 
+		System.out.println("Start Calculating POT...");
+		calculateProbabilityOfTopics();
+		System.out.println("Calculating POT done.");
+
+		System.out.println("Start Calculating Matrix...");
+		printMatrix();
+		System.out.println("Start Calculating Matrix...");
+
 		System.out.println("Extracting topics done.");
 	}
 
@@ -82,7 +93,7 @@ public class LDA {
 		double sim = 0.0;
 
 		for (int i = 0; i < numOfTopics; i++)
-			sim += SimilarityOnEachTopic(story1, story2, i) * this.prob_of_topics[i];
+			sim += SimilarityOnEachTopic(story1, story2, i) * prob_of_topics[i];
 
 		return sim;
 	}
@@ -212,6 +223,50 @@ public class LDA {
 					num_of_every_topic[tmp_topic]++;
 				}
 			}
+		}
+	}
+
+	private void calculateProbabilityOfTopics() {
+		int num_of_unique_words = glossary.size();
+
+		double sum = 0.0; // All the times of tokens
+
+		// calculate pro_of_topics
+		for (int i = 0; i < numOfTopics; i++) {
+			this.prob_of_topics[i] = num_of_every_topic[i] + ALPHA;
+			sum += prob_of_topics[i];
+		}
+
+		for (int i = 0; i < numOfTopics; i++) {
+			prob_of_topics[i] /= sum;
+		}
+
+		// calculate prob_topic_word_matrix
+		for (int i = 0; i < numOfTopics; i++) {
+			for (int j = 0; j < num_of_unique_words; j++) {
+				prob_topic_word_matrix[i][j] = (word_topic_matrix[j][i] + BETA)
+						/ (num_of_every_topic[i] + num_of_unique_words * BETA);
+			}
+		}
+	}
+
+	private void printMatrix() {
+		try {
+			String matrixFile = "/Users/danny/Documents/Dataset/POT.dat";
+			FileOutputStream fos = new FileOutputStream(matrixFile);
+			OutputStreamWriter osw = new OutputStreamWriter(fos);
+
+			for (int curTopic = 0; curTopic < numOfTopics; ++curTopic) {
+				for (int j = 0; j < glossary.size(); j++) {
+					osw.append(Double.toString(prob_topic_word_matrix[curTopic][j]) + " ");
+				}
+				osw.append('\n');
+			}
+			
+			osw.close();
+			fos.close();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 }
