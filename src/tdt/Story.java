@@ -7,6 +7,7 @@ package tdt;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map.Entry;
@@ -55,7 +56,12 @@ public class Story {
 	 * invoked
 	 */
 	private HashMap<Integer, Double> tfidf;
-
+	
+	/**
+	 * 
+	 */
+	private ArrayList<Double> probOfTopics;
+	
 	// ---------- CONSTRUCTORS ------------------------------------------------
 	/**
 	 * UNSUGGESTED: Default constructor, used only for temporary story.
@@ -226,6 +232,22 @@ public class Story {
 	public void setTfidf(HashMap<Integer, Double> tfidf) {
 		this.tfidf = tfidf;
 	}
+	
+	/**
+	 * 
+	 * @return probability of every topics
+	 */
+	public ArrayList<Double> getProbOfTopics() {
+		return probOfTopics;
+	}
+	
+	/**
+	 * 
+	 * @param probOfTopics
+	 */
+	public void setProbOfTopics(ArrayList<Double> probOfTopics) {
+		this.probOfTopics = probOfTopics;
+	}
 
 	// ---------- BOOLEAN -----------------------------------------------------
 	/**
@@ -291,7 +313,14 @@ public class Story {
 	public void initTfidf() {
 		this.tfidf = new HashMap<Integer, Double>();
 	}
-
+	
+	/**
+	 * Initialize probOfTopics.
+	 */
+	public void initProbOfTopics() {
+		this.probOfTopics = new ArrayList<Double>();
+	}
+	
 	// ---------- OTHERS ------------------------------------------------------
 	/**
 	 * Add a word to the words
