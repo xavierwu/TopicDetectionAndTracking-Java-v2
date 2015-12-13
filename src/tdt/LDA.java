@@ -3,6 +3,9 @@ package tdt;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Random;
 import java.util.Vector;
 
@@ -31,6 +34,10 @@ public class LDA {
 	private double[] prob_of_topics = null; // the probability array for each
 											// topic over all topics
 
+	private int[] wordCount = null;
+	private double[][] prob_word_topic_matrix = null;
+	private double[][] prob_story_topic_matrix = null;
+
 	public LDA(Vector<Story> corpus, Glossary glossary) {
 		this.corpus = corpus;
 		this.glossary = glossary;
@@ -58,6 +65,10 @@ public class LDA {
 													// = wordID(glossary)
 		topics_of_matrix = new int[corpus.size()][];
 
+		wordCount = new int[glossary.size()];
+		prob_word_topic_matrix = new double[glossary.size()][numOfTopics];
+		prob_story_topic_matrix = new double[corpus.size()][numOfTopics];
+
 		System.out.println("Start extracting topics...");
 
 		System.out.println("Start setting matrix...");
@@ -69,6 +80,7 @@ public class LDA {
 			for (int wordIndex = 0; wordIndex < content.size(); ++wordIndex) {
 				// System.out.println("## "+wordIndex);
 				words_of_matrix[storyIndex][wordIndex] = content.get(wordIndex);
+				wordCount[wordIndex]++;
 			}
 		}
 
@@ -90,37 +102,50 @@ public class LDA {
 	}
 
 	public double getSimilarity(Story story1, Story story2) {
-		double sim = 0.0;
+//		double sim = 0.0;
 
-		for (int i = 0; i < numOfTopics; i++)
-			sim += SimilarityOnEachTopic(story1, story2, i) * prob_of_topics[i];
-
-		return sim;
-	}
-
-	// compute the similarity between two documents over one topic
-	public double SimilarityOnEachTopic(Story story1, Story story2, int topicIndex) {
-		double[] A = new double[glossary.size()];
-		double[] B = new double[glossary.size()];
-
-		for (int i = 0; i < story1.getWords().size(); i++) {
-			int i_word = story1.getWords().get(i);
-
-			if (i_word > -1) {
-				A[i_word] = prob_topic_word_matrix[topicIndex][i_word];
-			}
+//		for (int i = 0; i < numOfTopics; i++)
+//			sim += SimilarityOnEachTopic(story1, story2, i) * prob_of_topics[i];
+		
+//		return sim;
+		
+		double[] A = new double[numOfTopics];
+		double[] B = new double[numOfTopics];
+		
+		for (int i = 0; i < story1.getProbOfTopics().size(); ++i) {
+			A[i] = story1.getProbOfTopics().get(i).doubleValue();
 		}
-
-		for (int i = 0; i < story2.getWords().size(); i++) {
-			int i_word = story2.getWords().get(i);
-
-			if (i_word > -1) {
-				B[i_word] = prob_topic_word_matrix[topicIndex][i_word];
-			}
+		
+		for (int i = 0; i < story2.getProbOfTopics().size(); ++i) {
+			B[i] = story2.getProbOfTopics().get(i).doubleValue();
 		}
 
 		return Cosine(A, B);
 	}
+
+	// compute the similarity between two documents over one topic
+//	public double SimilarityOnEachTopic(Story story1, Story story2, int topicIndex) {
+//		double[] A = new double[glossary.size()];
+//		double[] B = new double[glossary.size()];
+//
+//		for (int i = 0; i < story1.getWords().size(); i++) {
+//			int i_word = story1.getWords().get(i);
+//
+//			if (i_word > -1) {
+//				A[i_word] += prob_topic_word_matrix[topicIndex][i_word];
+//			}
+//		}
+//
+//		for (int i = 0; i < story2.getWords().size(); i++) {
+//			int i_word = story2.getWords().get(i);
+//
+//			if (i_word > -1) {
+//				B[i_word] += prob_topic_word_matrix[topicIndex][i_word];
+//			}
+//		}
+//
+//		return Cosine(A, B);
+//	}
 
 	public double Cosine(double[] a, double[] b) {
 		double innerProduct = 0.0;
@@ -242,27 +267,78 @@ public class LDA {
 		}
 
 		// calculate prob_topic_word_matrix
-		for (int i = 0; i < numOfTopics; i++) {
-			for (int j = 0; j < num_of_unique_words; j++) {
-				prob_topic_word_matrix[i][j] = (word_topic_matrix[j][i] + BETA)
-						/ (num_of_every_topic[i] + num_of_unique_words * BETA);
+//		for (int i = 0; i < numOfTopics; i++) {
+//			for (int j = 0; j < num_of_unique_words; j++) {
+//				prob_topic_word_matrix[i][j] = (word_topic_matrix[j][i] + BETA)
+//						/ (num_of_every_topic[i] + num_of_unique_words * BETA);
+//			}
+//		}
+
+		for (int wordIndex = 0; wordIndex < num_of_unique_words; ++wordIndex) {
+			for (int topicIndex = 0; topicIndex < numOfTopics; ++topicIndex) {
+				prob_word_topic_matrix[wordIndex][topicIndex] = (word_topic_matrix[wordIndex][topicIndex] + BETA)
+						/ (wordCount[wordIndex] + numOfTopics * BETA);
 			}
+		}
+
+		// init P(t|d)
+		for (int storyIndex = 0; storyIndex < corpus.size(); ++storyIndex) {
+			for (int topicIndex = 0; topicIndex < numOfTopics; ++topicIndex) {
+				prob_story_topic_matrix[storyIndex][topicIndex] = 1;
+			}
+		}
+
+		// calculate P(t|d)
+		for (int storyIndex = 0; storyIndex < corpus.size(); ++storyIndex) {
+			for (int topicIndex = 0; topicIndex < numOfTopics; ++topicIndex) {
+				Vector<Integer> words = corpus.get(storyIndex).getWords();
+				HashSet<Integer> wordSet = new HashSet<Integer>();
+
+				for (int i = 0; i < words.size(); i++) {
+					wordSet.add(words.get(i));
+				}
+
+				Iterator<Integer> it = wordSet.iterator();
+				while (it.hasNext()) {
+					Integer wordIndex = it.next();
+					prob_story_topic_matrix[storyIndex][topicIndex] *= prob_word_topic_matrix[wordIndex][topicIndex];				}
+			}
+			
+			// set probOfTopics to story
+			ArrayList<Double> probOfTopics = new ArrayList<Double>();
+			
+			double total = 0;
+			for (int i = 0; i < prob_story_topic_matrix[storyIndex].length; ++i) {
+				total += prob_story_topic_matrix[storyIndex][i];
+			}
+			
+			for (int i = 0; i < prob_story_topic_matrix[storyIndex].length; ++i) {
+				probOfTopics.add(prob_story_topic_matrix[storyIndex][i] / total);
+			}
+			corpus.get(storyIndex).setProbOfTopics(probOfTopics);
 		}
 	}
 
 	private void printMatrix() {
 		try {
-			String matrixFile = "/Users/danny/Documents/Dataset/POT.dat";
+			String matrixFile = "/Users/danny/Documents/Dataset/P(t|d).dat";
 			FileOutputStream fos = new FileOutputStream(matrixFile);
 			OutputStreamWriter osw = new OutputStreamWriter(fos);
 
-			for (int curTopic = 0; curTopic < numOfTopics; ++curTopic) {
-				for (int j = 0; j < glossary.size(); j++) {
-					osw.append(Double.toString(prob_topic_word_matrix[curTopic][j]) + " ");
+//			for (int curTopic = 0; curTopic < numOfTopics; ++curTopic) {
+//				for (int j = 0; j < glossary.size(); j++) {
+//					osw.append(Double.toString(prob_topic_word_matrix[curTopic][j]) + " ");
+//				}
+//				osw.append('\n');
+//			}
+			
+			for (int storyIndex = 0; storyIndex < corpus.size(); ++storyIndex) {
+				for (int topicIndex = 0; topicIndex < numOfTopics; ++topicIndex) {
+					osw.append(Double.toString(prob_story_topic_matrix[storyIndex][topicIndex]) + " ");
 				}
 				osw.append('\n');
 			}
-			
+
 			osw.close();
 			fos.close();
 		} catch (IOException e) {

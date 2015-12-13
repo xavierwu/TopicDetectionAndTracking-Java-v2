@@ -3,6 +3,7 @@
  */
 package tdt;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.Vector;
@@ -345,21 +346,29 @@ class TopicDetector {
 		Vector<Story> centroids = new Vector<Story>();
 		Story tmp = null;
 		HashMap<Integer, Double> tfidf = null;
+		
 		System.out.println("=== KMeans start");
 		/* Initialization */
 		for (int i = 0; i < numOfTopics; i++) {
 			tmp = new Story();
 			tmp.setTfidf(corpus.get(i).getTfidf());
 			tmp.setTopicID(i);
+//			tmp.setStoryID(corpus.size() + i);
+			tmp.setProbOfTopics(corpus.get(i).getProbOfTopics());
 			centroids.addElement(tmp);
 		}
+		
 
-		for (int loopCnt = 0; loopCnt < numOfLoops; ++loopCnt) {
-			System.out.println(loopCnt + "/" + numOfLoops);
+		for (int loopCnt = 0; loopCnt < numOfLoops; ++loopCnt) {			
+			System.out.println(loopCnt + "/" + numOfLoops);	
+			
+			double[][] totalProbOfTopics = new double[centroids.size()][numOfTopics];
+			
 			/* Assignment step. */
 			for (Story curStory : corpus) {
 				double maxSimilarity = 0;
 				for (Story curCentroid : centroids) {
+//					System.out.print("storyID:" + curCentroid.getStoryID() + " topicID:" + curCentroid.getTopicID());
 					double similarity = storyLinkDetector.getSimilarity(curStory, curCentroid);
 					if (similarity > maxSimilarity) {
 						maxSimilarity = similarity;
@@ -378,6 +387,7 @@ class TopicDetector {
 				for (Story story : corpus) {
 					if (story.getTopicID() == curTopic) {
 						cnt++;
+						
 						for (Entry<Integer, Double> entry : story.getTfidf().entrySet()) {
 							int wordID = entry.getKey();
 							double tmpTfidf = entry.getValue();
@@ -387,10 +397,24 @@ class TopicDetector {
 								tfidf.put(wordID, tmpTfidf);
 							}
 						}
+						
+						for (int topicIndex = 0; topicIndex < numOfTopics; ++topicIndex) {
+							totalProbOfTopics[curTopic][topicIndex] 
+									+= story.getProbOfTopics().get(topicIndex).doubleValue();
+						}
 					}
 				}
-				for (int wordID : tfidf.keySet())
+				
+				for (int wordID : tfidf.keySet()) {
 					tfidf.put(wordID, tfidf.get(wordID) / cnt);
+				}
+
+				ArrayList<Double> probOfTopics = new ArrayList<Double>();
+				for (int i = 0; i < totalProbOfTopics[curTopic].length; ++i) {
+					probOfTopics.add(totalProbOfTopics[curTopic][i] / cnt);
+				}
+				tmp.setProbOfTopics(probOfTopics);
+				
 				tmp.setTfidf(tfidf);
 				centroids.addElement(tmp);
 			}
