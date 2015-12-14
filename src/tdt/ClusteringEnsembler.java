@@ -1,6 +1,7 @@
 package tdt;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Vector;
 
 /**
@@ -10,9 +11,17 @@ public class ClusteringEnsembler {
 	// [partitionID][storyID]=topicID
 	ArrayList<ArrayList<Integer>> partitions = null;
 	Vector<Story> corpus = null;
+	StoryLinkDetector storyLinkDetector;
 
-	public ClusteringEnsembler(Vector<Story> corpus) {
+	public ClusteringEnsembler(Vector<Story> corpus, StoryLinkDetector storyLinkDetector) {
 		this.corpus = corpus;
+		this.storyLinkDetector = storyLinkDetector;
+		this.partitions = new ArrayList<ArrayList<Integer>>();
+	}
+
+	public ArrayList<Integer> doClustering(String methodName, HashMap<String, Double> parameters) {
+		// TODO Clustering.doClustering()
+		return null;
 	}
 
 	/**
@@ -38,7 +47,7 @@ public class ClusteringEnsembler {
 		ArrayList<Integer> partition = null;
 		for (int curPartition = 0; curPartition < numOfPartitions; ++curPartition) {
 			partition = new ArrayList<Integer>();
-			KMeans(corpus, numOfTopics, numOfLoops, partition);
+//			KMeans(corpus, numOfTopics, numOfLoops, partition);
 			partitions.add(partition);
 		}
 	}
