@@ -344,9 +344,10 @@ class TopicDetector {
 			System.out.println("> numOfTopics = " + numOfTopics);
 			System.out.println("> numOfLoops = " + numOfLoops);
 			methodName = "votingKMeans";
-			parameters.put("numOfPartition", (double) numOfPartitions);
+			parameters.put("numOfPartitions", (double) numOfPartitions);
 			parameters.put("numOfTopics", (double) numOfTopics);
 			parameters.put("numOfLoops", (double) numOfLoops);
+			System.out.println("parameters: " + parameters.size());
 			resultPartition = ensembler.doClustering(methodName, parameters);
 		}
 		numOfTopics = resultPartition.size();

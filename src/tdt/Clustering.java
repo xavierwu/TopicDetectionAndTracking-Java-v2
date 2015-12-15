@@ -5,6 +5,8 @@ package tdt;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Random;
 import java.util.Vector;
 import java.util.Map.Entry;
 
@@ -23,7 +25,7 @@ public class Clustering {
 
 	public ArrayList<Integer> doClustering(String methodName, HashMap<String, Double> parameters) {
 		ArrayList<Integer> partition = new ArrayList<Integer>();
-		if ("kmeans".equalsIgnoreCase(methodName)) {
+		if ("KMeans".equalsIgnoreCase(methodName)) {
 			int numOfTopics = parameters.get("numOfTopics").intValue();
 			int numOfLoops = parameters.get("numOfLoops").intValue();
 			partition = KMeans(numOfTopics, numOfLoops);
@@ -56,20 +58,32 @@ public class Clustering {
 		ArrayList<Integer> partition = new ArrayList<Integer>();
 
 		System.out.println("=== KMeans start");
+
 		/* Initialization */
+		Random r = new Random();
+
+		HashSet<Integer> set = new HashSet<Integer>();
 		for (int i = 0; i < numOfTopics; i++) {
 			tmp = new Story();
-			tmp.setTfidf(corpus.get(i).getTfidf());
 			tmp.setTopicID(i);
-			// tmp.setStoryID(corpus.size() + i);
-			tmp.setProbOfTopics(corpus.get(i).getProbOfTopics());
+			int randInt = r.nextInt(corpus.size());
+			while (set.contains(randInt))
+				randInt = r.nextInt(corpus.size());
+			set.add(randInt);
+			if (storyLinkDetector.isUsingLDA())
+				tmp.setProbOfTopics(corpus.get(randInt).getProbOfTopics());
+			else
+				tmp.setTfidf(corpus.get(randInt).getTfidf());
+
 			centroids.addElement(tmp);
 		}
 
 		for (int loopCnt = 0; loopCnt < numOfLoops; ++loopCnt) {
 			System.out.println(loopCnt + "/" + numOfLoops);
 
-			double[][] totalProbOfTopics = new double[centroids.size()][numOfTopics];
+			double[][] totalProbOfTopics = null;
+			if (storyLinkDetector.isUsingLDA())
+				totalProbOfTopics = new double[centroids.size()][numOfTopics];
 
 			/* Assignment step. */
 			for (Story curStory : corpus) {
@@ -105,11 +119,11 @@ public class Clustering {
 								tfidf.put(wordID, tmpTfidf);
 							}
 						}
-
-						for (int topicIndex = 0; topicIndex < numOfTopics; ++topicIndex) {
-							totalProbOfTopics[curTopic][topicIndex] += story.getProbOfTopics().get(topicIndex)
-									.doubleValue();
-						}
+						if (storyLinkDetector.isUsingLDA())
+							for (int topicIndex = 0; topicIndex < numOfTopics; ++topicIndex) {
+								totalProbOfTopics[curTopic][topicIndex] += story.getProbOfTopics().get(topicIndex)
+										.doubleValue();
+							}
 					}
 				}
 
@@ -117,11 +131,14 @@ public class Clustering {
 					tfidf.put(wordID, tfidf.get(wordID) / cnt);
 				}
 
-				ArrayList<Double> probOfTopics = new ArrayList<Double>();
-				for (int i = 0; i < totalProbOfTopics[curTopic].length; ++i) {
-					probOfTopics.add(totalProbOfTopics[curTopic][i] / cnt);
+				ArrayList<Double> probOfTopics = null;
+				if (storyLinkDetector.isUsingLDA()) {
+					probOfTopics = new ArrayList<Double>();
+					for (int i = 0; i < totalProbOfTopics[curTopic].length; ++i) {
+						probOfTopics.add(totalProbOfTopics[curTopic][i] / cnt);
+					}
+					tmp.setProbOfTopics(probOfTopics);
 				}
-				tmp.setProbOfTopics(probOfTopics);
 
 				tmp.setTfidf(tfidf);
 				centroids.addElement(tmp);

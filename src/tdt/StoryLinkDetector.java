@@ -50,7 +50,8 @@ public class StoryLinkDetector {
 		this.isLDAEnabled = true;
 	}
 
-	public void trainLDA(int ldaNumOfTopics, int ldaNumOfIterations, double ldaLAMBDA, double ldaALPHA, double ldaBETA) {
+	public void trainLDA(int ldaNumOfTopics, int ldaNumOfIterations, double ldaLAMBDA, double ldaALPHA,
+			double ldaBETA) {
 		if (isLDAEnabled) {
 			lda.train(ldaNumOfTopics, ldaNumOfIterations, ldaLAMBDA, ldaALPHA, ldaBETA);
 			this.isLDATrained = true;
@@ -94,6 +95,10 @@ public class StoryLinkDetector {
 		similarity = innerProduct / tmp1;
 
 		return similarity;
+	}
+
+	public boolean isUsingLDA() {
+		return this.isLDATrained;
 	}
 
 	/**
