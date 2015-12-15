@@ -20,8 +20,16 @@ public class ClusteringEnsembler {
 	}
 
 	public ArrayList<Integer> doClustering(String methodName, HashMap<String, Double> parameters) {
-		// TODO Clustering.doClustering()
-		return null;
+		int numOfPartitions = 0;
+		ArrayList<Integer> resultPartition = null;
+		
+		if ("votingKMeans".equalsIgnoreCase(methodName)) {
+			numOfPartitions = parameters.get("numOfPartitions").intValue();
+			int numOfTopics = parameters.get("numOfTopics").intValue();
+			int numOfLoops = parameters.get("numOfLoops").intValue();
+			resultPartition = this.votingKMeans(numOfPartitions, numOfTopics, numOfLoops);
+		}
+		return resultPartition;
 	}
 
 	/**
@@ -43,12 +51,20 @@ public class ClusteringEnsembler {
 		}
 	}
 
-	public void votingKMeans(int numOfPartitions, int numOfTopics, int numOfLoops) {
+	public ArrayList<Integer> votingKMeans(int numOfPartitions, int numOfTopics, int numOfLoops) {
 		ArrayList<Integer> partition = null;
+		ArrayList<Integer> resultPartition = new ArrayList<Integer>();
+		Clustering clustering = new Clustering(corpus, storyLinkDetector);
+		HashMap<String, Double> parameters = new HashMap<String, Double>();
 		for (int curPartition = 0; curPartition < numOfPartitions; ++curPartition) {
 			partition = new ArrayList<Integer>();
-//			KMeans(corpus, numOfTopics, numOfLoops, partition);
+			parameters.put("numOfTopics", (double)numOfTopics);
+			parameters.put("numOfLoops", (double)numOfLoops);
+			clustering.doClustering("KMeans", parameters);
 			partitions.add(partition);
 		}
+		
+		
+		return resultPartition;
 	}
 }
