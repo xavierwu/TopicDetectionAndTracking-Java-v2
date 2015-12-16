@@ -25,7 +25,7 @@ public class Plsa {
 	// p(z|d,w), d * w * z
 	private double[][][] docTermTopicPros = null;
 	private double[] probOfTopic = null;//
-	
+
 	/**
 	 * 
 	 * @param corpus
@@ -49,6 +49,28 @@ public class Plsa {
 		topicTermPros = new double[numOfTopics][glossary.size()];
 		docTermTopicPros = new double[corpus.size()][glossary.size()][numOfTopics];
 		probOfTopic = new double[numOfTopics];
+
+		for (int i = 0; i < corpus.size(); i++) {
+			double[] pros = randomProbilities(numOfTopics);
+			for (int j = 0; j < numOfTopics; j++) {
+				docTopicPros[i][j] = pros[j];
+			}
+		}
+		// init p(w|z),for each topic the constraint is sum(p(w|z))=1.0
+		for (int i = 0; i < numOfTopics; i++) {
+			double[] pros = randomProbilities(glossary.size());
+			for (int j = 0; j < glossary.size(); j++) {
+				topicTermPros[i][j] = pros[j];
+			}
+		}
+
+		// use em to estimate params
+		for (int i = 0; i < maxIter; i++) {
+			em();
+			System.out.print(i + "-");
+		}
+		System.out.println("done");
+
 	}
 
 	/**
@@ -63,17 +85,37 @@ public class Plsa {
 	 */
 	public double getSimilarity(Story story1, Story story2) {
 		// Similairty = sum_z (Similarity_z * P(z))
-		double similarity = 0.0;
-		for (int curTopic = 0; curTopic < numOfTopics; ++curTopic) {
-			similarity += getSimilarity(story1, story2, curTopic) * probOfTopic[curTopic];
-		}
-		return similarity;
+		// double similarity = 0.0;
+		// for (int curTopic = 0; curTopic < numOfTopics; ++curTopic) {
+		// similarity += getSimilarity(story1, story2, curTopic) *
+		// probOfTopic[curTopic];
+		// }
+		// return similarity;
+		return Cosine(docTopicPros[story1.getStoryID()], docTopicPros[story2.getStoryID()]);
+	}
+
+	public double Cosine(double[] a, double[] b) {
+		double innerProduct = 0.0;
+		for (int i = 0; i < a.length; i++)
+			innerProduct += a[i] * b[i];
+
+		double aLength = 0.0;
+		for (int i = 0; i < a.length; i++)
+			aLength += a[i] * a[i];
+		aLength = Math.sqrt(aLength);
+
+		double bLength = 0.0;
+		for (int i = 0; i < b.length; i++)
+			bLength += b[i] * b[i];
+		bLength = Math.sqrt(bLength);
+
+		return innerProduct / (aLength * bLength);
 	}
 
 	/**
 	 * Return the similarity of two stories, based on a certain topic.
 	 * Similarity_z = cosineSimilarity( P(w | z), P(w | z) )
-	 * 
+	 * @deprecated
 	 * @param story1
 	 * @param story2
 	 * @param topic
