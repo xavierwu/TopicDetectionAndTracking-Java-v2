@@ -95,8 +95,8 @@ public class LDA {
 		System.out.println("Calculating POT done.");
 
 		System.out.println("Start Calculating Matrix...");
-		printMatrix();
-		System.out.println("Start Calculating Matrix...");
+//		printMatrix();
+		System.out.println("Done Calculating Matrix...");
 
 		System.out.println("Extracting topics done.");
 	}

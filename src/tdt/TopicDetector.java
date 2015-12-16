@@ -51,10 +51,19 @@ class TopicDetector {
 		tmp.put("PMiss", 1.0);
 		tmp.put("PFa", 1.0);
 		responseJSONObject.put(methodID, tmp);
+		// plsa_KMeans
+		tmp = new JSONObject();
+		methodID = 2;
+		tmp.put("methodID", methodID);
+		tmp.put("algorithm", "plsa_KMeans");
+		tmp.put("normCdet", 5.9);
+		tmp.put("PMiss", 1.0);
+		tmp.put("PFa", 1.0);
+		responseJSONObject.put(methodID, tmp);
 
 		// tfidf_DBSCAN
 		tmp = new JSONObject();
-		methodID = 2;
+		methodID = 3;
 		tmp.put("methodID", methodID);
 		tmp.put("algorithm", "tfidf_DBSCAN");
 		tmp.put("normCdet", 5.9);
@@ -63,9 +72,18 @@ class TopicDetector {
 		responseJSONObject.put(methodID, tmp);
 		// lda_DBSCAN
 		tmp = new JSONObject();
-		methodID = 3;
+		methodID = 4;
 		tmp.put("methodID", methodID);
 		tmp.put("algorithm", "lda_DBSCAN");
+		tmp.put("normCdet", 5.9);
+		tmp.put("PMiss", 1.0);
+		tmp.put("PFa", 1.0);
+		responseJSONObject.put(methodID, tmp);
+		// plsa_DBSCAN
+		tmp = new JSONObject();
+		methodID = 5;
+		tmp.put("methodID", methodID);
+		tmp.put("algorithm", "plsa_DBSCAN");
 		tmp.put("normCdet", 5.9);
 		tmp.put("PMiss", 1.0);
 		tmp.put("PFa", 1.0);
@@ -73,7 +91,7 @@ class TopicDetector {
 
 		// tfidf_aggDetection
 		tmp = new JSONObject();
-		methodID = 4;
+		methodID = 6;
 		tmp.put("methodID", methodID);
 		tmp.put("algorithm", "tfidf_aggDetection");
 		tmp.put("normCdet", 3.7694);
@@ -82,9 +100,18 @@ class TopicDetector {
 		responseJSONObject.put(methodID, tmp);
 		// lda_aggDetection
 		tmp = new JSONObject();
-		methodID = 5;
+		methodID = 7;
 		tmp.put("methodID", methodID);
 		tmp.put("algorithm", "lda_aggDetection");
+		tmp.put("normCdet", 5.9);
+		tmp.put("PMiss", 1.0);
+		tmp.put("PFa", 1.0);
+		responseJSONObject.put(methodID, tmp);
+		// plsa_aggDetection
+		tmp = new JSONObject();
+		methodID = 8;
+		tmp.put("methodID", methodID);
+		tmp.put("algorithm", "plsa_aggDetection");
 		tmp.put("normCdet", 5.9);
 		tmp.put("PMiss", 1.0);
 		tmp.put("PFa", 1.0);
@@ -92,9 +119,27 @@ class TopicDetector {
 
 		// tfidf_votingKMeans
 		tmp = new JSONObject();
-		methodID = 6;
+		methodID = 9;
 		tmp.put("methodID", methodID);
 		tmp.put("algorithm", "tfidf_votingKMeans");
+		tmp.put("normCdet", 5.9);
+		tmp.put("PMiss", 1.0);
+		tmp.put("PFa", 1.0);
+		responseJSONObject.put(methodID, tmp);
+		// lda_votingKMeans
+		tmp = new JSONObject();
+		methodID = 10;
+		tmp.put("methodID", methodID);
+		tmp.put("algorithm", "lda_votingKMeans");
+		tmp.put("normCdet", 5.9);
+		tmp.put("PMiss", 1.0);
+		tmp.put("PFa", 1.0);
+		responseJSONObject.put(methodID, tmp);
+		// plsa_votingKMeans
+		tmp = new JSONObject();
+		methodID = 11;
+		tmp.put("methodID", methodID);
+		tmp.put("algorithm", "plsa_votingKMeans");
 		tmp.put("normCdet", 5.9);
 		tmp.put("PMiss", 1.0);
 		tmp.put("PFa", 1.0);
@@ -115,7 +160,7 @@ class TopicDetector {
 
 			tmp = new JSONObject();
 			tmp.put("parameter", "numOfTopics");
-			tmp.put("value", 36);
+			tmp.put("value", 63);
 			responseJSONObject.put(0, tmp);
 
 			tmp = new JSONObject();
@@ -129,7 +174,7 @@ class TopicDetector {
 
 			tmp = new JSONObject();
 			tmp.put("parameter", "lda.numOfTopics");
-			tmp.put("value", 36);
+			tmp.put("value", 63);
 			responseJSONObject.put(0, tmp);
 
 			tmp = new JSONObject();
@@ -154,7 +199,7 @@ class TopicDetector {
 
 			tmp = new JSONObject();
 			tmp.put("parameter", "numOfTopics");
-			tmp.put("value", 36);
+			tmp.put("value", 63);
 			responseJSONObject.put(5, tmp);
 
 			tmp = new JSONObject();
@@ -162,7 +207,31 @@ class TopicDetector {
 			tmp.put("value", 5);
 			responseJSONObject.put(6, tmp);
 			break;
-		case 2: // tfidf_DBSCAN
+		case 2: // plsa_KMeans
+			numOfParameters = 4;
+			responseJSONObject.put("numOfParameters", numOfParameters);
+
+			tmp = new JSONObject();
+			tmp.put("parameter", "plsa.numOfTopics");
+			tmp.put("value", 63);
+			responseJSONObject.put(0, tmp);
+
+			tmp = new JSONObject();
+			tmp.put("parameter", "plsa.numOfIterations");
+			tmp.put("value", 5);
+			responseJSONObject.put(1, tmp);
+
+			tmp = new JSONObject();
+			tmp.put("parameter", "numOfTopics");
+			tmp.put("value", 63);
+			responseJSONObject.put(2, tmp);
+
+			tmp = new JSONObject();
+			tmp.put("parameter", "numOfLoops");
+			tmp.put("value", 5);
+			responseJSONObject.put(3, tmp);
+			break;
+		case 3: // tfidf_DBSCAN
 			numOfParameters = 2;
 			responseJSONObject.put("numOfParameters", numOfParameters);
 
@@ -176,13 +245,13 @@ class TopicDetector {
 			tmp.put("value", 5);
 			responseJSONObject.put(1, tmp);
 			break;
-		case 3: // lda_DBSCAN
+		case 4: // lda_DBSCAN
 			numOfParameters = 7;
 			responseJSONObject.put("numOfParameters", numOfParameters);
 
 			tmp = new JSONObject();
 			tmp.put("parameter", "lda.numOfTopics");
-			tmp.put("value", 36);
+			tmp.put("value", 63);
 			responseJSONObject.put(0, tmp);
 
 			tmp = new JSONObject();
@@ -215,7 +284,31 @@ class TopicDetector {
 			tmp.put("value", 5);
 			responseJSONObject.put(6, tmp);
 			break;
-		case 4: // tfidf_aggDetection
+		case 5: // plsa_DBSCAN
+			numOfParameters = 4;
+			responseJSONObject.put("numOfParameters", numOfParameters);
+
+			tmp = new JSONObject();
+			tmp.put("parameter", "plsa.numOfTopics");
+			tmp.put("value", 63);
+			responseJSONObject.put(0, tmp);
+
+			tmp = new JSONObject();
+			tmp.put("parameter", "plsa.numOfIterations");
+			tmp.put("value", 5);
+			responseJSONObject.put(1, tmp);
+
+			tmp = new JSONObject();
+			tmp.put("parameter", "minSimilarity");
+			tmp.put("value", 0.98);
+			responseJSONObject.put(2, tmp);
+
+			tmp = new JSONObject();
+			tmp.put("parameter", "minPts");
+			tmp.put("value", 5);
+			responseJSONObject.put(3, tmp);
+			break;
+		case 6: // tfidf_aggDetection
 			numOfParameters = 1;
 			responseJSONObject.put("numOfParameters", numOfParameters);
 
@@ -224,7 +317,7 @@ class TopicDetector {
 			tmp.put("value", 0.144);
 			responseJSONObject.put(0, tmp);
 			break;
-		case 5: // lda_aggDetection
+		case 7: // lda_aggDetection
 			numOfParameters = 6;
 			responseJSONObject.put("numOfParameters", numOfParameters);
 
@@ -258,7 +351,26 @@ class TopicDetector {
 			tmp.put("value", 0.144);
 			responseJSONObject.put(5, tmp);
 			break;
-		case 6: // tfidf_votingKMeans
+		case 8: // plsa_aggDetection
+			numOfParameters = 3;
+			responseJSONObject.put("numOfParameters", numOfParameters);
+
+			tmp = new JSONObject();
+			tmp.put("parameter", "plsa.numOfTopics");
+			tmp.put("value", 63);
+			responseJSONObject.put(0, tmp);
+
+			tmp = new JSONObject();
+			tmp.put("parameter", "plsa.numOfIterations");
+			tmp.put("value", 5);
+			responseJSONObject.put(1, tmp);
+
+			tmp = new JSONObject();
+			tmp.put("parameter", "threshold");
+			tmp.put("value", 0.144);
+			responseJSONObject.put(2, tmp);
+			break;
+		case 9: // tfidf_votingKMeans
 			numOfParameters = 3;
 			responseJSONObject.put("numOfParameters", numOfParameters);
 
@@ -277,6 +389,79 @@ class TopicDetector {
 			tmp.put("value", 5);
 			responseJSONObject.put(2, tmp);
 			break;
+		case 10: // lda_votingKMeans
+			numOfParameters = 8;
+			responseJSONObject.put("numOfParameters", numOfParameters);
+
+			tmp = new JSONObject();
+			tmp.put("parameter", "lda.numOfTopics");
+			tmp.put("value", 63);
+			responseJSONObject.put(0, tmp);
+
+			tmp = new JSONObject();
+			tmp.put("parameter", "lda.numOfIterations");
+			tmp.put("value", 5);
+			responseJSONObject.put(1, tmp);
+
+			tmp = new JSONObject();
+			tmp.put("parameter", "lda.lambda");
+			tmp.put("value", 0.5);
+			responseJSONObject.put(2, tmp);
+
+			tmp = new JSONObject();
+			tmp.put("parameter", "lda.alpha");
+			tmp.put("value", 0.5);
+			responseJSONObject.put(3, tmp);
+
+			tmp = new JSONObject();
+			tmp.put("parameter", "lda.beta");
+			tmp.put("value", 0.01);
+			responseJSONObject.put(4, tmp);
+
+			tmp = new JSONObject();
+			tmp.put("parameter", "numOfPartitions");
+			tmp.put("value", 5);
+			responseJSONObject.put(5, tmp);
+
+			tmp = new JSONObject();
+			tmp.put("parameter", "numOfTopics");
+			tmp.put("value", 36);
+			responseJSONObject.put(6, tmp);
+
+			tmp = new JSONObject();
+			tmp.put("parameter", "numOfLoops");
+			tmp.put("value", 5);
+			responseJSONObject.put(7, tmp);
+			break;
+		case 11: // plsa_votingKMeans
+			numOfParameters = 5;
+			responseJSONObject.put("numOfParameters", numOfParameters);
+
+			tmp = new JSONObject();
+			tmp.put("parameter", "plsa.numOfTopics");
+			tmp.put("value", 63);
+			responseJSONObject.put(0, tmp);
+
+			tmp = new JSONObject();
+			tmp.put("parameter", "plsa.numOfIterations");
+			tmp.put("value", 5);
+			responseJSONObject.put(1, tmp);
+
+			tmp = new JSONObject();
+			tmp.put("parameter", "numOfPartitions");
+			tmp.put("value", 5);
+			responseJSONObject.put(2, tmp);
+
+			tmp = new JSONObject();
+			tmp.put("parameter", "numOfTopics");
+			tmp.put("value", 63);
+			responseJSONObject.put(3, tmp);
+
+			tmp = new JSONObject();
+			tmp.put("parameter", "numOfLoops");
+			tmp.put("value", 5);
+			responseJSONObject.put(4, tmp);
+			break;
 		default:
 			break;
 		}
@@ -294,21 +479,25 @@ class TopicDetector {
 		int methodID = Integer.parseInt(request.getParameter("methodID"));
 		System.out.println("methodID = " + methodID);
 
-		if (methodID == 1 || methodID == 3 || methodID == 5) { // lda
+		if (methodID == 1 || methodID == 4 || methodID == 7 || methodID == 10) { // lda
 			int ldaNumOfTopics = Integer.parseInt(request.getParameter("lda.numOfTopics"));
 			int ldaNumOfIterations = Integer.parseInt(request.getParameter("lda.numOfIterations"));
 			double ldaLAMBDA = Double.parseDouble(request.getParameter("lda.lambda"));
 			double ldaALPHA = Double.parseDouble(request.getParameter("lda.alpha"));
 			double ldaBETA = Double.parseDouble(request.getParameter("lda.beta"));
 			storyLinkDetector.trainLDA(ldaNumOfTopics, ldaNumOfIterations, ldaLAMBDA, ldaALPHA, ldaBETA);
+		} else if (methodID == 2 || methodID == 5 || methodID == 8 || methodID == 11) {// plsa
+			int plsaNumOfTopics = Integer.parseInt(request.getParameter("plsa.numOfTopics"));
+			int plsaNumOfIterations = Integer.parseInt(request.getParameter("plsa.numOfIterations"));
+			storyLinkDetector.trainPlsa(plsaNumOfTopics, plsaNumOfIterations);
 		}
 
-		if (methodID >= 0 && methodID <= 5) {
+		if (methodID >= 0 && methodID <= 8) {// clustering
 			clustering = new Clustering(corpus, storyLinkDetector);
-		} else if (methodID == 6) {
+		} else if (methodID >= 9 && methodID <= 11) { // clustering ensemble
 			ensembler = new ClusteringEnsembler(corpus, storyLinkDetector);
 		}
-		if (methodID == 0 || methodID == 1) { // k-means
+		if (methodID == 0 || methodID == 1 || methodID == 2) { // k-means
 			numOfTopics = Integer.parseInt(request.getParameter("numOfTopics"));
 			int numOfLoops = Integer.parseInt(request.getParameter("numOfLoops"));
 			System.out.println("Parameters: ");
@@ -318,7 +507,7 @@ class TopicDetector {
 			parameters.put("numOfTopics", (double) numOfTopics);
 			parameters.put("numOfLoops", (double) numOfLoops);
 			resultPartition = clustering.doClustering(methodName, parameters);
-		} else if (methodID == 2 || methodID == 3) {// DBSCAN
+		} else if (methodID == 3 || methodID == 4 || methodID == 5) {// DBSCAN
 			double minSimilarity = Double.parseDouble(request.getParameter("minSimilarity"));
 			int minPts = Integer.parseInt(request.getParameter("minPts"));
 			System.out.println("Parameters: ");
@@ -328,14 +517,14 @@ class TopicDetector {
 			parameters.put("minSimilarity", minSimilarity);
 			parameters.put("minPts", (double) minPts);
 			resultPartition = clustering.doClustering(methodName, parameters);
-		} else if (methodID == 4 || methodID == 5) {// aggDetection
+		} else if (methodID == 6 || methodID == 7 || methodID == 8) {// aggDetection
 			double threshold = Double.parseDouble(request.getParameter("threshold"));
 			System.out.println("Parameters: ");
 			System.out.println("> threshold = " + threshold);
 			methodName = "aggDetection";
 			parameters.put("threshold", threshold);
 			resultPartition = clustering.doClustering(methodName, parameters);
-		} else if (methodID == 6) { // votingKMeans
+		} else if (methodID == 9 || methodID == 10 || methodID == 11) { // votingKMeans
 			int numOfPartitions = Integer.parseInt(request.getParameter("numOfPartitions"));
 			numOfTopics = Integer.parseInt(request.getParameter("numOfTopics"));
 			int numOfLoops = Integer.parseInt(request.getParameter("numOfLoops"));
