@@ -44,6 +44,10 @@ public class StoryLinkDetector {
 			this.isPlsaTrained = true;
 		}
 	}
+	
+	public void disablePlsa() {
+		this.isPlsaEnabled = false;
+	}
 
 	public void enableLDA(Vector<Story> corpus, Glossary glossary) {
 		this.lda = new LDA(corpus, glossary);
@@ -56,6 +60,13 @@ public class StoryLinkDetector {
 			this.isLDATrained = true;
 		}
 	}
+	
+	public void disableLDA(Vector<Story> corpus) {
+		this.isLDAEnabled = false;
+		for (Story story: corpus) {
+			story.clearProbOfTopics();
+		}
+ 	}
 
 	public double getSimilarity(Story story1, Story story2) {
 		return isLDATrained ? lda.getSimilarity(story1, story2) : getCosineSimilarity(story1, story2);

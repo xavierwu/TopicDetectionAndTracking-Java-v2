@@ -106,9 +106,13 @@ public class Clustering {
 							}
 						}
 
-						for (int topicIndex = 0; topicIndex < numOfTopics; ++topicIndex) {
-							totalProbOfTopics[curTopic][topicIndex] += story.getProbOfTopics().get(topicIndex)
-									.doubleValue();
+						try {
+							for (int topicIndex = 0; topicIndex < numOfTopics; ++topicIndex) {
+								totalProbOfTopics[curTopic][topicIndex] += story.getProbOfTopics().get(topicIndex)
+										.doubleValue();
+							}
+						} catch (NullPointerException e) {
+							
 						}
 					}
 				}

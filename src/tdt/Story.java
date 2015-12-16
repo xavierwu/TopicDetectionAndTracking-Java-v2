@@ -323,6 +323,13 @@ public class Story {
 	
 	// ---------- OTHERS ------------------------------------------------------
 	/**
+	 * 
+	 */
+	public void clearProbOfTopics() {
+		this.probOfTopics.clear();
+	}
+	
+	/**
 	 * Add a word to the words
 	 */
 	public void addWord(int wordID) {

@@ -49,88 +49,7 @@ public class Plsa {
 		topicTermPros = new double[numOfTopics][glossary.size()];
 		docTermTopicPros = new double[corpus.size()][glossary.size()][numOfTopics];
 		probOfTopic = new double[numOfTopics];
-	}
-
-	/**
-	 * Return the similarity between two stories, using the trained plsa model,
-	 * Please make sure the train() is already invoked, before using this
-	 * function. Similairty = sum_z (Similarity_z * P(z)) TODO
-	 * getSimilarity(Story, Story)
-	 * 
-	 * @see Plsa.getSimilarity(Story, Story, int)
-	 * @param story1
-	 * @param story2
-	 */
-	public double getSimilarity(Story story1, Story story2) {
-		// Similairty = sum_z (Similarity_z * P(z))
-		double similarity = 0.0;
-		for (int curTopic = 0; curTopic < numOfTopics; ++curTopic) {
-			similarity += getSimilarity(story1, story2, curTopic) * probOfTopic[curTopic];
-		}
-		return similarity;
-	}
-
-	/**
-	 * Return the similarity of two stories, based on a certain topic.
-	 * Similarity_z = cosineSimilarity( P(w | z), P(w | z) )
-	 * 
-	 * @param story1
-	 * @param story2
-	 * @param topic
-	 * @return
-	 */
-	private double getSimilarity(Story story1, Story story2, int topicID) {
-		double innerProduct = 0.0;
-		double squareSum1 = 0.0;
-		double squareSum2 = 0.0;
-		int i = 0; // TODO how to get the id of story1 in the corpus?
-		int j = 0; // the id of story2 in the corpus
-		for (int curTopic = 0; curTopic < numOfTopics; ++curTopic) {
-			innerProduct += docTopicPros[i][curTopic] * docTopicPros[j][curTopic];
-			squareSum1 += docTopicPros[i][curTopic] * docTopicPros[i][curTopic];
-			squareSum2 += docTopicPros[j][curTopic] * docTopicPros[j][curTopic];
-		}
-		double result = innerProduct / Math.sqrt(squareSum1 * squareSum2);
-		return result;
-	}
-	// ----------------- codes below are copied from somewhere...
-
-	/**
-	 * train plsa
-	 * 
-	 * @deprecated
-	 * @param corpus
-	 *            all documents
-	 */
-	public void train(Vector<Story> corpus, int maxIter) {
-		if (corpus == null) {
-			throw new IllegalArgumentException("The documents set must be not null!");
-		}
-
-		// statistics vocabularies
-		// allWords = statisticsVocabularies(corpus);
-
-		// element represent times the word appear in this document
-		docTermMatrix = new int[corpus.size()][glossary.size()];
-		// init docTermMatrix
-		// for (int docIndex = 0; docIndex < corpus.size(); docIndex++) {
-		// Document doc = corpus.get(docIndex);
-		// for (String word : doc.getWords()) {
-		// if (allWords.contains(word)) {
-		// int wordIndex = allWords.indexOf(word);
-		// docTermMatrix[docIndex][wordIndex] += 1;
-		// }
-		// }
-		//
-		// // free memory
-		// doc.setWords(null);
-		// }
-
-		docTopicPros = new double[corpus.size()][numOfTopics];
-		topicTermPros = new double[numOfTopics][glossary.size()];
-		docTermTopicPros = new double[corpus.size()][glossary.size()][numOfTopics];
-
-		// init p(z|d),for each document the constraint is sum(p(z|d))=1.0
+		
 		for (int i = 0; i < corpus.size(); i++) {
 			double[] pros = randomProbilities(numOfTopics);
 			for (int j = 0; j < numOfTopics; j++) {
@@ -152,6 +71,127 @@ public class Plsa {
 		}
 		System.out.println("done");
 	}
+
+	/**
+	 * Return the similarity between two stories, using the trained plsa model,
+	 * Please make sure the train() is already invoked, before using this
+	 * function. Similairty = sum_z (Similarity_z * P(z)) TODO
+	 * getSimilarity(Story, Story)
+	 * 
+	 * @see Plsa.getSimilarity(Story, Story, int)
+	 * @param story1
+	 * @param story2
+	 */
+	public double getSimilarity(Story story1, Story story2) {
+		// Similairty = sum_z (Similarity_z * P(z))
+//		double similarity = 0.0;
+//		for (int curTopic = 0; curTopic < numOfTopics; ++curTopic) {
+//			similarity += getSimilarity(story1, story2, curTopic) * probOfTopic[curTopic];
+//		}
+//		return similarity;
+		return Cosine(docTopicPros[story1.getStoryID()],  docTopicPros[story2.getStoryID()]);
+	}
+	
+	public double Cosine(double[] a, double[] b) {
+		double innerProduct = 0.0;
+		for (int i = 0; i < a.length; i++)
+			innerProduct += a[i] * b[i];
+
+		double aLength = 0.0;
+		for (int i = 0; i < a.length; i++)
+			aLength += a[i] * a[i];
+		aLength = Math.sqrt(aLength);
+
+		double bLength = 0.0;
+		for (int i = 0; i < b.length; i++)
+			bLength += b[i] * b[i];
+		bLength = Math.sqrt(bLength);
+
+		return innerProduct / (aLength * bLength);
+	}
+
+	/**
+	 * Return the similarity of two stories, based on a certain topic.
+	 * Similarity_z = cosineSimilarity( P(w | z), P(w | z) )
+	 * 
+	 * @param story1
+	 * @param story2
+	 * @param topic
+	 * @return
+	 */
+//	private double getSimilarity(Story story1, Story story2, int topicID) {
+//		double innerProduct = 0.0;
+//		double squareSum1 = 0.0;
+//		double squareSum2 = 0.0;
+//		int i = 0; // TODO how to get the id of story1 in the corpus?
+//		int j = 0; // the id of story2 in the corpus
+//		for (int curTopic = 0; curTopic < numOfTopics; ++curTopic) {
+//			innerProduct += docTopicPros[i][curTopic] * docTopicPros[j][curTopic];
+//			squareSum1 += docTopicPros[i][curTopic] * docTopicPros[i][curTopic];
+//			squareSum2 += docTopicPros[j][curTopic] * docTopicPros[j][curTopic];
+//		}
+//		double result = innerProduct / Math.sqrt(squareSum1 * squareSum2);
+//		return result;
+//	}
+	// ----------------- codes below are copied from somewhere...
+
+	/**
+	 * train plsa
+	 * 
+	 * @deprecated
+	 * @param corpus
+	 *            all documents
+	 */
+//	public void train(Vector<Story> corpus, int maxIter) {
+//		if (corpus == null) {
+//			throw new IllegalArgumentException("The documents set must be not null!");
+//		}
+//
+//		// statistics vocabularies
+//		// allWords = statisticsVocabularies(corpus);
+//
+//		// element represent times the word appear in this document
+//		docTermMatrix = new int[corpus.size()][glossary.size()];
+//		// init docTermMatrix
+//		// for (int docIndex = 0; docIndex < corpus.size(); docIndex++) {
+//		// Document doc = corpus.get(docIndex);
+//		// for (String word : doc.getWords()) {
+//		// if (allWords.contains(word)) {
+//		// int wordIndex = allWords.indexOf(word);
+//		// docTermMatrix[docIndex][wordIndex] += 1;
+//		// }
+//		// }
+//		//
+//		// // free memory
+//		// doc.setWords(null);
+//		// }
+//
+//		docTopicPros = new double[corpus.size()][numOfTopics];
+//		topicTermPros = new double[numOfTopics][glossary.size()];
+//		docTermTopicPros = new double[corpus.size()][glossary.size()][numOfTopics];
+//
+//		// init p(z|d),for each document the constraint is sum(p(z|d))=1.0
+//		for (int i = 0; i < corpus.size(); i++) {
+//			double[] pros = randomProbilities(numOfTopics);
+//			for (int j = 0; j < numOfTopics; j++) {
+//				docTopicPros[i][j] = pros[j];
+//			}
+//		}
+//		// init p(w|z),for each topic the constraint is sum(p(w|z))=1.0
+//		for (int i = 0; i < numOfTopics; i++) {
+//			double[] pros = randomProbilities(glossary.size());
+//			for (int j = 0; j < glossary.size(); j++) {
+//				topicTermPros[i][j] = pros[j];
+//			}
+//		}
+//
+//		// use em to estimate params
+//		for (int i = 0; i < maxIter; i++) {
+//			em();
+//			System.out.print(i + "-");
+//		}
+//		System.out.println("done");
+//	}
 
 	/**
 	 * EM algorithm
