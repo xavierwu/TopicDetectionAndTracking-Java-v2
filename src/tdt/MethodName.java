@@ -45,8 +45,8 @@ public enum MethodName {
 		case LDA_DBSCAN:
 		case LDA_AggDetection:
 		case LDA_VotingKMeans:
-			parameters.put("lda.numOfTopics", 63.0);
-			parameters.put("lda.numOfIteration", 5.0);
+			parameters.put("lda.numOfTopics", (double) 63);
+			parameters.put("lda.numOfIterations", (double) 5);
 			parameters.put("lda.lambda", 0.5);
 			parameters.put("lda.alpha", 0.5);
 			parameters.put("lda.beta", 0.01);
@@ -55,8 +55,8 @@ public enum MethodName {
 		case pLSA_DBSCAN:
 		case pLSA_AggDetection:
 		case pLSA_VotingKMeans:
-			parameters.put("plsa.numOfTopics", 63.0);
-			parameters.put("plsa.numOfIteration", 5.0);
+			parameters.put("plsa.numOfTopics", (double) 63);
+			parameters.put("plsa.numOfIterations", (double) 5);
 			break;
 		default:
 			break;
@@ -66,14 +66,14 @@ public enum MethodName {
 		case TFIDF_KMeans:
 		case LDA_KMeans:
 		case pLSA_KMeans:
-			parameters.put("numOfTopics", 63.0);
-			parameters.put("numOfLoops", 5.0);
+			parameters.put("numOfTopics", (double) 63);
+			parameters.put("numOfLoops", (double) 5);
 			break;
 		case TFIDF_DBSCAN:
 		case LDA_DBSCAN:
 		case pLSA_DBSCAN:
 			parameters.put("minSimilarity", 0.5);
-			parameters.put("minPts", 5.0);
+			parameters.put("minPts", (double) 5);
 			break;
 		case TFIDF_AggDetection:
 		case LDA_AggDetection:
@@ -83,9 +83,9 @@ public enum MethodName {
 		case TFIDF_VotingKMeans:
 		case LDA_VotingKMeans:
 		case pLSA_VotingKMeans:
-			parameters.put("numOfPartitions", 63.0);
-			parameters.put("numOfTopics", 63.0);
-			parameters.put("numOfLoops", 5.0);
+			parameters.put("numOfPartitions", (double) 63);
+			parameters.put("numOfTopics", (double) 63);
+			parameters.put("numOfLoops", (double) 5);
 			break;
 		}
 		return parameters;

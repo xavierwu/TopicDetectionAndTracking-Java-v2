@@ -51,7 +51,6 @@ class TopicDetector {
 	public JSONObject prepareTopicDetection(int methodID) {
 		JSONObject responseJSONObject = new JSONObject();
 		JSONObject tmp = null;
-		int numOfParameters = 0;
 
 		HashMap<String, Double> parameters = MethodName.valueOf(methodID).getBestParameters();
 		responseJSONObject.put("numOfParameters", parameters.size());
@@ -77,7 +76,7 @@ class TopicDetector {
 		ClusteringEnsembler ensembler = null;
 		ArrayList<Integer> resultPartition = null;
 
-		int methodID = Integer.parseInt(request.getParameter("methodID"));
+		int methodID = Integer.parseInt(request.getParameter("methodID"));		
 		System.out.println("methodID = " + methodID);
 
 		if (methodID == 1 || methodID == 4 || methodID == 7 || methodID == 10) { // lda
