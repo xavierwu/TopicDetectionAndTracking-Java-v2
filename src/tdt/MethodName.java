@@ -9,18 +9,18 @@ import net.sf.json.JSONObject;
  *
  */
 public enum MethodName {
-	TFIDF_KMeans("", 0, 0, 0),
-	LDA_KMeans("", 0, 0, 0),
-	pLSA_KMeans("", 0, 0, 0),
-	TFIDF_DBSCAN("", 0, 0, 0),
-	LDA_DBSCAN("", 0, 0, 0),
-	pLSA_DBSCAN("", 0, 0, 0),
-	TFIDF_AggDetection("", 0, 0, 0),
-	LDA_AggDetection("", 0, 0, 0),
-	pLSA_AggDetection("", 0, 0, 0),
-	TFIDF_VotingKMeans("", 0, 0, 0),
-	LDA_VotingKMeans("", 0, 0, 0),
-	pLSA_VotingKMeans("", 0, 0, 0);
+	TFIDF_KMeans("TFIDF_KMeans", 5.9, 1.0, 1.0),
+	LDA_KMeans("LDA_KMeans", 5.9, 1.0, 1.0),
+	pLSA_KMeans("pLSA_KMeans", 5.9, 1.0, 1.0),
+	TFIDF_DBSCAN("TFIDF_DBSCAN", 5.9, 1.0, 1.0),
+	LDA_DBSCAN("LDA_DBSCAN", 5.9, 1.0, 1.0),
+	pLSA_DBSCAN("pLSA_DBSCAN", 5.9, 1.0, 1.0),
+	TFIDF_AggDetection("TFIDF_AggDetection", 5.9, 1.0, 1.0),
+	LDA_AggDetection("LDA_AggDetection", 5.9, 1.0, 1.0),
+	pLSA_AggDetection("pLSA_AggDetection", 5.9, 1.0, 1.0),
+	TFIDF_VotingKMeans("TFIDF_VotingKMeans", 5.9, 1.0, 1.0),
+	LDA_VotingKMeans("LDA_VotingKMeans", 5.9, 1.0, 1.0),
+	pLSA_VotingKMeans("pLSA_VotingKMeans", 5.9, 1.0, 1.0);
 
 	private String name;
 	private double bestNormCdet;
@@ -33,50 +33,59 @@ public enum MethodName {
 		this.bestPMiss = bestPMiss;
 		this.bestPFa = bestPFa;
 	}
-	
-	public static MethodName valueOf(int methodID){
+
+	public static MethodName valueOf(int methodID) {
 		return MethodName.values()[methodID];
 	}
 
 	public HashMap<String, Double> getBestParameters() {
 		HashMap<String, Double> parameters = new HashMap<String, Double>();
-		switch (this) {
-		case TFIDF_KMeans:
-			parameters.put("numOfTopics", 63.0);
-			parameters.put("numOfLoops", 5.0);
-			break;
+		switch (this) { // choose similarity algorithm
 		case LDA_KMeans:
+		case LDA_DBSCAN:
+		case LDA_AggDetection:
+		case LDA_VotingKMeans:
 			parameters.put("lda.numOfTopics", 63.0);
 			parameters.put("lda.numOfIteration", 5.0);
 			parameters.put("lda.lambda", 0.5);
 			parameters.put("lda.alpha", 0.5);
 			parameters.put("lda.beta", 0.01);
-			parameters.put("numOfTopics", 63.0);
-			parameters.put("numOfLoops", 5.0);
 			break;
 		case pLSA_KMeans:
+		case pLSA_DBSCAN:
+		case pLSA_AggDetection:
+		case pLSA_VotingKMeans:
 			parameters.put("plsa.numOfTopics", 63.0);
 			parameters.put("plsa.numOfIteration", 5.0);
+			break;
+		default:
+			break;
+		}
+
+		switch (this) {// choose clustering algorithm
+		case TFIDF_KMeans:
+		case LDA_KMeans:
+		case pLSA_KMeans:
 			parameters.put("numOfTopics", 63.0);
 			parameters.put("numOfLoops", 5.0);
 			break;
 		case TFIDF_DBSCAN:
-			break;
 		case LDA_DBSCAN:
-			break;
 		case pLSA_DBSCAN:
+			parameters.put("minSimilarity", 0.5);
+			parameters.put("minPts", 5.0);
 			break;
 		case TFIDF_AggDetection:
-			break;
 		case LDA_AggDetection:
-			break;
 		case pLSA_AggDetection:
+			parameters.put("threshold", 0.144);
 			break;
 		case TFIDF_VotingKMeans:
-			break;
 		case LDA_VotingKMeans:
-			break;
 		case pLSA_VotingKMeans:
+			parameters.put("numOfPartitions", 63.0);
+			parameters.put("numOfTopics", 63.0);
+			parameters.put("numOfLoops", 5.0);
 			break;
 		}
 		return parameters;
@@ -101,244 +110,5 @@ public enum MethodName {
 	public double getBestPFa() {
 		return this.bestPFa;
 	}
-	
 
-			
-		
-		case 3: // tfidf_DBSCAN
-			numOfParameters = 2;
-			responseJSONObject.put("numOfParameters", numOfParameters);
-
-			tmp = new JSONObject();
-			tmp.put("parameter", "minSimilarity");
-			tmp.put("value", 0.98);
-			responseJSONObject.put(0, tmp);
-
-			tmp = new JSONObject();
-			tmp.put("parameter", "minPts");
-			tmp.put("value", 5);
-			responseJSONObject.put(1, tmp);
-			break;
-		case 4: // lda_DBSCAN
-			numOfParameters = 7;
-			responseJSONObject.put("numOfParameters", numOfParameters);
-
-			tmp = new JSONObject();
-			tmp.put("parameter", "lda.numOfTopics");
-			tmp.put("value", 63);
-			responseJSONObject.put(0, tmp);
-
-			tmp = new JSONObject();
-			tmp.put("parameter", "lda.numOfIterations");
-			tmp.put("value", 5);
-			responseJSONObject.put(1, tmp);
-
-			tmp = new JSONObject();
-			tmp.put("parameter", "lda.lambda");
-			tmp.put("value", 0.5);
-			responseJSONObject.put(2, tmp);
-
-			tmp = new JSONObject();
-			tmp.put("parameter", "lda.alpha");
-			tmp.put("value", 0.5);
-			responseJSONObject.put(3, tmp);
-
-			tmp = new JSONObject();
-			tmp.put("parameter", "lda.beta");
-			tmp.put("value", 0.01);
-			responseJSONObject.put(4, tmp);
-
-			tmp = new JSONObject();
-			tmp.put("parameter", "minSimilarity");
-			tmp.put("value", 0.98);
-			responseJSONObject.put(5, tmp);
-
-			tmp = new JSONObject();
-			tmp.put("parameter", "minPts");
-			tmp.put("value", 5);
-			responseJSONObject.put(6, tmp);
-			break;
-		case 5: // plsa_DBSCAN
-			numOfParameters = 4;
-			responseJSONObject.put("numOfParameters", numOfParameters);
-
-			tmp = new JSONObject();
-			tmp.put("parameter", "plsa.numOfTopics");
-			tmp.put("value", 63);
-			responseJSONObject.put(0, tmp);
-
-			tmp = new JSONObject();
-			tmp.put("parameter", "plsa.numOfIterations");
-			tmp.put("value", 5);
-			responseJSONObject.put(1, tmp);
-
-			tmp = new JSONObject();
-			tmp.put("parameter", "minSimilarity");
-			tmp.put("value", 0.98);
-			responseJSONObject.put(2, tmp);
-
-			tmp = new JSONObject();
-			tmp.put("parameter", "minPts");
-			tmp.put("value", 5);
-			responseJSONObject.put(3, tmp);
-			break;
-		case 6: // tfidf_aggDetection
-			numOfParameters = 1;
-			responseJSONObject.put("numOfParameters", numOfParameters);
-
-			tmp = new JSONObject();
-			tmp.put("parameter", "threshold");
-			tmp.put("value", 0.144);
-			responseJSONObject.put(0, tmp);
-			break;
-		case 7: // lda_aggDetection
-			numOfParameters = 6;
-			responseJSONObject.put("numOfParameters", numOfParameters);
-
-			tmp = new JSONObject();
-			tmp.put("parameter", "lda.numOfTopics");
-			tmp.put("value", 36);
-			responseJSONObject.put(0, tmp);
-
-			tmp = new JSONObject();
-			tmp.put("parameter", "lda.numOfIterations");
-			tmp.put("value", 5);
-			responseJSONObject.put(1, tmp);
-
-			tmp = new JSONObject();
-			tmp.put("parameter", "lda.lambda");
-			tmp.put("value", 0.5);
-			responseJSONObject.put(2, tmp);
-
-			tmp = new JSONObject();
-			tmp.put("parameter", "lda.alpha");
-			tmp.put("value", 0.5);
-			responseJSONObject.put(3, tmp);
-
-			tmp = new JSONObject();
-			tmp.put("parameter", "lda.beta");
-			tmp.put("value", 0.01);
-			responseJSONObject.put(4, tmp);
-
-			tmp = new JSONObject();
-			tmp.put("parameter", "threshold");
-			tmp.put("value", 0.144);
-			responseJSONObject.put(5, tmp);
-			break;
-		case 8: // plsa_aggDetection
-			numOfParameters = 3;
-			responseJSONObject.put("numOfParameters", numOfParameters);
-
-			tmp = new JSONObject();
-			tmp.put("parameter", "plsa.numOfTopics");
-			tmp.put("value", 63);
-			responseJSONObject.put(0, tmp);
-
-			tmp = new JSONObject();
-			tmp.put("parameter", "plsa.numOfIterations");
-			tmp.put("value", 5);
-			responseJSONObject.put(1, tmp);
-
-			tmp = new JSONObject();
-			tmp.put("parameter", "threshold");
-			tmp.put("value", 0.144);
-			responseJSONObject.put(2, tmp);
-			break;
-		case 9: // tfidf_votingKMeans
-			numOfParameters = 3;
-			responseJSONObject.put("numOfParameters", numOfParameters);
-
-			tmp = new JSONObject();
-			tmp.put("parameter", "numOfPartitions");
-			tmp.put("value", 5);
-			responseJSONObject.put(0, tmp);
-
-			tmp = new JSONObject();
-			tmp.put("parameter", "numOfTopics");
-			tmp.put("value", 36);
-			responseJSONObject.put(1, tmp);
-
-			tmp = new JSONObject();
-			tmp.put("parameter", "numOfLoops");
-			tmp.put("value", 5);
-			responseJSONObject.put(2, tmp);
-			break;
-		case 10: // lda_votingKMeans
-			numOfParameters = 8;
-			responseJSONObject.put("numOfParameters", numOfParameters);
-
-			tmp = new JSONObject();
-			tmp.put("parameter", "lda.numOfTopics");
-			tmp.put("value", 63);
-			responseJSONObject.put(0, tmp);
-
-			tmp = new JSONObject();
-			tmp.put("parameter", "lda.numOfIterations");
-			tmp.put("value", 5);
-			responseJSONObject.put(1, tmp);
-
-			tmp = new JSONObject();
-			tmp.put("parameter", "lda.lambda");
-			tmp.put("value", 0.5);
-			responseJSONObject.put(2, tmp);
-
-			tmp = new JSONObject();
-			tmp.put("parameter", "lda.alpha");
-			tmp.put("value", 0.5);
-			responseJSONObject.put(3, tmp);
-
-			tmp = new JSONObject();
-			tmp.put("parameter", "lda.beta");
-			tmp.put("value", 0.01);
-			responseJSONObject.put(4, tmp);
-
-			tmp = new JSONObject();
-			tmp.put("parameter", "numOfPartitions");
-			tmp.put("value", 5);
-			responseJSONObject.put(5, tmp);
-
-			tmp = new JSONObject();
-			tmp.put("parameter", "numOfTopics");
-			tmp.put("value", 36);
-			responseJSONObject.put(6, tmp);
-
-			tmp = new JSONObject();
-			tmp.put("parameter", "numOfLoops");
-			tmp.put("value", 5);
-			responseJSONObject.put(7, tmp);
-			break;
-		case 11: // plsa_votingKMeans
-			numOfParameters = 5;
-			responseJSONObject.put("numOfParameters", numOfParameters);
-
-			tmp = new JSONObject();
-			tmp.put("parameter", "plsa.numOfTopics");
-			tmp.put("value", 63);
-			responseJSONObject.put(0, tmp);
-
-			tmp = new JSONObject();
-			tmp.put("parameter", "plsa.numOfIterations");
-			tmp.put("value", 5);
-			responseJSONObject.put(1, tmp);
-
-			tmp = new JSONObject();
-			tmp.put("parameter", "numOfPartitions");
-			tmp.put("value", 5);
-			responseJSONObject.put(2, tmp);
-
-			tmp = new JSONObject();
-			tmp.put("parameter", "numOfTopics");
-			tmp.put("value", 63);
-			responseJSONObject.put(3, tmp);
-
-			tmp = new JSONObject();
-			tmp.put("parameter", "numOfLoops");
-			tmp.put("value", 5);
-			responseJSONObject.put(4, tmp);
-			break;
-		default:
-			break;
-		}
-	 * */
-	
 }
