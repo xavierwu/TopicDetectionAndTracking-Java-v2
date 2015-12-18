@@ -2,8 +2,6 @@ package tdt;
 
 import java.util.HashMap;
 
-import net.sf.json.JSONObject;
-
 /**
  * @author Zewei Wu
  *
@@ -38,25 +36,25 @@ public enum MethodName {
 		return MethodName.values()[methodID];
 	}
 
-	public HashMap<String, Double> getBestParameters() {
-		HashMap<String, Double> parameters = new HashMap<String, Double>();
+	public HashMap<String, String> getBestParameters() {
+		HashMap<String, String> parameters = new HashMap<String, String>();
 		switch (this) { // choose similarity algorithm
 		case LDA_KMeans:
 		case LDA_DBSCAN:
 		case LDA_AggDetection:
 		case LDA_VotingKMeans:
-			parameters.put("lda.numOfTopics", (double) 63);
-			parameters.put("lda.numOfIterations", (double) 5);
-			parameters.put("lda.lambda", 0.5);
-			parameters.put("lda.alpha", 0.5);
-			parameters.put("lda.beta", 0.01);
+			parameters.put("lda.numOfTopics", String.valueOf(63));
+			parameters.put("lda.numOfIterations", String.valueOf(5));
+			parameters.put("lda.lambda", String.valueOf(0.5));
+			parameters.put("lda.alpha", String.valueOf(0.5));
+			parameters.put("lda.beta", String.valueOf(0.01));
 			break;
 		case pLSA_KMeans:
 		case pLSA_DBSCAN:
 		case pLSA_AggDetection:
 		case pLSA_VotingKMeans:
-			parameters.put("plsa.numOfTopics", (double) 63);
-			parameters.put("plsa.numOfIterations", (double) 5);
+			parameters.put("plsa.numOfTopics", String.valueOf(63));
+			parameters.put("plsa.numOfIterations", String.valueOf(5));
 			break;
 		default:
 			break;
@@ -66,26 +64,26 @@ public enum MethodName {
 		case TFIDF_KMeans:
 		case LDA_KMeans:
 		case pLSA_KMeans:
-			parameters.put("numOfTopics", (double) 63);
-			parameters.put("numOfLoops", (double) 5);
+			parameters.put("numOfTopics", String.valueOf(63));
+			parameters.put("numOfLoops", String.valueOf(5));
 			break;
 		case TFIDF_DBSCAN:
 		case LDA_DBSCAN:
 		case pLSA_DBSCAN:
-			parameters.put("minSimilarity", 0.5);
-			parameters.put("minPts", (double) 5);
+			parameters.put("minSimilarity", String.valueOf(0.5));
+			parameters.put("minPts", String.valueOf(5));
 			break;
 		case TFIDF_AggDetection:
 		case LDA_AggDetection:
 		case pLSA_AggDetection:
-			parameters.put("threshold", 0.144);
+			parameters.put("threshold", String.valueOf(0.144));
 			break;
 		case TFIDF_VotingKMeans:
 		case LDA_VotingKMeans:
 		case pLSA_VotingKMeans:
-			parameters.put("numOfPartitions", (double) 63);
-			parameters.put("numOfTopics", (double) 63);
-			parameters.put("numOfLoops", (double) 5);
+			parameters.put("numOfPartitions", String.valueOf(63));
+			parameters.put("numOfTopics", String.valueOf(63));
+			parameters.put("numOfLoops", String.valueOf(5));
 			break;
 		}
 		return parameters;

@@ -21,13 +21,11 @@ import net.sf.json.JSONObject;
  */
 class TopicDetector {
 	private Vector<Story> corpus = null;
-	private StoryLinkDetector storyLinkDetector = null;
+	private Glossary glossary = null;
 
 	public TopicDetector(Vector<Story> corpus, Glossary glossary) {
 		this.corpus = corpus;
-		this.storyLinkDetector = new StoryLinkDetector();
-		this.storyLinkDetector.enableLDA(corpus, glossary);
-		this.storyLinkDetector.enablePlsa(corpus, glossary);
+		this.glossary = glossary;
 	}
 
 	public JSONObject getMethodList() {
@@ -52,12 +50,12 @@ class TopicDetector {
 		JSONObject responseJSONObject = new JSONObject();
 		JSONObject tmp = null;
 
-		HashMap<String, Double> parameters = MethodName.valueOf(methodID).getBestParameters();
+		HashMap<String, String> parameters = MethodName.valueOf(methodID).getBestParameters();
 		responseJSONObject.put("numOfParameters", parameters.size());
 		int ctr = 0;
-		for (Entry<String, Double> entry : parameters.entrySet()) {
+		for (Entry<String, String> entry : parameters.entrySet()) {
 			String parameter = entry.getKey();
-			double value = entry.getValue();
+			String value = entry.getValue();
 			tmp = new JSONObject();
 			tmp.put("parameter", parameter);
 			tmp.put("value", value);
@@ -69,76 +67,103 @@ class TopicDetector {
 	}
 
 	public int doTopicDetection(HttpServletRequest request) {
+		StoryLinkDetector storyLinkDetector = new StoryLinkDetector();
 		int numOfTopics = 0;
-		String methodName = "";
-		HashMap<String, Double> parameters = new HashMap<String, Double>();
+		HashMap<String, String> parameters = new HashMap<String, String>();
 		Clustering clustering = null;
 		ClusteringEnsembler ensembler = null;
 		ArrayList<Integer> resultPartition = null;
 
-		int methodID = Integer.parseInt(request.getParameter("methodID"));		
+		int methodID = Integer.parseInt(request.getParameter("methodID"));
 		System.out.println("methodID = " + methodID);
-
-		if (methodID == 1 || methodID == 4 || methodID == 7 || methodID == 10) { // lda
+		MethodName methodName = MethodName.valueOf(methodID);
+		switch (methodName) {
+		/* LDA */
+		case LDA_KMeans:
+		case LDA_DBSCAN:
+		case LDA_AggDetection:
+		case LDA_VotingKMeans:
 			int ldaNumOfTopics = Integer.parseInt(request.getParameter("lda.numOfTopics"));
 			int ldaNumOfIterations = Integer.parseInt(request.getParameter("lda.numOfIterations"));
 			double ldaLAMBDA = Double.parseDouble(request.getParameter("lda.lambda"));
 			double ldaALPHA = Double.parseDouble(request.getParameter("lda.alpha"));
 			double ldaBETA = Double.parseDouble(request.getParameter("lda.beta"));
+			storyLinkDetector.enableLDA(corpus, glossary);
 			storyLinkDetector.trainLDA(ldaNumOfTopics, ldaNumOfIterations, ldaLAMBDA, ldaALPHA, ldaBETA);
-		} else if (methodID == 2 || methodID == 5 || methodID == 8 || methodID == 11) {// plsa
+			break;
+		/* pLSA */
+		case pLSA_KMeans:
+		case pLSA_DBSCAN:
+		case pLSA_AggDetection:
+		case pLSA_VotingKMeans:
 			int plsaNumOfTopics = Integer.parseInt(request.getParameter("plsa.numOfTopics"));
 			int plsaNumOfIterations = Integer.parseInt(request.getParameter("plsa.numOfIterations"));
+			storyLinkDetector.enablePlsa(corpus, glossary);
 			storyLinkDetector.trainPlsa(plsaNumOfTopics, plsaNumOfIterations);
+			break;
+		/* TFIDF */
+		default:
+			break;
 		}
 
-		if (methodID >= 0 && methodID <= 8) {// clustering
-			clustering = new Clustering(corpus, storyLinkDetector);
-		} else if (methodID >= 9 && methodID <= 11) { // clustering ensemble
-			ensembler = new ClusteringEnsembler(corpus, storyLinkDetector);
-		}
-		if (methodID == 0 || methodID == 1 || methodID == 2) { // k-means
+		switch (methodName) {
+		case TFIDF_KMeans:
+		case LDA_KMeans:
+		case pLSA_KMeans:
 			numOfTopics = Integer.parseInt(request.getParameter("numOfTopics"));
 			int numOfLoops = Integer.parseInt(request.getParameter("numOfLoops"));
 			System.out.println("Parameters: ");
 			System.out.println("> numOfTopics = " + numOfTopics);
 			System.out.println("> numOfLoops = " + numOfLoops);
-			methodName = "kmeans";
-			parameters.put("numOfTopics", (double) numOfTopics);
-			parameters.put("numOfLoops", (double) numOfLoops);
+			parameters.put("numOfTopics", String.valueOf(numOfTopics));
+			parameters.put("numOfLoops", String.valueOf(numOfLoops));
+			clustering = new Clustering(corpus, storyLinkDetector);
 			resultPartition = clustering.doClustering(methodName, parameters);
-		} else if (methodID == 3 || methodID == 4 || methodID == 5) {// DBSCAN
+			break;
+		case TFIDF_DBSCAN:
+		case LDA_DBSCAN:
+		case pLSA_DBSCAN:
 			double minSimilarity = Double.parseDouble(request.getParameter("minSimilarity"));
 			int minPts = Integer.parseInt(request.getParameter("minPts"));
 			System.out.println("Parameters: ");
 			System.out.println("> minSimilarity = " + minSimilarity);
 			System.out.println("> minPts = " + minPts);
-			methodName = "DBSCAN";
-			parameters.put("minSimilarity", minSimilarity);
-			parameters.put("minPts", (double) minPts);
+			parameters.put("minSimilarity", String.valueOf(minSimilarity));
+			parameters.put("minPts", String.valueOf(minPts));
+			clustering = new Clustering(corpus, storyLinkDetector);
 			resultPartition = clustering.doClustering(methodName, parameters);
-		} else if (methodID == 6 || methodID == 7 || methodID == 8) {// aggDetection
+			break;
+		case TFIDF_AggDetection:
+		case LDA_AggDetection:
+		case pLSA_AggDetection:
 			double threshold = Double.parseDouble(request.getParameter("threshold"));
 			System.out.println("Parameters: ");
 			System.out.println("> threshold = " + threshold);
-			methodName = "aggDetection";
-			parameters.put("threshold", threshold);
+			parameters.put("threshold", String.valueOf(threshold));
+			clustering = new Clustering(corpus, storyLinkDetector);
 			resultPartition = clustering.doClustering(methodName, parameters);
-		} else if (methodID == 9 || methodID == 10 || methodID == 11) { // votingKMeans
+			break;
+		case TFIDF_VotingKMeans:
+		case LDA_VotingKMeans:
+		case pLSA_VotingKMeans:
 			int numOfPartitions = Integer.parseInt(request.getParameter("numOfPartitions"));
 			numOfTopics = Integer.parseInt(request.getParameter("numOfTopics"));
-			int numOfLoops = Integer.parseInt(request.getParameter("numOfLoops"));
+			numOfLoops = Integer.parseInt(request.getParameter("numOfLoops"));
 			System.out.println("Parameters: ");
 			System.out.println("> numOfPartitions = " + numOfPartitions);
 			System.out.println("> numOfTopics = " + numOfTopics);
 			System.out.println("> numOfLoops = " + numOfLoops);
-			methodName = "votingKMeans";
-			parameters.put("numOfPartitions", (double) numOfPartitions);
-			parameters.put("numOfTopics", (double) numOfTopics);
-			parameters.put("numOfLoops", (double) numOfLoops);
+			parameters.put("numOfPartitions", String.valueOf(numOfPartitions));
+			parameters.put("numOfTopics", String.valueOf(numOfTopics));
+			parameters.put("numOfLoops", String.valueOf(numOfLoops));
 			System.out.println("parameters: " + parameters.size());
+			ensembler = new ClusteringEnsembler(corpus, storyLinkDetector);
 			resultPartition = ensembler.doClustering(methodName, parameters);
+			break;
+		default:
+			break;
 		}
+
 		numOfTopics = resultPartition.size();
 		return numOfTopics;
 	}

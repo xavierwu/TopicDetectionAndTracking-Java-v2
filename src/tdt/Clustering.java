@@ -23,18 +23,53 @@ public class Clustering {
 		this.storyLinkDetector = storyLinkDetector;
 	}
 
-	public ArrayList<Integer> doClustering(String methodName, HashMap<String, Double> parameters) {
+	public ArrayList<Integer> doClustering(MethodName methodName, HashMap<String, String> parameters) {
+		ArrayList<Integer> partition = new ArrayList<Integer>();
+		switch (methodName) {
+		case TFIDF_KMeans:
+		case LDA_KMeans:
+		case pLSA_KMeans:
+			int numOfTopics = Integer.parseInt(parameters.get("numOfTopics"));
+			int numOfLoops = Integer.parseInt(parameters.get("numOfLoops"));
+			partition = KMeans(numOfTopics, numOfLoops);
+			break;
+		case TFIDF_DBSCAN:
+		case LDA_DBSCAN:
+		case pLSA_DBSCAN:
+			double minSimilarity = Double.parseDouble(parameters.get("minSimilarity"));
+			int minPts = Integer.parseInt(parameters.get("minPts"));
+			partition = DBSCAN(minSimilarity, minPts);
+			break;
+		case TFIDF_AggDetection:
+		case LDA_AggDetection:
+		case pLSA_AggDetection:
+			double threshold = Double.parseDouble(parameters.get("threshold"));
+			partition = aggDetection(threshold);
+			break;
+		default:
+			break;
+		}
+		return partition;
+	}
+
+	/**
+	 * @deprecated
+	 * @param methodName
+	 * @param parameters
+	 * @return
+	 */
+	public ArrayList<Integer> doClustering(String methodName, HashMap<String, String> parameters) {
 		ArrayList<Integer> partition = new ArrayList<Integer>();
 		if ("KMeans".equalsIgnoreCase(methodName)) {
-			int numOfTopics = parameters.get("numOfTopics").intValue();
-			int numOfLoops = parameters.get("numOfLoops").intValue();
+			int numOfTopics = Integer.parseInt(parameters.get("numOfTopics"));
+			int numOfLoops = Integer.parseInt(parameters.get("numOfLoops"));
 			partition = KMeans(numOfTopics, numOfLoops);
 		} else if ("DBSCAN".equalsIgnoreCase(methodName)) {
-			double minSimilarity = parameters.get("minSimilarity");
-			int minPts = parameters.get("minPts").intValue();
+			double minSimilarity = Double.parseDouble(parameters.get("minSimilarity"));
+			int minPts = Integer.parseInt(parameters.get("minPts"));
 			partition = DBSCAN(minSimilarity, minPts);
 		} else if ("aggDetection".equalsIgnoreCase(methodName)) {
-			double threshold = parameters.get("threshold");
+			double threshold = Double.parseDouble(parameters.get("threshold"));
 			partition = aggDetection(threshold);
 		}
 		return partition;

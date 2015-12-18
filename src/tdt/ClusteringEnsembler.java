@@ -19,16 +19,22 @@ public class ClusteringEnsembler {
 		this.partitions = new ArrayList<ArrayList<Integer>>();
 	}
 
-	public ArrayList<Integer> doClustering(String methodName, HashMap<String, Double> parameters) {
+	public ArrayList<Integer> doClustering(MethodName methodName, HashMap<String, String> parameters) {
 		int numOfPartitions = 0;
 		ArrayList<Integer> resultPartition = null;
 
-		if ("votingKMeans".equalsIgnoreCase(methodName)) {
+		switch (methodName) {
+		case TFIDF_VotingKMeans:
+		case LDA_VotingKMeans:
+		case pLSA_VotingKMeans:
 			System.out.println(methodName + " is called.");
-			numOfPartitions = parameters.get("numOfPartitions").intValue();
-			int numOfTopics = parameters.get("numOfTopics").intValue();
-			int numOfLoops = parameters.get("numOfLoops").intValue();
-			resultPartition = this.votingKMeans(numOfPartitions, numOfTopics, numOfLoops);
+			numOfPartitions = Integer.parseInt(parameters.get("numOfPartitions"));
+			int numOfTopics = Integer.parseInt(parameters.get("numOfTopics"));
+			int numOfLoops = Integer.parseInt(parameters.get("numOfLoops"));
+			resultPartition = this.votingKMeans(methodName, numOfPartitions, numOfTopics, numOfLoops);
+			break;
+		default:
+			break;
 		}
 		return resultPartition;
 	}
@@ -45,23 +51,19 @@ public class ClusteringEnsembler {
 	 * @param methodName
 	 */
 	public void doConsensus(String methodName) {
-		if ("EA-SL".equalsIgnoreCase(methodName)) {
-			// TODO EA-SL
-		} else {
-
-		}
 	}
 
-	public ArrayList<Integer> votingKMeans(int numOfPartitions, int numOfTopics, int numOfLoops) {
+	public ArrayList<Integer> votingKMeans(MethodName methodName, int numOfPartitions, int numOfTopics,
+			int numOfLoops) {
 		ArrayList<Integer> partition = null;
 		ArrayList<Integer> resultPartition = new ArrayList<Integer>();
 		Clustering clustering = new Clustering(corpus, storyLinkDetector);
-		HashMap<String, Double> parameters = new HashMap<String, Double>();
+		HashMap<String, String> parameters = new HashMap<String, String>();
 		for (int curPartition = 0; curPartition < numOfPartitions; ++curPartition) {
 			System.out.println("=> Start partition: " + (curPartition + 1) + "/" + numOfPartitions);
-			parameters.put("numOfTopics", (double) numOfTopics);
-			parameters.put("numOfLoops", (double) numOfLoops);
-			partition = clustering.doClustering("KMeans", parameters);
+			parameters.put("numOfTopics", String.valueOf(numOfTopics));
+			parameters.put("numOfLoops", String.valueOf(numOfLoops));
+			partition = clustering.doClustering(methodName, parameters);
 			partitions.add(partition);
 		}
 
@@ -87,4 +89,5 @@ public class ClusteringEnsembler {
 
 		return resultPartition;
 	}
+
 }

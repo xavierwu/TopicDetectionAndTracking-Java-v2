@@ -24,9 +24,9 @@ import java.util.Vector;
  */
 public class StoryLinkDetector {
 	private Plsa plsa = null;
+	private LDA lda = null;
 	private boolean isPlsaEnabled = false;
 	private boolean isPlsaTrained = false;
-	private LDA lda = null;
 	private boolean isLDAEnabled = false;
 	private boolean isLDATrained = false;
 
@@ -38,16 +38,17 @@ public class StoryLinkDetector {
 		this.isPlsaEnabled = true;
 	}
 
+	public void disablePlsa() {
+		this.plsa = null;
+		this.isPlsaEnabled = false;
+		this.isPlsaTrained = false;
+	}
+
 	public void trainPlsa(int plsaNumOfTopics, int plsaMaxIter) {
 		if (isPlsaEnabled) {
-			plsa.clear();
 			plsa.train(plsaNumOfTopics, plsaMaxIter);
 			this.isPlsaTrained = true;
 		}
-	}
-
-	public void disablePlsa() {
-		this.isPlsaEnabled = false;
 	}
 
 	public void enableLDA(Vector<Story> corpus, Glossary glossary) {
@@ -55,25 +56,27 @@ public class StoryLinkDetector {
 		this.isLDAEnabled = true;
 	}
 
+	public void disableLDA() {
+		this.lda = null;
+		this.isLDAEnabled = false;
+		this.isLDATrained = false;
+	}
+
 	public void trainLDA(int ldaNumOfTopics, int ldaNumOfIterations, double ldaLAMBDA, double ldaALPHA,
 			double ldaBETA) {
 		if (isLDAEnabled) {
-			this.lda.clear();
 			lda.train(ldaNumOfTopics, ldaNumOfIterations, ldaLAMBDA, ldaALPHA, ldaBETA);
 			this.isLDATrained = true;
 		}
 	}
 
-	public void disableLDA(Vector<Story> corpus) {
-		this.isLDAEnabled = false;
-		for (Story story : corpus)
-			story.clearProbOfTopics();
-	}
-
 	public double getSimilarity(Story story1, Story story2) {
-		return isLDATrained ? lda.getSimilarity(story1, story2) : getCosineSimilarity(story1, story2);
-		// return isPlsaTrained ? plsa.getSimilarity(story1, story2) :
-		// getCosineSimilarity(story1, story2);
+		if (isPlsaTrained)
+			return plsa.getSimilarity(story1, story2);
+		else if (isLDATrained)
+			return lda.getSimilarity(story1, story2);
+		else
+			return getCosineSimilarity(story1, story2);
 	}
 
 	/**
