@@ -391,4 +391,8 @@ public class Plsa {
 		return num;
 	}
 
+	public void clear() {
+		// TODO
+	}
+
 }

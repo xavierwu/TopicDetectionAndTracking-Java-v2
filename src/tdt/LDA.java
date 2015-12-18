@@ -345,4 +345,9 @@ public class LDA {
 			e.printStackTrace();
 		}
 	}
+
+	public void clear() {
+		// TODO Auto-generated method stub
+		
+	}
 }

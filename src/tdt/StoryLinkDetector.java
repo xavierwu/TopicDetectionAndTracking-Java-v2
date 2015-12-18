@@ -40,6 +40,7 @@ public class StoryLinkDetector {
 
 	public void trainPlsa(int plsaNumOfTopics, int plsaMaxIter) {
 		if (isPlsaEnabled) {
+			plsa.clear();
 			plsa.train(plsaNumOfTopics, plsaMaxIter);
 			this.isPlsaTrained = true;
 		}
@@ -57,6 +58,7 @@ public class StoryLinkDetector {
 	public void trainLDA(int ldaNumOfTopics, int ldaNumOfIterations, double ldaLAMBDA, double ldaALPHA,
 			double ldaBETA) {
 		if (isLDAEnabled) {
+			this.lda.clear();
 			lda.train(ldaNumOfTopics, ldaNumOfIterations, ldaLAMBDA, ldaALPHA, ldaBETA);
 			this.isLDATrained = true;
 		}

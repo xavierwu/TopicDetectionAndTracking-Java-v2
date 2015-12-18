@@ -26,6 +26,7 @@ class TopicDetector {
 		this.corpus = corpus;
 		this.storyLinkDetector = new StoryLinkDetector();
 		this.storyLinkDetector.enableLDA(corpus, glossary);
+		this.storyLinkDetector.enablePlsa(corpus, glossary);
 	}
 
 	public JSONObject getMethodList() {
