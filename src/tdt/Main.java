@@ -227,8 +227,23 @@ public class Main {
 			responseJSONObject.put("PMiss", PMiss);
 			responseJSONObject.put("PFa", PFa);
 	
-			// {normCdet:, PMiss:, PFa:, topicNum:, 0:{topicID, title:, source:,
-			// date:}, ...}
+			try {
+				BufferedReader reader = new BufferedReader(new FileReader("result.dat"));
+				String line = null;
+
+				while ((line = reader.readLine()) != null) {
+					String[] parts = line.split(" ");
+					for (int i = 1; i < parts.length; ++i) {
+						corpus.get(storyCount).addWord(Integer.parseInt(parts[i]));
+					}
+				
+				}
+				System.out.println("Done!");
+				reader.close();
+			} catch (Exception e) {
+				System.out.println(storyCount);
+				e.printStackTrace();
+			}
 			
 			int topicNum = firstStories.size();
 			JSONObject tmp = null;
