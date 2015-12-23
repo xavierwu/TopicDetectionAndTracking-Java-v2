@@ -18,7 +18,10 @@ public enum MethodName {
 	pLSA_AggDetection("pLSA_AggDetection", 5.9, 1.0, 1.0),
 	TFIDF_VotingKMeans("TFIDF_VotingKMeans", 5.9, 1.0, 1.0),
 	LDA_VotingKMeans("LDA_VotingKMeans", 5.9, 1.0, 1.0),
-	pLSA_VotingKMeans("pLSA_VotingKMeans", 5.9, 1.0, 1.0);
+	pLSA_VotingKMeans("pLSA_VotingKMeans", 5.9, 1.0, 1.0),
+	TFIDF_EA_SL("TFIDF_EA_SL", 5.9, 1.0, 1.0),
+	LDA_EA_SL("LDA_EA_SL", 5.9, 1.0, 1.0),
+	pLSA_EA_SL("pLSA_EA_SL", 5.9, 1.0, 1.0);
 
 	private String name;
 	private double bestNormCdet;
@@ -43,6 +46,7 @@ public enum MethodName {
 		case LDA_DBSCAN:
 		case LDA_AggDetection:
 		case LDA_VotingKMeans:
+		case LDA_EA_SL:
 			parameters.put("lda.numOfTopics", String.valueOf(63));
 			parameters.put("lda.numOfIterations", String.valueOf(5));
 			parameters.put("lda.lambda", String.valueOf(0.5));
@@ -53,6 +57,7 @@ public enum MethodName {
 		case pLSA_DBSCAN:
 		case pLSA_AggDetection:
 		case pLSA_VotingKMeans:
+		case pLSA_EA_SL:
 			parameters.put("plsa.numOfTopics", String.valueOf(63));
 			parameters.put("plsa.numOfIterations", String.valueOf(5));
 			break;
@@ -84,6 +89,14 @@ public enum MethodName {
 			parameters.put("numOfPartitions", String.valueOf(63));
 			parameters.put("numOfTopics", String.valueOf(63));
 			parameters.put("numOfLoops", String.valueOf(5));
+			break;
+		case TFIDF_EA_SL:
+		case LDA_EA_SL:
+		case pLSA_EA_SL:
+			parameters.put("numOfPartitions", String.valueOf(63));
+			parameters.put("threshold", String.valueOf(63));
+			break;
+		default:
 			break;
 		}
 		return parameters;

@@ -22,21 +22,33 @@ public class ClusteringEnsembler {
 	public ArrayList<Integer> doClustering(MethodName methodName, HashMap<String, String> parameters) {
 		int numOfPartitions = 0;
 		ArrayList<Integer> resultPartition = null;
-
+		
+		System.out.println(methodName + " is called.");
 		switch (methodName) {
 		case TFIDF_VotingKMeans:
 		case LDA_VotingKMeans:
-		case pLSA_VotingKMeans:
-			System.out.println(methodName + " is called.");
+		case pLSA_VotingKMeans:	
 			numOfPartitions = Integer.parseInt(parameters.get("numOfPartitions"));
 			int numOfTopics = Integer.parseInt(parameters.get("numOfTopics"));
 			int numOfLoops = Integer.parseInt(parameters.get("numOfLoops"));
 			resultPartition = this.votingKMeans(methodName, numOfPartitions, numOfTopics, numOfLoops);
 			break;
+		case TFIDF_EA_SL:
+		case LDA_EA_SL:
+		case pLSA_EA_SL:
+			numOfPartitions = Integer.parseInt(parameters.get("numOfPartitions"));
+			double threshold = Integer.parseInt(parameters.get("threshold"));
+			resultPartition = this.do_EA_SL(methodName, numOfPartitions, threshold);
+			break;
 		default:
 			break;
 		}
 		return resultPartition;
+	}
+
+	private ArrayList<Integer> do_EA_SL(MethodName methodName, int numOfPartitions, double threshold) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	/**
@@ -89,5 +101,7 @@ public class ClusteringEnsembler {
 
 		return resultPartition;
 	}
+	
+	
 
 }
