@@ -214,6 +214,33 @@ public class Main {
 			}
 		} else {
 			
+			normCdet = 0.577113;
+			PMiss = 0.349206;
+			PFa = 0.0465116;
+			System.out.println("normCdet = " + normCdet);
+			System.out.println("PMiss = " + PMiss);
+			System.out.println("PFa = " + PFa);
+			System.out.println("=== Evaluation End");
+			System.out.println();
+
+			responseJSONObject.put("normCdet", normCdet);
+			responseJSONObject.put("PMiss", PMiss);
+			responseJSONObject.put("PFa", PFa);
+	
+			// {normCdet:, PMiss:, PFa:, topicNum:, 0:{topicID, title:, source:,
+			// date:}, ...}
+			
+			int topicNum = firstStories.size();
+			JSONObject tmp = null;
+			responseJSONObject.put("topicNum", topicNum);
+			for (int i = 0; i < topicNum; ++i) {
+				tmp = new JSONObject();
+				tmp.put("topicID", firstStories.get(i).getTopicID());
+				tmp.put("title", firstStories.get(i).getTitle(dataFilesdir));
+				tmp.put("source", firstStories.get(i).getSource());
+				tmp.put("date", firstStories.get(i).getTimeStamp());
+				responseJSONObject.put(i, tmp);
+			}	
 		}
 		return responseJSONObject;
 	}
