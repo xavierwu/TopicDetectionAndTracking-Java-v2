@@ -162,52 +162,57 @@ public class Main {
 	 */
 	private JSONObject do_commitParameters(HttpServletRequest request) {
 		JSONObject responseJSONObject = new JSONObject();
+			
+		int methodID = Integer.parseInt(request.getParameter("methodID"));
+		if (methodID != SubTopic) {
+			System.out.println();
+			System.out.println("=== Topic Detection Start");
+			numOfTopics = topicDetector.doTopicDetection(request);
+			System.out.println("numOfTopics = " + numOfTopics);
+			System.out.println("=== Topic Detection End");
+			System.out.println();
 
-		System.out.println();
-		System.out.println("=== Topic Detection Start");
-		numOfTopics = topicDetector.doTopicDetection(request);
-		System.out.println("numOfTopics = " + numOfTopics);
-		System.out.println("=== Topic Detection End");
-		System.out.println();
+			System.out.println();
+			System.out.println("=== First Story Detection Start");
+			FirstStoryDetector firstStoryDetector = new FirstStoryDetector(corpus);
+			firstStories = firstStoryDetector.doFirstStoryDetection(numOfTopics);
+			System.out.println("firstStories: " + firstStories.size());
+			System.out.println("actualFirstStories: " + actualFirstStories.size());
+			System.out.println("=== First Story Detection End");
+			System.out.println();
 
-		System.out.println();
-		System.out.println("=== First Story Detection Start");
-		FirstStoryDetector firstStoryDetector = new FirstStoryDetector(corpus);
-		firstStories = firstStoryDetector.doFirstStoryDetection(numOfTopics);
-		System.out.println("firstStories: " + firstStories.size());
-		System.out.println("actualFirstStories: " + actualFirstStories.size());
-		System.out.println("=== First Story Detection End");
-		System.out.println();
+			System.out.println();
+			System.out.println("=== Evaluation Start");
+			Evaluator evaluator = new Evaluator();
+			evaluator.doEvaluation_v3(corpus, actualFirstStories, firstStories);
+			normCdet = evaluator.getNormCdet();
+			PMiss = evaluator.getPMiss();
+			PFa = evaluator.getPFa();
+			System.out.println("normCdet = " + normCdet);
+			System.out.println("PMiss = " + PMiss);
+			System.out.println("PFa = " + PFa);
+			System.out.println("=== Evaluation End");
+			System.out.println();
 
-		System.out.println();
-		System.out.println("=== Evaluation Start");
-		Evaluator evaluator = new Evaluator();
-		evaluator.doEvaluation_v3(corpus, actualFirstStories, firstStories);
-		normCdet = evaluator.getNormCdet();
-		PMiss = evaluator.getPMiss();
-		PFa = evaluator.getPFa();
-		System.out.println("normCdet = " + normCdet);
-		System.out.println("PMiss = " + PMiss);
-		System.out.println("PFa = " + PFa);
-		System.out.println("=== Evaluation End");
-		System.out.println();
-
-		responseJSONObject.put("normCdet", normCdet);
-		responseJSONObject.put("PMiss", PMiss);
-		responseJSONObject.put("PFa", PFa);
-
-		// {normCdet:, PMiss:, PFa:, topicNum:, 0:{topicID, title:, source:,
-		// date:}, ...}
-		int topicNum = firstStories.size();
-		JSONObject tmp = null;
-		responseJSONObject.put("topicNum", topicNum);
-		for (int i = 0; i < topicNum; ++i) {
-			tmp = new JSONObject();
-			tmp.put("topicID", firstStories.get(i).getTopicID());
-			tmp.put("title", firstStories.get(i).getTitle(dataFilesdir));
-			tmp.put("source", firstStories.get(i).getSource());
-			tmp.put("date", firstStories.get(i).getTimeStamp());
-			responseJSONObject.put(i, tmp);
+			responseJSONObject.put("normCdet", normCdet);
+			responseJSONObject.put("PMiss", PMiss);
+			responseJSONObject.put("PFa", PFa);
+	
+			// {normCdet:, PMiss:, PFa:, topicNum:, 0:{topicID, title:, source:,
+			// date:}, ...}
+			int topicNum = firstStories.size();
+			JSONObject tmp = null;
+			responseJSONObject.put("topicNum", topicNum);
+			for (int i = 0; i < topicNum; ++i) {
+				tmp = new JSONObject();
+				tmp.put("topicID", firstStories.get(i).getTopicID());
+				tmp.put("title", firstStories.get(i).getTitle(dataFilesdir));
+				tmp.put("source", firstStories.get(i).getSource());
+				tmp.put("date", firstStories.get(i).getTimeStamp());
+				responseJSONObject.put(i, tmp);
+			}
+		} else {
+			
 		}
 		return responseJSONObject;
 	}
