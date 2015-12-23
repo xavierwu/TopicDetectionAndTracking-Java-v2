@@ -164,7 +164,8 @@ public class Main {
 		JSONObject responseJSONObject = new JSONObject();
 			
 		int methodID = Integer.parseInt(request.getParameter("methodID"));
-		if (methodID != SubTopic) {
+		MethodName methodName = MethodName.valueOf(methodID);
+		if (methodName != SubTopic) {
 			System.out.println();
 			System.out.println("=== Topic Detection Start");
 			numOfTopics = topicDetector.doTopicDetection(request);
