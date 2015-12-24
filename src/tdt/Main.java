@@ -160,7 +160,7 @@ public class Main {
 	 * @return {normCdet:, PMiss:, PFa:, topicNum:, 0:{topicID, title:, source:,
 	 *         date:}, 1:{...}, ...}
 	 */
-	private JSONObject do_commitParameters(HttpServletRequest request) {
+		private JSONObject do_commitParameters(HttpServletRequest request) {
 		JSONObject responseJSONObject = new JSONObject();
 			
 		int methodID = Integer.parseInt(request.getParameter("methodID"));
@@ -230,18 +230,23 @@ public class Main {
 			try {
 				BufferedReader reader = new BufferedReader(new FileReader("result.dat"));
 				String line = null;
-
+				int myRow = 0;
 				while ((line = reader.readLine()) != null) {
 					String[] parts = line.split(" ");
-					for (int i = 1; i < parts.length; ++i) {
-						//corpus.get(storyCount).addWord(Integer.parseInt(parts[i]));
+					if (parts.length == 1){
+						break;
 					}
-				
+					firstStories.add(corpus.get(Integer.parseInt(parts[1])));
+					for (int i = 2; i < parts.length; ++i) {
+						//corpus.get(storyCount).addWord(Integer.parseInt(parts[i]));
+						corpus.get(Integer.parseInt(parts[i])).setTopicID(myRow);
+					}
+					myRow++;
 				}
 				System.out.println("Done!");
 				reader.close();
 			} catch (Exception e) {
-				System.out.println(storyCount);
+				System.out.println("Exception!");
 				e.printStackTrace();
 			}
 			
