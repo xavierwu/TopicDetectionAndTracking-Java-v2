@@ -234,7 +234,7 @@ public class Main {
 				while ((line = reader.readLine()) != null) {
 					String[] parts = line.split(" ");
 					for (int i = 1; i < parts.length; ++i) {
-						corpus.get(storyCount).addWord(Integer.parseInt(parts[i]));
+						//corpus.get(storyCount).addWord(Integer.parseInt(parts[i]));
 					}
 				
 				}
