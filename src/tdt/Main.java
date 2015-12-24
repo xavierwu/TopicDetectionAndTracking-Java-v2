@@ -3,6 +3,8 @@
  */
 package tdt;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Vector;
@@ -160,12 +162,12 @@ public class Main {
 	 * @return {normCdet:, PMiss:, PFa:, topicNum:, 0:{topicID, title:, source:,
 	 *         date:}, 1:{...}, ...}
 	 */
-		private JSONObject do_commitParameters(HttpServletRequest request) {
+	private JSONObject do_commitParameters(HttpServletRequest request) {
 		JSONObject responseJSONObject = new JSONObject();
 			
 		int methodID = Integer.parseInt(request.getParameter("methodID"));
 		MethodName methodName = MethodName.valueOf(methodID);
-		if (methodName != SubTopic) {
+		if (methodName != MethodName.SubTitle) {
 			System.out.println();
 			System.out.println("=== Topic Detection Start");
 			numOfTopics = topicDetector.doTopicDetection(request);
@@ -228,7 +230,7 @@ public class Main {
 			responseJSONObject.put("PFa", PFa);
 	
 			try {
-				BufferedReader reader = new BufferedReader(new FileReader("result.dat"));
+				BufferedReader reader = new BufferedReader(new FileReader("/Users/danny/Documents/Dataset/result.dat"));
 				String line = null;
 				int myRow = 0;
 				while ((line = reader.readLine()) != null) {
