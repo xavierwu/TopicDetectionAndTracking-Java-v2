@@ -52,6 +52,18 @@ public class Clustering {
 		return partition;
 	}
 
+	public static int[][] generateCAMatrix(ArrayList<Integer> partition) {
+		int[][] CAMatrix = new int[partition.size()][partition.size()];
+		for (int i = 0; i < partition.size(); ++i)
+			for (int j = i; j < partition.size(); ++j) {
+				if (i == j)
+					CAMatrix[i][j] = 0;
+				else
+					CAMatrix[i][j] = CAMatrix[j][i] = (partition.get(i) == partition.get(j) ? 1 : 0);
+			}
+		return CAMatrix;
+	}
+
 	/**
 	 * @deprecated
 	 * @param methodName

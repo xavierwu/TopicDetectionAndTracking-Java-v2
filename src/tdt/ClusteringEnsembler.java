@@ -12,6 +12,8 @@ public class ClusteringEnsembler {
 	ArrayList<ArrayList<Integer>> partitions = null;
 	Vector<Story> corpus = null;
 	StoryLinkDetector storyLinkDetector;
+	MethodName methodName = null;
+	HashMap<String, String> parameters = null;
 
 	public ClusteringEnsembler(Vector<Story> corpus, StoryLinkDetector storyLinkDetector) {
 		this.corpus = corpus;
@@ -20,41 +22,29 @@ public class ClusteringEnsembler {
 	}
 
 	public ArrayList<Integer> doClustering(MethodName methodName, HashMap<String, String> parameters) {
-		int numOfPartitions = 0;
-		ArrayList<Integer> resultPartition = null;
-		
-		System.out.println(methodName + " is called.");
-		switch (methodName) {
-		case TFIDF_VotingKMeans:
-		case LDA_VotingKMeans:
-		case pLSA_VotingKMeans:	
-			numOfPartitions = Integer.parseInt(parameters.get("numOfPartitions"));
-			int numOfTopics = Integer.parseInt(parameters.get("numOfTopics"));
-			int numOfLoops = Integer.parseInt(parameters.get("numOfLoops"));
-			resultPartition = this.votingKMeans(methodName, numOfPartitions, numOfTopics, numOfLoops);
-			break;
-		case TFIDF_EA_SL:
-		case LDA_EA_SL:
-		case pLSA_EA_SL:
-			numOfPartitions = Integer.parseInt(parameters.get("numOfPartitions"));
-			double threshold = Integer.parseInt(parameters.get("threshold"));
-			resultPartition = this.do_EA_SL(methodName, numOfPartitions, threshold);
-			break;
-		default:
-			break;
-		}
-		return resultPartition;
-	}
-
-	private ArrayList<Integer> do_EA_SL(MethodName methodName, int numOfPartitions, double threshold) {
-		// TODO Auto-generated method stub
-		return null;
+		this.methodName = methodName;
+		this.parameters = parameters;
+		this.doGeneration();
+		return this.doConsensus();
 	}
 
 	/**
-	 * Set this.partitions;
+	 * Set this.partitions
+	 * 
+	 * @param methodName
+	 * @param parameters
+	 * @return this.partitions
 	 */
-	public void doGeneration(String methodName) {
+	private  ArrayList<ArrayList<Integer>> doGeneration() {
+		partitions.clear();
+		ArrayList<Integer> partition = null;
+		Clustering clustering = new Clustering(corpus, storyLinkDetector);
+		int numOfPartitions = Integer.parseInt(parameters.get("numOfPartitions"));
+		for (int curPartition = 0; curPartition < numOfPartitions; ++curPartition) {
+			partition = clustering.doClustering(methodName, parameters);
+			partitions.add(partition);
+		}
+		return partitions;
 	}
 
 	/**
@@ -62,9 +52,43 @@ public class ClusteringEnsembler {
 	 * 
 	 * @param methodName
 	 */
-	public void doConsensus(String methodName) {
+	private ArrayList<Integer> doConsensus() {
+		if (partitions.isEmpty())
+			return null;
+
+		ArrayList<Integer> resultPartition = new ArrayList<Integer>();
+		switch (methodName) {
+		case TFIDF_VotingKMeans:
+		case LDA_VotingKMeans:
+		case pLSA_VotingKMeans:
+			resultPartition = votingKMeans();
+			break;
+		default:
+			return null;
+		}
+		return resultPartition;
 	}
 
+	private ArrayList<Integer> votingKMeans() {
+		/*
+		 * TODO voting KMeans
+		 */
+		return null;
+	}
+
+	private ArrayList<Integer> do_EA_SL() {
+		// TODO EA-SL
+		return null;
+	}
+
+	/**
+	 * @deprecated
+	 * @param methodName
+	 * @param numOfPartitions
+	 * @param numOfTopics
+	 * @param numOfLoops
+	 * @return
+	 */
 	public ArrayList<Integer> votingKMeans(MethodName methodName, int numOfPartitions, int numOfTopics,
 			int numOfLoops) {
 		ArrayList<Integer> partition = null;
@@ -101,7 +125,22 @@ public class ClusteringEnsembler {
 
 		return resultPartition;
 	}
-	
-	
+
+	public static double[][] generateCAMatrix(ArrayList<ArrayList<Integer>> partitions) {
+		double[][] CAMatrix = new double[partitions.get(0).size()][partitions.get(0).size()];
+		for (int i = 0; i < partitions.get(0).size(); ++i)
+			CAMatrix[i][i] = 0;
+		for (ArrayList<Integer> partition : partitions) {
+			for (int i = 0; i < partition.size(); ++i)
+				for (int j = i + 1; j < partition.size(); ++j) {
+					CAMatrix[i][j] += (partition.get(i) == partition.get(j) ? 1 : 0);
+					CAMatrix[j][i] = CAMatrix[i][j];
+				}
+		}
+		for (int i = 0; i < partitions.get(0).size(); ++i)
+			for (int j = i + 1; j < partitions.get(0).size(); ++j)
+				CAMatrix[i][j] /= partitions.size();
+		return CAMatrix;
+	}
 
 }
