@@ -237,7 +237,7 @@ public class Main {
 						break;
 					}
 					firstStories.add(corpus.get(Integer.parseInt(parts[1])));
-					for (int i = 2; i < parts.length; ++i) {
+					for (int i = 2; i < parts.length - 1; ++i) {
 						//corpus.get(storyCount).addWord(Integer.parseInt(parts[i]));
 						corpus.get(Integer.parseInt(parts[i])).setTopicID(myRow);
 					}
