@@ -35,7 +35,7 @@ public class ClusteringEnsembler {
 	 * @param parameters
 	 * @return this.partitions
 	 */
-	private  ArrayList<ArrayList<Integer>> doGeneration() {
+	private ArrayList<ArrayList<Integer>> doGeneration() {
 		partitions.clear();
 		ArrayList<Integer> partition = null;
 		Clustering clustering = new Clustering(corpus, storyLinkDetector);
@@ -56,7 +56,7 @@ public class ClusteringEnsembler {
 		if (partitions.isEmpty())
 			return null;
 
-		ArrayList<Integer> resultPartition = new ArrayList<Integer>();
+		ArrayList<Integer> resultPartition = null;
 		switch (methodName) {
 		case TFIDF_VotingKMeans:
 		case LDA_VotingKMeans:
@@ -70,10 +70,27 @@ public class ClusteringEnsembler {
 	}
 
 	private ArrayList<Integer> votingKMeans() {
-		/*
-		 * TODO voting KMeans
-		 */
-		return null;
+		ArrayList<Integer> resultPartition = new ArrayList<Integer>();
+		ArrayList<Integer> topicCount = new ArrayList<Integer>();
+		int numOfTopics = Integer.parseInt(this.parameters.get("numOfTopics"));
+		for (int i = 0; i < numOfTopics; ++i)
+			topicCount.add(0);
+		for (int tmpStoryId = 0; tmpStoryId < corpus.size(); ++tmpStoryId) {
+			for (int i = 0; i < numOfTopics; ++i)
+				topicCount.set(i, 0);
+			for (int tmpPartitionId = 0; tmpPartitionId < partitions.size(); ++tmpPartitionId) {
+				int tmpTopic = partitions.get(tmpPartitionId).get(tmpStoryId);
+				topicCount.set(tmpTopic, topicCount.get(tmpTopic) + 1);
+			}
+			int maxTopic = 0, max = 0;
+			for (int i = 0; i < numOfTopics; ++i)
+				if (max < topicCount.get(i)) {
+					max = topicCount.get(i);
+					maxTopic = i;
+				}
+			resultPartition.add(maxTopic);
+		}
+		return resultPartition;
 	}
 
 	private ArrayList<Integer> do_EA_SL() {

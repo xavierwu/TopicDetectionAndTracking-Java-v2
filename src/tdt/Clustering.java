@@ -29,6 +29,9 @@ public class Clustering {
 		case TFIDF_KMeans:
 		case LDA_KMeans:
 		case pLSA_KMeans:
+		case TFIDF_VotingKMeans:
+		case LDA_VotingKMeans:
+		case pLSA_VotingKMeans:
 			int numOfTopics = Integer.parseInt(parameters.get("numOfTopics"));
 			int numOfLoops = Integer.parseInt(parameters.get("numOfLoops"));
 			partition = KMeans(numOfTopics, numOfLoops);
@@ -50,18 +53,6 @@ public class Clustering {
 			break;
 		}
 		return partition;
-	}
-
-	public static int[][] generateCAMatrix(ArrayList<Integer> partition) {
-		int[][] CAMatrix = new int[partition.size()][partition.size()];
-		for (int i = 0; i < partition.size(); ++i)
-			for (int j = i; j < partition.size(); ++j) {
-				if (i == j)
-					CAMatrix[i][j] = 0;
-				else
-					CAMatrix[i][j] = CAMatrix[j][i] = (partition.get(i) == partition.get(j) ? 1 : 0);
-			}
-		return CAMatrix;
 	}
 
 	/**
@@ -117,7 +108,7 @@ public class Clustering {
 			while (set.contains(randInt))
 				randInt = r.nextInt(corpus.size());
 			set.add(randInt);
-			if (storyLinkDetector.isUsingLDA())
+			if (storyLinkDetector.isUsingLDA() || storyLinkDetector.isUsingPLSA())
 				tmp.setProbOfTopics(corpus.get(randInt).getProbOfTopics());
 			else
 				tmp.setTfidf(corpus.get(randInt).getTfidf());
@@ -129,7 +120,7 @@ public class Clustering {
 			System.out.println(loopCnt + "/" + numOfLoops);
 
 			double[][] totalProbOfTopics = null;
-			if (storyLinkDetector.isUsingLDA())
+			if (storyLinkDetector.isUsingLDA() || storyLinkDetector.isUsingPLSA())
 				totalProbOfTopics = new double[centroids.size()][numOfTopics];
 
 			/* Assignment step. */
@@ -166,7 +157,7 @@ public class Clustering {
 								tfidf.put(wordID, tmpTfidf);
 							}
 						}
-						if (storyLinkDetector.isUsingLDA())
+						if (storyLinkDetector.isUsingLDA() || storyLinkDetector.isUsingPLSA())
 							for (int topicIndex = 0; topicIndex < numOfTopics; ++topicIndex) {
 								totalProbOfTopics[curTopic][topicIndex] += story.getProbOfTopics().get(topicIndex)
 										.doubleValue();
@@ -179,7 +170,7 @@ public class Clustering {
 				}
 
 				ArrayList<Double> probOfTopics = null;
-				if (storyLinkDetector.isUsingLDA()) {
+				if (storyLinkDetector.isUsingLDA() || storyLinkDetector.isUsingPLSA()) {
 					probOfTopics = new ArrayList<Double>();
 					for (int i = 0; i < totalProbOfTopics[curTopic].length; ++i) {
 						probOfTopics.add(totalProbOfTopics[curTopic][i] / cnt);

@@ -1,10 +1,9 @@
 package tdt;
 
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Map.Entry;
 import java.util.Random;
-import java.util.Set;
 import java.util.Vector;
 
 /**
@@ -24,7 +23,8 @@ public class Plsa {
 	private double[][] topicTermPros = null;//
 	// p(z|d,w), d * w * z
 	private double[][][] docTermTopicPros = null;
-	private double[] probOfTopic = null;//
+	
+	private int[][] wordPosition = null;
 
 	/**
 	 * 
@@ -44,11 +44,27 @@ public class Plsa {
 	 */
 	public void train(int numOfTopics, int maxIter) {
 		this.numOfTopics = numOfTopics;
-		docTermMatrix = new int[corpus.size()][glossary.size()];
+		docTermMatrix = new int[corpus.size()][];
+		
 		docTopicPros = new double[corpus.size()][numOfTopics];
 		topicTermPros = new double[numOfTopics][glossary.size()];
-		docTermTopicPros = new double[corpus.size()][glossary.size()][numOfTopics];
-		probOfTopic = new double[numOfTopics];
+		
+		wordPosition = new int[glossary.size()][corpus.size()];
+		
+		docTermTopicPros = new double[corpus.size()][][];
+		
+		for (int word = 0; word < glossary.size(); ++word) {
+			for (int storyIndex = 0; storyIndex < corpus.size(); ++storyIndex) {
+				wordPosition[word][storyIndex] = -1;
+			}
+		}
+		
+		for (int storyIndex = 0; storyIndex < corpus.size(); ++storyIndex) {
+			for (int wordIndex = 0; wordIndex < corpus.get(storyIndex).getWords().size(); ++wordIndex) {
+				int word = corpus.get(storyIndex).getWords().get(wordIndex);
+				wordPosition[word][storyIndex] = wordIndex;
+			}
+		}
 
 		for (int i = 0; i < corpus.size(); i++) {
 			double[] pros = randomProbilities(numOfTopics);
@@ -64,19 +80,71 @@ public class Plsa {
 			}
 		}
 
+		for (int storyIndex = 0; storyIndex < corpus.size(); ++storyIndex) {
+			Vector<Integer> words = corpus.get(storyIndex).getWords();
+			int[] tf = new int[words.size()];
+			
+			Iterator<Entry<Integer, Double>> it = corpus.get(storyIndex).getTfidf().entrySet().iterator();
+			int index = 0;
+			while (it.hasNext()) {
+				Entry<Integer, Double> entry = (Entry<Integer, Double>) it.next();
+				tf[index] = entry.getKey();
+				++index;
+			}
+
+//			index = 0;
+//			for (Integer wordIndex: words) {
+//				docTermMatrix[storyIndex][wordIndex] += tf[index];
+//				++index;
+//			}
+			
+			docTermTopicPros[storyIndex] = new double[words.size()][numOfTopics];
+
+			
+			docTermMatrix[storyIndex] = new int[words.size()];
+			docTermMatrix[storyIndex] = tf;
+			
+			
+//			double[] tfidf = new double[words.size()];
+//			
+//			Iterator<Entry<Integer, Double>> it = corpus.get(storyIndex).getTfidf().entrySet().iterator();
+//			int index = 0;
+//			while (it.hasNext()) {
+//				Entry<Integer, Double> entry = (Entry<Integer, Double>) it.next();
+//				tfidf[index] = entry.getKey() * entry.getValue();
+//				++index;
+//			}
+		}
+		
+		System.out.println("Initialization finished.");
+
 		// use em to estimate params
 		for (int i = 0; i < maxIter; i++) {
+			System.out.println("em:" + i+ "/" + maxIter);
 			em();
-			System.out.print(i + "-");
 		}
 		System.out.println("done");
+		
+		// Set Story.probOfTopics
+		for (int storyIndex = 0; storyIndex < corpus.size(); ++storyIndex) {
+			ArrayList<Double> probOfTopics = new ArrayList<Double>();
+			for (int topicIndex = 0; topicIndex < numOfTopics; ++topicIndex) {
+				probOfTopics.add(docTopicPros[storyIndex][topicIndex]);
+			}
+			corpus.get(storyIndex).setProbOfTopics(probOfTopics);
+		}
 
+		// free memory
+		docTermMatrix = null;
+		topicTermPros = null;
+		docTermTopicPros = null;
+		System.gc();
 	}
 
 	/**
 	 * Return the similarity between two stories, using the trained plsa model,
 	 * Please make sure the train() is already invoked, before using this
-	 * function. Similairty = sum_z (Similarity_z * P(z)) TODO
+	 * function. Similarity = sum_z (Similarity_z * P(z)) TODO
 	 * getSimilarity(Story, Story)
 	 * 
 	 * @see Plsa.getSimilarity(Story, Story, int)
@@ -84,16 +152,27 @@ public class Plsa {
 	 * @param story2
 	 */
 	public double getSimilarity(Story story1, Story story2) {
-		// Similairty = sum_z (Similarity_z * P(z))
-		// double similarity = 0.0;
-		// for (int curTopic = 0; curTopic < numOfTopics; ++curTopic) {
-		// similarity += getSimilarity(story1, story2, curTopic) *
-		// probOfTopic[curTopic];
-		// }
-		// return similarity;
-		return Cosine(docTopicPros[story1.getStoryID()], docTopicPros[story2.getStoryID()]);
+//		return Cosine(docTopicPros[story1.getStoryID()], docTopicPros[story2.getStoryID()]);
+		double[] A = new double[numOfTopics];
+		double[] B = new double[numOfTopics];
+		
+		for (int i = 0; i < story1.getProbOfTopics().size(); ++i) {
+			A[i] = story1.getProbOfTopics().get(i).doubleValue();
+		}
+		
+		for (int i = 0; i < story2.getProbOfTopics().size(); ++i) {
+			B[i] = story2.getProbOfTopics().get(i).doubleValue();
+		}
+
+		return Cosine(A, B);
 	}
 
+	/**
+	 * 
+	 * @param a
+	 * @param b
+	 * @return
+	 */
 	public double Cosine(double[] a, double[] b) {
 		double innerProduct = 0.0;
 		for (int i = 0; i < a.length; i++)
@@ -109,90 +188,8 @@ public class Plsa {
 			bLength += b[i] * b[i];
 		bLength = Math.sqrt(bLength);
 
+//		System.out.println(innerProduct / (aLength * bLength));
 		return innerProduct / (aLength * bLength);
-	}
-
-	/**
-	 * Return the similarity of two stories, based on a certain topic.
-	 * Similarity_z = cosineSimilarity( P(w | z), P(w | z) )
-	 * @deprecated
-	 * @param story1
-	 * @param story2
-	 * @param topic
-	 * @return
-	 */
-	private double getSimilarity(Story story1, Story story2, int topicID) {
-		double innerProduct = 0.0;
-		double squareSum1 = 0.0;
-		double squareSum2 = 0.0;
-		int i = 0; // TODO how to get the id of story1 in the corpus?
-		int j = 0; // the id of story2 in the corpus
-		for (int curTopic = 0; curTopic < numOfTopics; ++curTopic) {
-			innerProduct += docTopicPros[i][curTopic] * docTopicPros[j][curTopic];
-			squareSum1 += docTopicPros[i][curTopic] * docTopicPros[i][curTopic];
-			squareSum2 += docTopicPros[j][curTopic] * docTopicPros[j][curTopic];
-		}
-		double result = innerProduct / Math.sqrt(squareSum1 * squareSum2);
-		return result;
-	}
-	// ----------------- codes below are copied from somewhere...
-
-	/**
-	 * train plsa
-	 * 
-	 * @deprecated
-	 * @param corpus
-	 *            all documents
-	 */
-	public void train(Vector<Story> corpus, int maxIter) {
-		if (corpus == null) {
-			throw new IllegalArgumentException("The documents set must be not null!");
-		}
-
-		// statistics vocabularies
-		// allWords = statisticsVocabularies(corpus);
-
-		// element represent times the word appear in this document
-		docTermMatrix = new int[corpus.size()][glossary.size()];
-		// init docTermMatrix
-		// for (int docIndex = 0; docIndex < corpus.size(); docIndex++) {
-		// Document doc = corpus.get(docIndex);
-		// for (String word : doc.getWords()) {
-		// if (allWords.contains(word)) {
-		// int wordIndex = allWords.indexOf(word);
-		// docTermMatrix[docIndex][wordIndex] += 1;
-		// }
-		// }
-		//
-		// // free memory
-		// doc.setWords(null);
-		// }
-
-		docTopicPros = new double[corpus.size()][numOfTopics];
-		topicTermPros = new double[numOfTopics][glossary.size()];
-		docTermTopicPros = new double[corpus.size()][glossary.size()][numOfTopics];
-
-		// init p(z|d),for each document the constraint is sum(p(z|d))=1.0
-		for (int i = 0; i < corpus.size(); i++) {
-			double[] pros = randomProbilities(numOfTopics);
-			for (int j = 0; j < numOfTopics; j++) {
-				docTopicPros[i][j] = pros[j];
-			}
-		}
-		// init p(w|z),for each topic the constraint is sum(p(w|z))=1.0
-		for (int i = 0; i < numOfTopics; i++) {
-			double[] pros = randomProbilities(glossary.size());
-			for (int j = 0; j < glossary.size(); j++) {
-				topicTermPros[i][j] = pros[j];
-			}
-		}
-
-		// use em to estimate params
-		for (int i = 0; i < maxIter; i++) {
-			em();
-			System.out.print(i + "-");
-		}
-		System.out.println("done");
 	}
 
 	/**
@@ -207,8 +204,29 @@ public class Plsa {
 		 * posible topic
 		 * 
 		 */
+//		for (int docIndex = 0; docIndex < corpus.size(); docIndex++) {
+//			for (int wordIndex = 0; wordIndex < glossary.size(); wordIndex++) {
+//				double total = 0.0;
+//				double[] perTopicPro = new double[numOfTopics];
+//				for (int topicIndex = 0; topicIndex < numOfTopics; topicIndex++) {
+//					double numerator = docTopicPros[docIndex][topicIndex] * topicTermPros[topicIndex][wordIndex];
+//					total += numerator;
+//					perTopicPro[topicIndex] = numerator;
+//				}
+//
+//				if (total == 0.0) {
+//					total = avoidZero(total);
+//				}
+//
+//				for (int topicIndex = 0; topicIndex < numOfTopics; topicIndex++) {
+//					docTermTopicPros[docIndex][wordIndex][topicIndex] = perTopicPro[topicIndex] / total;
+//				}
+//			}
+//		}
+		
+		System.out.println("E step.");
 		for (int docIndex = 0; docIndex < corpus.size(); docIndex++) {
-			for (int wordIndex = 0; wordIndex < glossary.size(); wordIndex++) {
+			for (int wordIndex = 0; wordIndex < corpus.get(docIndex).getWords().size(); wordIndex++) {
 				double total = 0.0;
 				double[] perTopicPro = new double[numOfTopics];
 				for (int topicIndex = 0; topicIndex < numOfTopics; topicIndex++) {
@@ -227,6 +245,7 @@ public class Plsa {
 			}
 		}
 
+		System.out.println("M step.");
 		// M-step
 		/*
 		 * update
@@ -239,13 +258,19 @@ public class Plsa {
 		 */
 		for (int topicIndex = 0; topicIndex < numOfTopics; topicIndex++) {
 			double totalDenominator = 0.0;
-			for (int wordIndex = 0; wordIndex < glossary.size(); wordIndex++) {
+			
+			for (int word = 0; word < glossary.size(); word++) {
 				double numerator = 0.0;
+				
 				for (int docIndex = 0; docIndex < corpus.size(); docIndex++) {
-					numerator += docTermMatrix[docIndex][wordIndex] * docTermTopicPros[docIndex][wordIndex][topicIndex];
+					int wordIndex = wordPosition[word][docIndex];
+					
+					if (wordIndex != -1) {
+						numerator += docTermMatrix[docIndex][wordIndex] * docTermTopicPros[docIndex][wordIndex][topicIndex];
+					}
 				}
 
-				topicTermPros[topicIndex][wordIndex] = numerator;
+				topicTermPros[topicIndex][word] = numerator;
 
 				totalDenominator += numerator;
 			}
@@ -258,6 +283,8 @@ public class Plsa {
 				topicTermPros[topicIndex][wordIndex] = topicTermPros[topicIndex][wordIndex] / totalDenominator;
 			}
 		}
+		
+		System.out.println("Updating.");
 		/*
 		 * update
 		 * p(z|d),p(z|d)=sum(n(d,w')*p(z|d,w'&))/sum(sum(n(d,w')*p(z'|d,w',&)))
@@ -268,9 +295,11 @@ public class Plsa {
 		for (int docIndex = 0; docIndex < corpus.size(); docIndex++) {
 			// actually equal sum(w) of this doc
 			double totalDenominator = 0.0;
+			
 			for (int topicIndex = 0; topicIndex < numOfTopics; topicIndex++) {
 				double numerator = 0.0;
-				for (int wordIndex = 0; wordIndex < glossary.size(); wordIndex++) {
+				
+				for (int wordIndex = 0; wordIndex < corpus.get(docIndex).getWords().size(); wordIndex++) {
 					numerator += docTermMatrix[docIndex][wordIndex] * docTermTopicPros[docIndex][wordIndex][topicIndex];
 				}
 				docTopicPros[docIndex][topicIndex] = numerator;
@@ -285,26 +314,6 @@ public class Plsa {
 				docTopicPros[docIndex][topicIndex] = docTopicPros[docIndex][topicIndex] / totalDenominator;
 			}
 		}
-	}
-
-	/**
-	 * @deprecated
-	 * @param corpus
-	 * @return
-	 */
-	private List<String> statisticsVocabularies(Vector<Story> corpus) {
-		Set<String> uniqWords = new HashSet<String>();
-		// for (Document doc : corpus) {
-		// for (String word : doc.getWords()) {
-		// if (!uniqWords.contains(word)) {
-		// uniqWords.add(word);
-		// }
-		// }
-		// corpus.size()++;
-		// }
-		// glossary.size() = uniqWords.size();
-
-		return new LinkedList<String>(uniqWords);
 	}
 
 	/**
@@ -360,25 +369,6 @@ public class Plsa {
 	}
 
 	/**
-	 * Get p(w|z)
-	 * 
-	 * @param word
-	 * @return
-	 */
-	public double[] getTopicWordPros(String word) {
-		// int index = allWords.indexOf(word);
-		// if (index != -1) {
-		// double[] topicWordPros = new double[numOfTopics];
-		// for (int i = 0; i < numOfTopics; i++) {
-		// topicWordPros[i] = topicTermPros[i][index];
-		// }
-		// return topicWordPros;
-		// }
-		//
-		return null;
-	}
-
-	/**
 	 * avoid zero number.if input number is zero, we will return a magic number.
 	 */
 	private final static double MAGICNUM = 0.0000000000000001;
@@ -390,9 +380,9 @@ public class Plsa {
 
 		return num;
 	}
-
+	
 	public void clear() {
-		// TODO
+		
 	}
 
 }

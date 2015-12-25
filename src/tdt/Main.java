@@ -164,7 +164,7 @@ public class Main {
 	 */
 	private JSONObject do_commitParameters(HttpServletRequest request) {
 		JSONObject responseJSONObject = new JSONObject();
-			
+
 		int methodID = Integer.parseInt(request.getParameter("methodID"));
 		MethodName methodName = MethodName.valueOf(methodID);
 		if (methodName != MethodName.SubTitle) {
@@ -200,7 +200,7 @@ public class Main {
 			responseJSONObject.put("normCdet", normCdet);
 			responseJSONObject.put("PMiss", PMiss);
 			responseJSONObject.put("PFa", PFa);
-	
+
 			// {normCdet:, PMiss:, PFa:, topicNum:, 0:{topicID, title:, source:,
 			// date:}, ...}
 			int topicNum = firstStories.size();
@@ -215,7 +215,7 @@ public class Main {
 				responseJSONObject.put(i, tmp);
 			}
 		} else {
-			
+
 			normCdet = 0.577113;
 			PMiss = 0.349206;
 			PFa = 0.0465116;
@@ -228,19 +228,19 @@ public class Main {
 			responseJSONObject.put("normCdet", normCdet);
 			responseJSONObject.put("PMiss", PMiss);
 			responseJSONObject.put("PFa", PFa);
-	
+
 			try {
-				BufferedReader reader = new BufferedReader(new FileReader("/Users/danny/Documents/Dataset/result.dat"));
+				BufferedReader reader = new BufferedReader(new FileReader(this.dataFilesdir + "/../kpResult.dat"));
 				String line = null;
 				int myRow = 0;
 				while ((line = reader.readLine()) != null) {
 					String[] parts = line.split(" ");
-					if (parts.length == 1){
+					if (parts.length == 1) {
 						break;
 					}
 					firstStories.add(corpus.get(Integer.parseInt(parts[1])));
 					for (int i = 2; i < parts.length - 1; ++i) {
-						//corpus.get(storyCount).addWord(Integer.parseInt(parts[i]));
+						// corpus.get(storyCount).addWord(Integer.parseInt(parts[i]));
 						corpus.get(Integer.parseInt(parts[i])).setTopicID(myRow);
 					}
 					myRow++;
@@ -251,7 +251,7 @@ public class Main {
 				System.out.println("Exception!");
 				e.printStackTrace();
 			}
-			
+
 			int topicNum = firstStories.size();
 			JSONObject tmp = null;
 			responseJSONObject.put("topicNum", topicNum);
@@ -262,7 +262,7 @@ public class Main {
 				tmp.put("source", firstStories.get(i).getSource());
 				tmp.put("date", firstStories.get(i).getTimeStamp());
 				responseJSONObject.put(i, tmp);
-			}	
+			}
 		}
 		return responseJSONObject;
 	}

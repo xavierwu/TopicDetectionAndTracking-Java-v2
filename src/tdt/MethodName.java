@@ -21,7 +21,7 @@ public enum MethodName {
 	pLSA_VotingKMeans("pLSA_VotingKMeans", 5.9, 1.0, 1.0),
 	TFIDF_EA_SL("TFIDF_EA_SL", 5.9, 1.0, 1.0),
 	LDA_EA_SL("LDA_EA_SL", 5.9, 1.0, 1.0),
-	pLSA_EA_SL("pLSA_EA_SL", 5.9, 1.0, 1.0);
+	pLSA_EA_SL("pLSA_EA_SL", 5.9, 1.0, 1.0),
 	SubTitle("SubTitle", 0.58, 0.35, 0.05);
 
 	private String name;
@@ -87,7 +87,7 @@ public enum MethodName {
 		case TFIDF_VotingKMeans:
 		case LDA_VotingKMeans:
 		case pLSA_VotingKMeans:
-			parameters.put("numOfPartitions", String.valueOf(63));
+			parameters.put("numOfPartitions", String.valueOf(5));
 			parameters.put("numOfTopics", String.valueOf(63));
 			parameters.put("numOfLoops", String.valueOf(5));
 			break;

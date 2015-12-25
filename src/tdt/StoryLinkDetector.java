@@ -75,7 +75,7 @@ public class StoryLinkDetector {
 			return plsa.getSimilarity(story1, story2);
 		else if (isLDATrained)
 			return lda.getSimilarity(story1, story2);
-		else
+		else 	
 			return getCosineSimilarity(story1, story2);
 	}
 
@@ -114,6 +114,10 @@ public class StoryLinkDetector {
 
 	public boolean isUsingLDA() {
 		return this.isLDATrained;
+	}
+	
+	public boolean isUsingPLSA() {
+		return this.isPlsaTrained;
 	}
 
 	/**
@@ -241,4 +245,34 @@ public class StoryLinkDetector {
 			e.printStackTrace();
 		}
 	}
+	
+	/**
+	 * 
+	 * 
+	 * 
+	 * @param story1
+	 * @param story2
+	 * @return
+	 */
+	public static double getJaccardSimilarity(Story story1, Story story2) {
+		double similarity = 0.0;
+		double commonWords = 0.0;
+		
+		Vector<Integer> words1 = story1.getWords();
+		Vector<Integer> words2 = story2.getWords();
+		
+		for (int i = 0; i < words1.size(); ++i) {
+			for (int j = 0; j < words2.size(); ++j) {
+				if (words1.get(i).equals(words2.get(j))) {
+					commonWords += 2;
+					break;
+				}
+			}
+		}
+		
+		similarity = commonWords / ((double) (words1.size() + words2.size()));
+		
+		return similarity;
+	}
+
 }
