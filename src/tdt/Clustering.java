@@ -24,7 +24,7 @@ public class Clustering {
 	}
 
 	public ArrayList<Integer> doClustering(MethodName methodName, HashMap<String, String> parameters) {
-		ArrayList<Integer> partition = new ArrayList<Integer>();
+		ArrayList<Integer> partition = null;
 		switch (methodName) {
 		case TFIDF_KMeans:
 		case LDA_KMeans:

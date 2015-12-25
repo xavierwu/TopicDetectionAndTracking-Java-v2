@@ -66,7 +66,10 @@ class TopicDetector {
 		return responseJSONObject;
 	}
 
-	public int doTopicDetection(HttpServletRequest request) {
+	public int doTopicDetection(HttpServletRequest request) { 
+		for (Story story : corpus)
+			story.setTopicID(-1);
+
 		StoryLinkDetector storyLinkDetector = new StoryLinkDetector();
 		int numOfTopics = 0;
 		HashMap<String, String> parameters = new HashMap<String, String>();
