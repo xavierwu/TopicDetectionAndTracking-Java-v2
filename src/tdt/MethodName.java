@@ -7,16 +7,16 @@ import java.util.HashMap;
  *
  */
 public enum MethodName {
-	TFIDF_KMeans("TFIDF_KMeans", 5.9, 1.0, 1.0),
-	LDA_KMeans("LDA_KMeans", 5.9, 1.0, 1.0),
-	pLSA_KMeans("pLSA_KMeans", 5.9, 1.0, 1.0),
-	TFIDF_DBSCAN("TFIDF_DBSCAN", 5.9, 1.0, 1.0),
+	TFIDF_KMeans("TFIDF_KMeans", 2.19, 0.38, 0.37),
+	LDA_KMeans("LDA_KMeans", 0.71, 0.51, 3.23),
+	pLSA_KMeans("pLSA_KMeans", 4.86, 0.82, 0.82),
+	TFIDF_DBSCAN("TFIDF_DBSCAN", 0.42, 0.31, 0.02),
 	LDA_DBSCAN("LDA_DBSCAN", 5.9, 1.0, 1.0),
 	pLSA_DBSCAN("pLSA_DBSCAN", 5.9, 1.0, 1.0),
-	TFIDF_AggDetection("TFIDF_AggDetection", 5.9, 1.0, 1.0),
+	TFIDF_AggDetection("TFIDF_AggDetection", 0.28, 0.19, 0.01),
 	LDA_AggDetection("LDA_AggDetection", 5.9, 1.0, 1.0),
 	pLSA_AggDetection("pLSA_AggDetection", 5.9, 1.0, 1.0),
-	TFIDF_VotingKMeans("TFIDF_VotingKMeans", 5.9, 1.0, 1.0),
+	TFIDF_VotingKMeans("TFIDF_VotingKMeans", 2.24, 0.38, 0.38),
 	LDA_VotingKMeans("LDA_VotingKMeans", 5.9, 1.0, 1.0),
 	pLSA_VotingKMeans("pLSA_VotingKMeans", 5.9, 1.0, 1.0),
 	TFIDF_EA_SL("TFIDF_EA_SL", 5.9, 1.0, 1.0),
