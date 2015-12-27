@@ -36,14 +36,17 @@ public class ClusteringEnsembler {
 	 * @return this.partitions
 	 */
 	private ArrayList<ArrayList<Integer>> doGeneration() {
+		System.out.println("Start doGeneration...");
 		partitions.clear();
 		ArrayList<Integer> partition = null;
 		Clustering clustering = new Clustering(corpus, storyLinkDetector);
 		int numOfPartitions = Integer.parseInt(parameters.get("numOfPartitions"));
 		for (int curPartition = 0; curPartition < numOfPartitions; ++curPartition) {
+			System.out.println("Generating partition: " + curPartition + "/" + numOfPartitions);
 			partition = clustering.doClustering(methodName, parameters);
 			partitions.add(partition);
 		}
+		System.out.println("Done.");
 		return partitions;
 	}
 
@@ -56,6 +59,7 @@ public class ClusteringEnsembler {
 		if (partitions.isEmpty())
 			return null;
 
+		System.out.println("Start doConsensus...");
 		ArrayList<Integer> resultPartition = null;
 		switch (methodName) {
 		case TFIDF_VotingKMeans:
@@ -71,6 +75,7 @@ public class ClusteringEnsembler {
 		default:
 			return null;
 		}
+		System.out.println("Done.");
 		return resultPartition;
 	}
 
@@ -99,8 +104,18 @@ public class ClusteringEnsembler {
 	}
 
 	private ArrayList<Integer> do_EA_SL() {
-		// TODO EA-SL
-		return null;
+		ArrayList<Integer> resultPartition = new ArrayList<Integer>();
+		double[][] matrix = generateCAMatrix(this.partitions);
+		double threshold = Double.parseDouble(this.parameters.get("threshold"));
+		for (int i = 0; i < matrix.length; ++i) {
+			for (int j = i + 1; j < matrix[i].length; ++j) {
+				if (matrix[i][j] >= threshold) {
+					// TODO
+					
+				}
+			}
+		}
+		return resultPartition;
 	}
 
 	/**

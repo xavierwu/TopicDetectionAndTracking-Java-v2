@@ -43,8 +43,7 @@ public class Main {
 	 */
 	public Main(String dataFilesdir, String glossaryFile, String tfidfFile, String matrixFile, String ansFile) {
 		this.dataFilesdir = dataFilesdir;
-		System.out.println();
-		System.out.println("====== Start initializing ======");
+		System.out.println("\n====== Start initializing ======");
 
 		glossary.load(glossaryFile);
 		DataPreprocessor.recoverCorpusFromTFIDF(corpus, tfidfFile);
@@ -58,8 +57,7 @@ public class Main {
 		System.out.println("actualFirstStories: " + actualFirstStories.size());
 		assert(actualFirstStories.size() > 0);
 
-		System.out.println("====== Done initializing ======");
-		System.out.println();
+		System.out.println("====== Done initializing ======\n");
 	}
 
 	/**
