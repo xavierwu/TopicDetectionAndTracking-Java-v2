@@ -28,6 +28,7 @@ public class LDA {
 												// corresponding to matrix;
 	private int[][] word_topic_matrix = null; // num_of_unique_words *
 												// num_of_topics
+	@SuppressWarnings("unused")
 	private double[][] prob_topic_word_matrix = null; // num_of_topics x
 														// num_of_unique_words
 	// private double[] similarities = null;
@@ -319,6 +320,7 @@ public class LDA {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private void printMatrix() {
 		try {
 			String matrixFile = "/Users/danny/Documents/Dataset/P(t|d).dat";
@@ -344,10 +346,5 @@ public class LDA {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-	}
-
-	public void clear() {
-		// TODO Auto-generated method stub
-		
 	}
 }

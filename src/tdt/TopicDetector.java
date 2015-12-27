@@ -66,7 +66,7 @@ class TopicDetector {
 		return responseJSONObject;
 	}
 
-	public int doTopicDetection(HttpServletRequest request) { 
+	public int doTopicDetection(HttpServletRequest request) {
 		for (Story story : corpus)
 			story.setTopicID(-1);
 
@@ -160,6 +160,13 @@ class TopicDetector {
 			parameters.put("numOfTopics", String.valueOf(numOfTopics));
 			parameters.put("numOfLoops", String.valueOf(numOfLoops));
 			System.out.println("parameters: " + parameters.size());
+			ensembler = new ClusteringEnsembler(corpus, storyLinkDetector);
+			resultPartition = ensembler.doClustering(methodName, parameters);
+			break;
+		case TFIDF_EA_SL:
+		case LDA_EA_SL:
+		case pLSA_EA_SL:
+			// TODO commit parameters of EA-SL
 			ensembler = new ClusteringEnsembler(corpus, storyLinkDetector);
 			resultPartition = ensembler.doClustering(methodName, parameters);
 			break;

@@ -23,7 +23,7 @@ public class Plsa {
 	private double[][] topicTermPros = null;//
 	// p(z|d,w), d * w * z
 	private double[][][] docTermTopicPros = null;
-	
+
 	private int[][] wordPosition = null;
 
 	/**
@@ -37,28 +37,26 @@ public class Plsa {
 	}
 
 	/**
-	 * TODO train()
-	 * 
 	 * @param numOfTopics
 	 * @param maxIter
 	 */
 	public void train(int numOfTopics, int maxIter) {
 		this.numOfTopics = numOfTopics;
 		docTermMatrix = new int[corpus.size()][];
-		
+
 		docTopicPros = new double[corpus.size()][numOfTopics];
 		topicTermPros = new double[numOfTopics][glossary.size()];
-		
+
 		wordPosition = new int[glossary.size()][corpus.size()];
-		
+
 		docTermTopicPros = new double[corpus.size()][][];
-		
+
 		for (int word = 0; word < glossary.size(); ++word) {
 			for (int storyIndex = 0; storyIndex < corpus.size(); ++storyIndex) {
 				wordPosition[word][storyIndex] = -1;
 			}
 		}
-		
+
 		for (int storyIndex = 0; storyIndex < corpus.size(); ++storyIndex) {
 			for (int wordIndex = 0; wordIndex < corpus.get(storyIndex).getWords().size(); ++wordIndex) {
 				int word = corpus.get(storyIndex).getWords().get(wordIndex);
@@ -83,7 +81,7 @@ public class Plsa {
 		for (int storyIndex = 0; storyIndex < corpus.size(); ++storyIndex) {
 			Vector<Integer> words = corpus.get(storyIndex).getWords();
 			int[] tf = new int[words.size()];
-			
+
 			Iterator<Entry<Integer, Double>> it = corpus.get(storyIndex).getTfidf().entrySet().iterator();
 			int index = 0;
 			while (it.hasNext()) {
@@ -92,39 +90,39 @@ public class Plsa {
 				++index;
 			}
 
-//			index = 0;
-//			for (Integer wordIndex: words) {
-//				docTermMatrix[storyIndex][wordIndex] += tf[index];
-//				++index;
-//			}
-			
+			// index = 0;
+			// for (Integer wordIndex: words) {
+			// docTermMatrix[storyIndex][wordIndex] += tf[index];
+			// ++index;
+			// }
+
 			docTermTopicPros[storyIndex] = new double[words.size()][numOfTopics];
 
-			
 			docTermMatrix[storyIndex] = new int[words.size()];
 			docTermMatrix[storyIndex] = tf;
-			
-			
-//			double[] tfidf = new double[words.size()];
-//			
-//			Iterator<Entry<Integer, Double>> it = corpus.get(storyIndex).getTfidf().entrySet().iterator();
-//			int index = 0;
-//			while (it.hasNext()) {
-//				Entry<Integer, Double> entry = (Entry<Integer, Double>) it.next();
-//				tfidf[index] = entry.getKey() * entry.getValue();
-//				++index;
-//			}
+
+			// double[] tfidf = new double[words.size()];
+			//
+			// Iterator<Entry<Integer, Double>> it =
+			// corpus.get(storyIndex).getTfidf().entrySet().iterator();
+			// int index = 0;
+			// while (it.hasNext()) {
+			// Entry<Integer, Double> entry = (Entry<Integer, Double>)
+			// it.next();
+			// tfidf[index] = entry.getKey() * entry.getValue();
+			// ++index;
+			// }
 		}
-		
+
 		System.out.println("Initialization finished.");
 
 		// use em to estimate params
 		for (int i = 0; i < maxIter; i++) {
-			System.out.println("em:" + i+ "/" + maxIter);
+			System.out.println("em:" + i + "/" + maxIter);
 			em();
 		}
 		System.out.println("done");
-		
+
 		// Set Story.probOfTopics
 		for (int storyIndex = 0; storyIndex < corpus.size(); ++storyIndex) {
 			ArrayList<Double> probOfTopics = new ArrayList<Double>();
@@ -144,22 +142,23 @@ public class Plsa {
 	/**
 	 * Return the similarity between two stories, using the trained plsa model,
 	 * Please make sure the train() is already invoked, before using this
-	 * function. Similarity = sum_z (Similarity_z * P(z)) TODO
-	 * getSimilarity(Story, Story)
+	 * function. Similarity = sum_z (Similarity_z * P(z))
+	 * 
 	 * 
 	 * @see Plsa.getSimilarity(Story, Story, int)
 	 * @param story1
 	 * @param story2
 	 */
 	public double getSimilarity(Story story1, Story story2) {
-//		return Cosine(docTopicPros[story1.getStoryID()], docTopicPros[story2.getStoryID()]);
+		// return Cosine(docTopicPros[story1.getStoryID()],
+		// docTopicPros[story2.getStoryID()]);
 		double[] A = new double[numOfTopics];
 		double[] B = new double[numOfTopics];
-		
+
 		for (int i = 0; i < story1.getProbOfTopics().size(); ++i) {
 			A[i] = story1.getProbOfTopics().get(i).doubleValue();
 		}
-		
+
 		for (int i = 0; i < story2.getProbOfTopics().size(); ++i) {
 			B[i] = story2.getProbOfTopics().get(i).doubleValue();
 		}
@@ -188,7 +187,7 @@ public class Plsa {
 			bLength += b[i] * b[i];
 		bLength = Math.sqrt(bLength);
 
-//		System.out.println(innerProduct / (aLength * bLength));
+		// System.out.println(innerProduct / (aLength * bLength));
 		return innerProduct / (aLength * bLength);
 	}
 
@@ -204,26 +203,28 @@ public class Plsa {
 		 * posible topic
 		 * 
 		 */
-//		for (int docIndex = 0; docIndex < corpus.size(); docIndex++) {
-//			for (int wordIndex = 0; wordIndex < glossary.size(); wordIndex++) {
-//				double total = 0.0;
-//				double[] perTopicPro = new double[numOfTopics];
-//				for (int topicIndex = 0; topicIndex < numOfTopics; topicIndex++) {
-//					double numerator = docTopicPros[docIndex][topicIndex] * topicTermPros[topicIndex][wordIndex];
-//					total += numerator;
-//					perTopicPro[topicIndex] = numerator;
-//				}
-//
-//				if (total == 0.0) {
-//					total = avoidZero(total);
-//				}
-//
-//				for (int topicIndex = 0; topicIndex < numOfTopics; topicIndex++) {
-//					docTermTopicPros[docIndex][wordIndex][topicIndex] = perTopicPro[topicIndex] / total;
-//				}
-//			}
-//		}
-		
+		// for (int docIndex = 0; docIndex < corpus.size(); docIndex++) {
+		// for (int wordIndex = 0; wordIndex < glossary.size(); wordIndex++) {
+		// double total = 0.0;
+		// double[] perTopicPro = new double[numOfTopics];
+		// for (int topicIndex = 0; topicIndex < numOfTopics; topicIndex++) {
+		// double numerator = docTopicPros[docIndex][topicIndex] *
+		// topicTermPros[topicIndex][wordIndex];
+		// total += numerator;
+		// perTopicPro[topicIndex] = numerator;
+		// }
+		//
+		// if (total == 0.0) {
+		// total = avoidZero(total);
+		// }
+		//
+		// for (int topicIndex = 0; topicIndex < numOfTopics; topicIndex++) {
+		// docTermTopicPros[docIndex][wordIndex][topicIndex] =
+		// perTopicPro[topicIndex] / total;
+		// }
+		// }
+		// }
+
 		System.out.println("E step.");
 		for (int docIndex = 0; docIndex < corpus.size(); docIndex++) {
 			for (int wordIndex = 0; wordIndex < corpus.get(docIndex).getWords().size(); wordIndex++) {
@@ -258,15 +259,16 @@ public class Plsa {
 		 */
 		for (int topicIndex = 0; topicIndex < numOfTopics; topicIndex++) {
 			double totalDenominator = 0.0;
-			
+
 			for (int word = 0; word < glossary.size(); word++) {
 				double numerator = 0.0;
-				
+
 				for (int docIndex = 0; docIndex < corpus.size(); docIndex++) {
 					int wordIndex = wordPosition[word][docIndex];
-					
+
 					if (wordIndex != -1) {
-						numerator += docTermMatrix[docIndex][wordIndex] * docTermTopicPros[docIndex][wordIndex][topicIndex];
+						numerator += docTermMatrix[docIndex][wordIndex]
+								* docTermTopicPros[docIndex][wordIndex][topicIndex];
 					}
 				}
 
@@ -283,7 +285,7 @@ public class Plsa {
 				topicTermPros[topicIndex][wordIndex] = topicTermPros[topicIndex][wordIndex] / totalDenominator;
 			}
 		}
-		
+
 		System.out.println("Updating.");
 		/*
 		 * update
@@ -295,10 +297,10 @@ public class Plsa {
 		for (int docIndex = 0; docIndex < corpus.size(); docIndex++) {
 			// actually equal sum(w) of this doc
 			double totalDenominator = 0.0;
-			
+
 			for (int topicIndex = 0; topicIndex < numOfTopics; topicIndex++) {
 				double numerator = 0.0;
-				
+
 				for (int wordIndex = 0; wordIndex < corpus.get(docIndex).getWords().size(); wordIndex++) {
 					numerator += docTermMatrix[docIndex][wordIndex] * docTermTopicPros[docIndex][wordIndex][topicIndex];
 				}
@@ -380,9 +382,9 @@ public class Plsa {
 
 		return num;
 	}
-	
+
 	public void clear() {
-		
+
 	}
 
 }

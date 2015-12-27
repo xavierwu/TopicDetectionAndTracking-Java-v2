@@ -779,7 +779,6 @@ public class DataPreprocessor {
 		BufferedReader reader = null;
 		BufferedWriter writer = null;
 		String line = null;
-		Story tmp = null;
 		int storyCount = 0;
 		Glossary glossary = new Glossary();
 		glossary.load(glossaryFile);
@@ -811,8 +810,8 @@ public class DataPreprocessor {
 		String datasetDir = "D:/Jee_workspace/TopicDetectionAndTracking/Dataset/";
 		// String sgmDir = datasetDir + "sgm/";
 		String stemDir = datasetDir + "stemData_1403/";
-		String tfFile = datasetDir + "1403_tf.dat";
-		String tfidfFile = datasetDir + "1403_tfidf.dat";
+		// String tfFile = datasetDir + "1403_tf.dat";
+		// String tfidfFile = datasetDir + "1403_tfidf.dat";
 		String matrixFile = datasetDir + "1403_matrix.dat";
 		String glossaryFile = datasetDir + "1403_glossary.dat";
 		// generateTFIDF(sgmDir, tfFile, tfidfFile, glossaryFile);

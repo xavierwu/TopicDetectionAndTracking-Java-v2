@@ -32,6 +32,9 @@ public class Clustering {
 		case TFIDF_VotingKMeans:
 		case LDA_VotingKMeans:
 		case pLSA_VotingKMeans:
+		case TFIDF_EA_SL:
+		case LDA_EA_SL:
+		case pLSA_EA_SL:
 			int numOfTopics = Integer.parseInt(parameters.get("numOfTopics"));
 			int numOfLoops = Integer.parseInt(parameters.get("numOfLoops"));
 			partition = KMeans(numOfTopics, numOfLoops);

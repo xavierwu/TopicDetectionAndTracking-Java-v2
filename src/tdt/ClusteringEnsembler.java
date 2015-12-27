@@ -63,6 +63,11 @@ public class ClusteringEnsembler {
 		case pLSA_VotingKMeans:
 			resultPartition = votingKMeans();
 			break;
+		case TFIDF_EA_SL:
+		case LDA_EA_SL:
+		case pLSA_EA_SL:
+			resultPartition = do_EA_SL();
+			break;
 		default:
 			return null;
 		}
