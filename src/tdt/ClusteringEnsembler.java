@@ -36,7 +36,7 @@ public class ClusteringEnsembler {
 	 * @return this.partitions
 	 */
 	private ArrayList<ArrayList<Integer>> doGeneration() {
-		System.out.println("Start doGeneration...");
+		System.out.println("Start doGeneration of " + methodName + "...");
 		partitions.clear();
 		ArrayList<Integer> partition = null;
 		Clustering clustering = new Clustering(corpus, storyLinkDetector);
@@ -59,7 +59,7 @@ public class ClusteringEnsembler {
 		if (partitions.isEmpty())
 			return null;
 
-		System.out.println("Start doConsensus...");
+		System.out.println("Start doConsensus of " + methodName + "...");
 		ArrayList<Integer> resultPartition = null;
 		switch (methodName) {
 		case TFIDF_VotingKMeans:
@@ -80,6 +80,7 @@ public class ClusteringEnsembler {
 	}
 
 	private ArrayList<Integer> votingKMeans() {
+		System.out.println("Start votingKMeans...");
 		ArrayList<Integer> resultPartition = new ArrayList<Integer>();
 		ArrayList<Integer> topicCount = new ArrayList<Integer>();
 		int numOfTopics = Integer.parseInt(this.parameters.get("numOfTopics"));
@@ -100,21 +101,38 @@ public class ClusteringEnsembler {
 				}
 			resultPartition.add(maxTopic);
 		}
+		System.out.println("Done.");
 		return resultPartition;
 	}
 
 	private ArrayList<Integer> do_EA_SL() {
+		System.out.println("Start EA-SL...");
 		ArrayList<Integer> resultPartition = new ArrayList<Integer>();
 		double[][] matrix = generateCAMatrix(this.partitions);
 		double threshold = Double.parseDouble(this.parameters.get("threshold"));
+		boolean[][] isConnected = new boolean[matrix.length][matrix[0].length];
 		for (int i = 0; i < matrix.length; ++i) {
+			isConnected[i][i] = false;
 			for (int j = i + 1; j < matrix[i].length; ++j) {
-				if (matrix[i][j] >= threshold) {
-					// TODO
-					
-				}
+				isConnected[i][j] = isConnected[j][i] = (matrix[i][j] >= threshold);
 			}
 		}
+		for (int i = 0; i < matrix.length; ++i) {
+			resultPartition.add(-1);
+		}
+		int numOfTopics = 0;
+		for (int i = 0; i < matrix.length; ++i) {
+			if (resultPartition.get(i) == -1) {
+				resultPartition.set(i, numOfTopics);
+				for (int j = i + 1; j < matrix.length; ++j) {
+					if (isConnected[i][j]) {
+						resultPartition.set(j, numOfTopics);
+					}
+				}
+				++numOfTopics;
+			}
+		}
+		System.out.println("Done.");
 		return resultPartition;
 	}
 

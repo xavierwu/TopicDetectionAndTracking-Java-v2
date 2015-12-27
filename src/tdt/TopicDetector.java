@@ -166,7 +166,19 @@ class TopicDetector {
 		case TFIDF_EA_SL:
 		case LDA_EA_SL:
 		case pLSA_EA_SL:
-			// TODO commit parameters of EA-SL
+			numOfPartitions = Integer.parseInt(request.getParameter("numOfPartitions"));
+			numOfTopics = Integer.parseInt(request.getParameter("numOfTopics"));
+			numOfLoops = Integer.parseInt(request.getParameter("numOfLoops"));
+			threshold = Double.parseDouble(request.getParameter("threshold"));
+			System.out.println("Parameters: ");
+			System.out.println("> numOfPartitions = " + numOfPartitions);
+			System.out.println("> numOfTopics = " + numOfTopics);
+			System.out.println("> numOfLoops = " + numOfLoops);
+			System.out.println("> threshold = " + threshold);
+			parameters.put("numOfPartitions", String.valueOf(numOfPartitions));
+			parameters.put("numOfTopics", String.valueOf(numOfTopics));
+			parameters.put("numOfLoops", String.valueOf(numOfLoops));
+			parameters.put("threshold", String.valueOf(threshold));
 			ensembler = new ClusteringEnsembler(corpus, storyLinkDetector);
 			resultPartition = ensembler.doClustering(methodName, parameters);
 			break;
@@ -174,7 +186,11 @@ class TopicDetector {
 			break;
 		}
 
-		numOfTopics = resultPartition.size();
+		numOfTopics = 0;
+		for (int i = 0; i < resultPartition.size(); ++i)
+			if (resultPartition.get(i) > numOfTopics)
+				numOfTopics = resultPartition.get(i);
+		++numOfTopics;
 		return numOfTopics;
 	}
 }

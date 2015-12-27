@@ -94,8 +94,10 @@ public enum MethodName {
 		case TFIDF_EA_SL:
 		case LDA_EA_SL:
 		case pLSA_EA_SL:
-			parameters.put("numOfPartitions", String.valueOf(63));
-			parameters.put("threshold", String.valueOf(63));
+			parameters.put("numOfPartitions", String.valueOf(5));
+			parameters.put("numOfTopics", String.valueOf(63));
+			parameters.put("numOfLoops", String.valueOf(5));
+			parameters.put("threshold", String.valueOf(0.5));
 			break;
 		case SubTitle:
 			parameters.put("lemda", String.valueOf(0.67));
