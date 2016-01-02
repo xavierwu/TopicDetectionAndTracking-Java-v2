@@ -22,7 +22,13 @@ public enum MethodName {
 	TFIDF_EA_SL("TFIDF_EA_SL", 5.9, 1.0, 1.0),
 	LDA_EA_SL("LDA_EA_SL", 5.9, 1.0, 1.0),
 	pLSA_EA_SL("pLSA_EA_SL", 5.9, 1.0, 1.0),
-	SubTitle("SubTitle", 0.58, 0.35, 0.05);
+	Original_Subtopic("Original_Subtopic", 0.73, 0.73, 0),
+	Original_Subtopic_Weight("Original_Subtopic_Weight", 0.69, 0.69, 0),
+	Improved_Subtopic("Improved_Subtopic", 0.58, 0.35, 0.05),
+	Improved_Subtopic_Weight("Improved_Subtopic_Weight", 0.61, 0.30, 0.06),
+	Improved_Subtopic_Weight_Agg("Improved_Subtopic_Weight_Agg", 0.41, 0.30, 0.02),
+	Improved_Agg("Improved_Agg", 0.19, 0.19, 0)
+};
 
 	private String name;
 	private double bestNormCdet;
@@ -99,9 +105,34 @@ public enum MethodName {
 			parameters.put("numOfLoops", String.valueOf(5));
 			parameters.put("threshold", String.valueOf(0.5));
 			break;
-		case SubTitle:
+		case Original_Subtopic:
+			parameters.put("lemda", String.valueOf(0.15));
+			parameters.put("theta", String.valueOf(4.0));
+			break;
+		case Original_Subtopic_Weight:
+			parameters.put("lemda", String.valueOf(0.15));
+			parameters.put("theta", String.valueOf(4.0));
+			parameters.put("firstWeight", String.valueOf(0.6));
+			parameters.put("lastWeight", String.valueOf(0.8));
+			break;	
+		case Improved_Subtopic:
 			parameters.put("lemda", String.valueOf(0.67));
 			parameters.put("theta", String.valueOf(8.0));
+			break;
+		case Improved_Subtopic_Weight:
+			parameters.put("lemda", String.valueOf(0.66));
+			parameters.put("theta", String.valueOf(9.0));
+			parameters.put("firstWeight", String.valueOf(0.9));
+			parameters.put("lastWeight", String.valueOf(0.8));
+			break;	
+		case Improved_Subtopic_Weight_Agg:
+			parameters.put("lemda", String.valueOf(0.66));
+			parameters.put("theta", String.valueOf(9.0));
+			parameters.put("firstWeight", String.valueOf(0.9));
+			parameters.put("lastWeight", String.valueOf(0.8));
+			break;	
+		case Improved_Agg:
+			parameters.put("theta", String.valueOf(0.12));
 			break;
 		default:
 			break;
