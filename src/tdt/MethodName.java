@@ -27,8 +27,7 @@ public enum MethodName {
 	Improved_Subtopic("Improved_Subtopic", 0.58, 0.35, 0.05),
 	Improved_Subtopic_Weight("Improved_Subtopic_Weight", 0.61, 0.30, 0.06),
 	Improved_Subtopic_Weight_Agg("Improved_Subtopic_Weight_Agg", 0.41, 0.30, 0.02),
-	Improved_Agg("Improved_Agg", 0.19, 0.19, 0)
-};
+	Improved_Agg("Improved_Agg", 0.19, 0.19, 0);
 
 	private String name;
 	private double bestNormCdet;
