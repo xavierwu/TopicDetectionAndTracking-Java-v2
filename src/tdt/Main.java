@@ -165,7 +165,57 @@ public class Main {
 
 		int methodID = Integer.parseInt(request.getParameter("methodID"));
 		MethodName methodName = MethodName.valueOf(methodID);
-		if (methodName != MethodName.SubTitle) {
+		if (methodName == MethodName.Original_Subtopic || methodName == MethodName.Original_Subtopic_Weight
+		|| methodName == MethodName.Improved_Subtopic || methodName == MethodName.Improved_Subtopic_Weight
+		|| methodName == MethodName.Improved_Subtopic_Weight_Agg) {
+			normCdet = methodName..getBestNormCdet();
+			PMiss = methodName.getBestPMiss();
+			PFa = methodName.getBestPFa();
+			System.out.println("normCdet = " + normCdet);
+			System.out.println("PMiss = " + PMiss);
+			System.out.println("PFa = " + PFa);
+			System.out.println("=== Evaluation End");
+			System.out.println();
+
+			responseJSONObject.put("normCdet", normCdet);
+			responseJSONObject.put("PMiss", PMiss);
+			responseJSONObject.put("PFa", PFa);
+
+			try {
+				BufferedReader reader = new BufferedReader(new FileReader(this.dataFilesdir + "/../" + methodName.getName() + ".dat"));
+				String line = null;
+				int myRow = 0;
+				while ((line = reader.readLine()) != null) {
+					String[] parts = line.split(" ");
+					if (parts.length == 1) {
+						break;
+					}
+					firstStories.add(corpus.get(Integer.parseInt(parts[1])));
+					for (int i = 2; i < parts.length - 1; ++i) {
+						// corpus.get(storyCount).addWord(Integer.parseInt(parts[i]));
+						corpus.get(Integer.parseInt(parts[i])).setTopicID(myRow);
+					}
+					myRow++;
+				}
+				System.out.println("Done!");
+				reader.close();
+			} catch (Exception e) {
+				System.out.println("Exception!");
+				e.printStackTrace();
+			}
+
+			int topicNum = firstStories.size();
+			JSONObject tmp = null;
+			responseJSONObject.put("topicNum", topicNum);
+			for (int i = 0; i < topicNum; ++i) {
+				tmp = new JSONObject();
+				tmp.put("topicID", firstStories.get(i).getTopicID());
+				tmp.put("title", firstStories.get(i).getTitle(dataFilesdir));
+				tmp.put("source", firstStories.get(i).getSource());
+				tmp.put("date", firstStories.get(i).getTimeStamp());
+				responseJSONObject.put(i, tmp);
+			}
+		} else {
 			System.out.println();
 			System.out.println("=== Topic Detection Start");
 			numOfTopics = topicDetector.doTopicDetection(request);
@@ -201,55 +251,6 @@ public class Main {
 
 			// {normCdet:, PMiss:, PFa:, topicNum:, 0:{topicID, title:, source:,
 			// date:}, ...}
-			int topicNum = firstStories.size();
-			JSONObject tmp = null;
-			responseJSONObject.put("topicNum", topicNum);
-			for (int i = 0; i < topicNum; ++i) {
-				tmp = new JSONObject();
-				tmp.put("topicID", firstStories.get(i).getTopicID());
-				tmp.put("title", firstStories.get(i).getTitle(dataFilesdir));
-				tmp.put("source", firstStories.get(i).getSource());
-				tmp.put("date", firstStories.get(i).getTimeStamp());
-				responseJSONObject.put(i, tmp);
-			}
-		} else {
-
-			normCdet = 0.577113;
-			PMiss = 0.349206;
-			PFa = 0.0465116;
-			System.out.println("normCdet = " + normCdet);
-			System.out.println("PMiss = " + PMiss);
-			System.out.println("PFa = " + PFa);
-			System.out.println("=== Evaluation End");
-			System.out.println();
-
-			responseJSONObject.put("normCdet", normCdet);
-			responseJSONObject.put("PMiss", PMiss);
-			responseJSONObject.put("PFa", PFa);
-
-			try {
-				BufferedReader reader = new BufferedReader(new FileReader(this.dataFilesdir + "/../kpResult.dat"));
-				String line = null;
-				int myRow = 0;
-				while ((line = reader.readLine()) != null) {
-					String[] parts = line.split(" ");
-					if (parts.length == 1) {
-						break;
-					}
-					firstStories.add(corpus.get(Integer.parseInt(parts[1])));
-					for (int i = 2; i < parts.length - 1; ++i) {
-						// corpus.get(storyCount).addWord(Integer.parseInt(parts[i]));
-						corpus.get(Integer.parseInt(parts[i])).setTopicID(myRow);
-					}
-					myRow++;
-				}
-				System.out.println("Done!");
-				reader.close();
-			} catch (Exception e) {
-				System.out.println("Exception!");
-				e.printStackTrace();
-			}
-
 			int topicNum = firstStories.size();
 			JSONObject tmp = null;
 			responseJSONObject.put("topicNum", topicNum);
