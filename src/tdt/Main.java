@@ -167,7 +167,8 @@ public class Main {
 		MethodName methodName = MethodName.valueOf(methodID);
 		if (methodName == MethodName.Original_Subtopic || methodName == MethodName.Original_Subtopic_Weight
 		|| methodName == MethodName.Improved_Subtopic || methodName == MethodName.Improved_Subtopic_Weight
-		|| methodName == MethodName.Improved_Subtopic_Weight_Agg || methodName == MethodName.Improved_Agg) {
+		|| methodName == MethodName.Improved_Subtopic_Weight_Agg || methodName == MethodName.Improved_Agg
+		|| methodName == MethodName.Original_Subtopic_Time) {
 			normCdet = methodName..getBestNormCdet();
 			PMiss = methodName.getBestPMiss();
 			PFa = methodName.getBestPFa();
