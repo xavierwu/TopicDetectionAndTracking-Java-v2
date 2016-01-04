@@ -169,7 +169,7 @@ public class Main {
 		|| methodName == MethodName.Improved_Subtopic || methodName == MethodName.Improved_Subtopic_Weight
 		|| methodName == MethodName.Improved_Subtopic_Weight_Agg || methodName == MethodName.Improved_Agg
 		|| methodName == MethodName.Original_Subtopic_Time) {
-			normCdet = methodName..getBestNormCdet();
+			normCdet = methodName.getBestNormCdet();
 			PMiss = methodName.getBestPMiss();
 			PFa = methodName.getBestPFa();
 			System.out.println("normCdet = " + normCdet);
