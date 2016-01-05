@@ -16,10 +16,12 @@
 	private String TFIDF_FILE_1403 = DATASET_DIR + "1403_tfidf.dat";
 	private String MATRIX_FILE_1403 = DATASET_DIR + "1403_matrix.dat";
 	private String ANSWER_FILE_1403 = DATASET_DIR + "answer1403.txt";
+	private String ORIGINAL_CONTENT_DIR_1403 = DATASET_DIR + "1403news/";
 
 	private tdt.Main main = new tdt.Main(STEMMED_DATASET_DIR_1403, 
 			GLOSSARY_FILE_1403, TFIDF_FILE_1403,
-			MATRIX_FILE_1403, ANSWER_FILE_1403);
+			MATRIX_FILE_1403, ANSWER_FILE_1403,
+			ORIGINAL_CONTENT_DIR_1403);
 %>
 
 <%!
