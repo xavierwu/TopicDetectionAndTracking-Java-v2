@@ -53,7 +53,7 @@ public class DataPreprocessor {
 		}
 	}
 
-	public static void recoverCorpusFromTFIDF(Vector<Story> corpus, String tfidfFile) {
+	public static void recoverCorpusFromTFIDF(Vector<Story> corpus, String tfidfFile, String contentDir) {
 		try {
 			BufferedReader reader = new BufferedReader(new FileReader(tfidfFile));
 			String line = null;
@@ -65,6 +65,9 @@ public class DataPreprocessor {
 				String[] parts = line.split(" ");
 				tmp = new Story();
 				tmp.setTimeStamp(parts[0].split("_")[0]);
+				
+				readOriginalContent(tmp, contentDir + tmp.getTimeStamp() + ".txt");
+				
 				tmp.setSource(parts[0].split("_")[1]);
 				tmpTfidf = new HashMap<Integer, Double>();
 				for (int i = 1; i < parts.length; ++i) {
@@ -805,9 +808,27 @@ public class DataPreprocessor {
 			e.printStackTrace();
 		}
 	}
+	
+	public static void readOriginalContent(Story tmp, String originalContentFile) {
+		try {
+			BufferedReader reader = new BufferedReader(new FileReader(originalContentFile));
+			String line = null;
+			
+			System.out.println("Start reading original content from: " + originalContentFile);
+
+			while ((line = reader.readLine()) != null) {
+				tmp.setOriginalContent(line);
+			}
+			
+			reader.close();
+			System.out.println("Done!");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 
 	public static void main(String[] args) {
-		String datasetDir = "D:/Jee_workspace/TopicDetectionAndTracking/Dataset/";
+		String datasetDir = "C:/Users/prince/Desktop/TopicDetectionAndTracking/Dataset/";
 		// String sgmDir = datasetDir + "sgm/";
 		String stemDir = datasetDir + "stemData_1403/";
 		// String tfFile = datasetDir + "1403_tf.dat";
