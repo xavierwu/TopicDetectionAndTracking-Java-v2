@@ -211,7 +211,7 @@ public class Main {
 			for (int i = 0; i < topicNum; ++i) {
 				tmp = new JSONObject();
 				tmp.put("topicID", firstStories.get(i).getTopicID());
-				tmp.put("title", firstStories.get(i).getOriginalContent().subSequence(0, 15) + "...");
+				tmp.put("title", firstStories.get(i).getOriginalContent().subSequence(0, 30) + "...");
 				tmp.put("source", firstStories.get(i).getSource());
 				tmp.put("date", firstStories.get(i).getTimeStamp());
 				responseJSONObject.put(i, tmp);
@@ -258,7 +258,7 @@ public class Main {
 			for (int i = 0; i < topicNum; ++i) {
 				tmp = new JSONObject();
 				tmp.put("topicID", firstStories.get(i).getTopicID());
-				tmp.put("title", firstStories.get(i).getOriginalContent().subSequence(0, 15) + "...");
+				tmp.put("title", firstStories.get(i).getOriginalContent().subSequence(0, 30) + "...");
 				tmp.put("source", firstStories.get(i).getSource());
 				tmp.put("date", firstStories.get(i).getTimeStamp());
 				responseJSONObject.put(i, tmp);
@@ -293,7 +293,7 @@ public class Main {
 			tmp = new JSONObject();
 			tmp.put("storyID", stories.get(i)); // the story id in corpus
 			// TODO how to get a reasonable title?
-			tmp.put("title", firstStories.get(i).getOriginalContent().subSequence(0, 15) + "...");
+			tmp.put("title", firstStories.get(i).getOriginalContent().subSequence(0, 30) + "...");
 			tmp.put("source", corpus.get(stories.get(i)).getSource());
 			tmp.put("date", corpus.get(stories.get(i)).getTimeStamp());
 			responseJSONObject.put(i, tmp);
