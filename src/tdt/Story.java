@@ -62,6 +62,11 @@ public class Story {
 	 */
 	private ArrayList<Double> probOfTopics;
 	
+	/**
+	 * original content
+	 */
+	private String originalContent;
+	
 	// ---------- CONSTRUCTORS ------------------------------------------------
 	/**
 	 * UNSUGGESTED: Default constructor, used only for temporary story.
@@ -247,6 +252,22 @@ public class Story {
 	 */
 	public void setProbOfTopics(ArrayList<Double> probOfTopics) {
 		this.probOfTopics = probOfTopics;
+	}
+	
+	/** 
+	 * 
+	 * @param originalContent
+	 */
+	public void setOriginalContent(String originalContent) {
+		this.originalContent = originalContent;
+	}
+	
+	/**
+	 * 
+	 * @return originalContent
+	 */
+	public String getOriginalContent() {
+		return this.originalContent;
 	}
 
 	// ---------- BOOLEAN -----------------------------------------------------
