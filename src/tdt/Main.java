@@ -41,12 +41,12 @@ public class Main {
 	 * @param tfidfFile
 	 * @param ansFile
 	 */
-	public Main(String dataFilesdir, String glossaryFile, String tfidfFile, String matrixFile, String ansFile) {
+	public Main(String dataFilesdir, String glossaryFile, String tfidfFile, String matrixFile, String ansFile, String contentDir) {
 		this.dataFilesdir = dataFilesdir;
 		System.out.println("\n====== Start initializing ======");
 
 		glossary.load(glossaryFile);
-		DataPreprocessor.recoverCorpusFromTFIDF(corpus, tfidfFile);
+		DataPreprocessor.recoverCorpusFromTFIDF(corpus, tfidfFile, contentDir);
 		DataPreprocessor.loadMatrix(corpus, matrixFile);
 		DataPreprocessor.readAnswer_v2(actualFirstStories, ansFile);
 
@@ -192,7 +192,7 @@ public class Main {
 						break;
 					}
 					firstStories.add(corpus.get(Integer.parseInt(parts[1])));
-					for (int i = 1; i < parts.length - 1; ++i) {
+					for (int i = 2; i < parts.length - 1; ++i) {
 						// corpus.get(storyCount).addWord(Integer.parseInt(parts[i]));
 						corpus.get(Integer.parseInt(parts[i])).setTopicID(myRow);
 					}
@@ -211,7 +211,7 @@ public class Main {
 			for (int i = 0; i < topicNum; ++i) {
 				tmp = new JSONObject();
 				tmp.put("topicID", firstStories.get(i).getTopicID());
-				tmp.put("title", firstStories.get(i).getTitle(dataFilesdir));
+				tmp.put("title", firstStories.get(i).getOriginalContent().subSequence(0, 15) + "...");
 				tmp.put("source", firstStories.get(i).getSource());
 				tmp.put("date", firstStories.get(i).getTimeStamp());
 				responseJSONObject.put(i, tmp);
@@ -258,7 +258,7 @@ public class Main {
 			for (int i = 0; i < topicNum; ++i) {
 				tmp = new JSONObject();
 				tmp.put("topicID", firstStories.get(i).getTopicID());
-				tmp.put("title", firstStories.get(i).getTitle(dataFilesdir));
+				tmp.put("title", firstStories.get(i).getOriginalContent().subSequence(0, 15) + "...");
 				tmp.put("source", firstStories.get(i).getSource());
 				tmp.put("date", firstStories.get(i).getTimeStamp());
 				responseJSONObject.put(i, tmp);
@@ -293,7 +293,7 @@ public class Main {
 			tmp = new JSONObject();
 			tmp.put("storyID", stories.get(i)); // the story id in corpus
 			// TODO how to get a reasonable title?
-			tmp.put("title", corpus.get(stories.get(i)).getTitle(dataFilesdir));
+			tmp.put("title", firstStories.get(i).getOriginalContent().subSequence(0, 15) + "...");
 			tmp.put("source", corpus.get(stories.get(i)).getSource());
 			tmp.put("date", corpus.get(stories.get(i)).getTimeStamp());
 			responseJSONObject.put(i, tmp);
@@ -312,7 +312,7 @@ public class Main {
 		JSONObject responseJSONObject = new JSONObject();
 		int storyID = Integer.parseInt(request.getParameter("storyID"));
 		// TODO how to get a reasonable content, that is not stemmed?
-		responseJSONObject.put("content", corpus.get(storyID).getContent(glossary));
+		responseJSONObject.put("content", corpus.get(storyID).getOriginalContent());
 		return responseJSONObject;
 	}
 
