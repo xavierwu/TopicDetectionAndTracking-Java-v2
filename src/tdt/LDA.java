@@ -45,18 +45,13 @@ public class LDA implements SimilarityInterface {
 		this.glossary = glossary;
 	}
 
-	/**
-	 * Extracting topics
-	 */
-	public void train(int numOfTopics, int numOfIterations, double LAMBDA,
-			// double DELTA,
-			double ALPHA, double BETA) {
-		this.numOfTopics = numOfTopics;
-		this.numOfIterations = numOfIterations;
-		this.ALPHA = ALPHA;
-		this.BETA = BETA;
-		// this.DELTA = DELTA;
-		this.LAMBDA = LAMBDA;
+	@Override
+	public void train(HashMap<String, String> parameters) {
+		this.numOfTopics = Integer.parseInt(parameters.get("lda.numOfTopics"));
+		this.numOfIterations = Integer.parseInt(parameters.get("lda.numOfIterations"));
+		this.LAMBDA = Double.parseDouble(parameters.get("lda.lambda"));
+		this.ALPHA = Double.parseDouble(parameters.get("lda.alpha"));
+		this.BETA = Double.parseDouble(parameters.get("lda.beta"));
 
 		word_topic_matrix = new int[glossary.size()][numOfTopics]; // wordTopic
 		num_of_every_topic = new int[numOfTopics]; //
@@ -101,8 +96,10 @@ public class LDA implements SimilarityInterface {
 		System.out.println("Done Calculating Matrix...");
 
 		System.out.println("Extracting topics done.");
+
 	}
 
+	@Override
 	public double getSimilarity(Story story1, Story story2) {
 		// double sim = 0.0;
 
@@ -352,9 +349,61 @@ public class LDA implements SimilarityInterface {
 		}
 	}
 
-	@Override
-	public void train(HashMap<String, String> parameters) {
-		// TODO Auto-generated method stub
+	/**
+	 * @deprecated Extracting topics
+	 */
+	public void train(int numOfTopics, int numOfIterations, double LAMBDA,
+			// double DELTA,
+			double ALPHA, double BETA) {
+		this.numOfTopics = numOfTopics;
+		this.numOfIterations = numOfIterations;
+		this.ALPHA = ALPHA;
+		this.BETA = BETA;
+		// this.DELTA = DELTA;
+		this.LAMBDA = LAMBDA;
 
+		word_topic_matrix = new int[glossary.size()][numOfTopics]; // wordTopic
+		num_of_every_topic = new int[numOfTopics]; //
+		prob_topic_word_matrix = new double[numOfTopics][glossary.size()]; //
+		prob_of_topics = new double[numOfTopics];
+		// similarities = new double[corpus.size()];
+		words_of_matrix = new int[corpus.size()][]; // [storyID][wordIndexOfTheStory]
+													// = wordID(glossary)
+		topics_of_matrix = new int[corpus.size()][];
+
+		wordCount = new int[glossary.size()];
+		prob_word_topic_matrix = new double[glossary.size()][numOfTopics];
+		prob_story_topic_matrix = new double[corpus.size()][numOfTopics];
+
+		System.out.println("Start extracting topics...");
+
+		System.out.println("Start setting matrix...");
+		for (int storyIndex = 0; storyIndex < corpus.size(); ++storyIndex) {
+			Vector<Integer> content = corpus.get(storyIndex).getWords();
+			// System.out.println("# "+content.size());
+			words_of_matrix[storyIndex] = new int[content.size()];
+			topics_of_matrix[storyIndex] = new int[content.size()];
+			for (int wordIndex = 0; wordIndex < content.size(); ++wordIndex) {
+				// System.out.println("## "+wordIndex);
+				words_of_matrix[storyIndex][wordIndex] = content.get(wordIndex);
+				wordCount[wordIndex]++;
+			}
+		}
+
+		System.out.println("Setting matrix done.");
+
+		System.out.println("Start Gibbs sampling...");
+		GibbsSamplerLDA();
+		System.out.println("Gibbs Sampling done.");
+
+		System.out.println("Start Calculating POT...");
+		calculateProbabilityOfTopics();
+		System.out.println("Calculating POT done.");
+
+		System.out.println("Start Calculating Matrix...");
+		// printMatrix();
+		System.out.println("Done Calculating Matrix...");
+
+		System.out.println("Extracting topics done.");
 	}
 }

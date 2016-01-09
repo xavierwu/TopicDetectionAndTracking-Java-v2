@@ -4,6 +4,7 @@
 package tdt;
 
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.Vector;
@@ -75,56 +76,28 @@ class TopicDetector {
 		for (Story story : corpus)
 			story.setTopicID(-1);
 
-		StoryLinkDetector storyLinkDetector = new StoryLinkDetector(corpus, glossary);
 		int numOfTopics = 0;
-		HashMap<String, String> parameters = new HashMap<String, String>();
-		Clustering clustering = null;
-		ClusteringEnsembler ensembler = null;
+
 		ArrayList<Integer> resultPartition = null;
 
 		int methodID = Integer.parseInt(request.getParameter("methodID"));
 		System.out.println("methodID = " + methodID);
-		MethodName methodName = MethodName.valueOf(methodID);
-		
-		storyLinkDetector.train(methodName, request);
 
+		MethodName methodName = MethodName.valueOf(methodID);
+		StoryLinkDetector storyLinkDetector = new StoryLinkDetector(methodName.getSimilarityName(), corpus, glossary);
+		storyLinkDetector.train(request);
+		
+		HashMap<String, String> parameters = new HashMap<String, String>();
+		Enumeration<String> names = request.getParameterNames();
+		while (names.hasMoreElements()) {
+			String name = names.nextElement();
+			parameters.put(name, request.getParameter(name));
+		}		
+		Clustering clustering = new Clustering(methodName.getClusteringName(), corpus, storyLinkDetector);
+		clustering.train(parameters);
+		resultPartition = clustering.doClustering();
+		
 		switch (methodName) {
-		case TFIDF_KMeans:
-		case LDA_KMeans:
-		case pLSA_KMeans:
-			numOfTopics = Integer.parseInt(request.getParameter("numOfTopics"));
-			int numOfLoops = Integer.parseInt(request.getParameter("numOfLoops"));
-			System.out.println("Parameters: ");
-			System.out.println("> numOfTopics = " + numOfTopics);
-			System.out.println("> numOfLoops = " + numOfLoops);
-			parameters.put("numOfTopics", String.valueOf(numOfTopics));
-			parameters.put("numOfLoops", String.valueOf(numOfLoops));
-			clustering = new Clustering(corpus, storyLinkDetector);
-			resultPartition = clustering.doClustering(methodName, parameters);
-			break;
-		case TFIDF_DBSCAN:
-		case LDA_DBSCAN:
-		case pLSA_DBSCAN:
-			double minSimilarity = Double.parseDouble(request.getParameter("minSimilarity"));
-			int minPts = Integer.parseInt(request.getParameter("minPts"));
-			System.out.println("Parameters: ");
-			System.out.println("> minSimilarity = " + minSimilarity);
-			System.out.println("> minPts = " + minPts);
-			parameters.put("minSimilarity", String.valueOf(minSimilarity));
-			parameters.put("minPts", String.valueOf(minPts));
-			clustering = new Clustering(corpus, storyLinkDetector);
-			resultPartition = clustering.doClustering(methodName, parameters);
-			break;
-		case TFIDF_AggDetection:
-		case LDA_AggDetection:
-		case pLSA_AggDetection:
-			double threshold = Double.parseDouble(request.getParameter("threshold"));
-			System.out.println("Parameters: ");
-			System.out.println("> threshold = " + threshold);
-			parameters.put("threshold", String.valueOf(threshold));
-			clustering = new Clustering(corpus, storyLinkDetector);
-			resultPartition = clustering.doClustering(methodName, parameters);
-			break;
 		case TFIDF_VotingKMeans:
 		case LDA_VotingKMeans:
 		case pLSA_VotingKMeans:
@@ -172,5 +145,5 @@ class TopicDetector {
 		++numOfTopics;
 		return numOfTopics;
 	}
-	
+
 }

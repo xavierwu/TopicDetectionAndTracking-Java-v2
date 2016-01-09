@@ -13,11 +13,18 @@ public class KMeans implements ClusteringInterface {
 	private int numOfTopics = 0;
 	private int numOfLoops = 0;
 
-	KMeans(Vector<Story> corpus, StoryLinkDetector storyLinkDetector, HashMap<String, String> parameters) {
+	public KMeans(Vector<Story> corpus, StoryLinkDetector storyLinkDetector) {
 		this.corpus = corpus;
 		this.storyLinkDetector = storyLinkDetector;
+	}
+
+	@Override
+	public void train(HashMap<String, String> parameters) {
 		this.numOfTopics = Integer.parseInt(parameters.get("numOfTopics"));
 		this.numOfLoops = Integer.parseInt(parameters.get("numOfLoops"));
+		System.out.println("Parameters: ");
+		System.out.println("> numOfTopics = " + numOfTopics);
+		System.out.println("> numOfLoops = " + numOfLoops);
 	}
 
 	public ArrayList<Integer> doClustering() {
@@ -119,4 +126,5 @@ public class KMeans implements ClusteringInterface {
 		return partition;
 
 	}
+
 }

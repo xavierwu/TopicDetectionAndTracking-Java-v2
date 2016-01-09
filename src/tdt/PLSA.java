@@ -37,12 +37,11 @@ public class PLSA implements SimilarityInterface {
 		this.glossary = glossary;
 	}
 
-	/**
-	 * @param numOfTopics
-	 * @param maxIter
-	 */
-	public void train(int numOfTopics, int maxIter) {
-		this.numOfTopics = numOfTopics;
+	@Override
+	public void train(HashMap<String, String> parameters) {
+		this.numOfTopics = Integer.parseInt(parameters.get("plsa.numOfTopics"));
+		int maxIter = Integer.parseInt(parameters.get("plsa.numOfIterations"));
+
 		docTermMatrix = new int[corpus.size()][];
 
 		docTopicPros = new double[corpus.size()][numOfTopics];
@@ -138,6 +137,7 @@ public class PLSA implements SimilarityInterface {
 		topicTermPros = null;
 		docTermTopicPros = null;
 		System.gc();
+
 	}
 
 	/**
@@ -388,10 +388,108 @@ public class PLSA implements SimilarityInterface {
 
 	}
 
-	@Override
-	public void train(HashMap<String, String> parameters) {
-		// TODO Auto-generated method stub
-		
+	/**
+	 * @deprecated
+	 * @param numOfTopics
+	 * @param maxIter
+	 */
+	public void train(int numOfTopics, int maxIter) {
+		this.numOfTopics = numOfTopics;
+		docTermMatrix = new int[corpus.size()][];
+
+		docTopicPros = new double[corpus.size()][numOfTopics];
+		topicTermPros = new double[numOfTopics][glossary.size()];
+
+		wordPosition = new int[glossary.size()][corpus.size()];
+
+		docTermTopicPros = new double[corpus.size()][][];
+
+		for (int word = 0; word < glossary.size(); ++word) {
+			for (int storyIndex = 0; storyIndex < corpus.size(); ++storyIndex) {
+				wordPosition[word][storyIndex] = -1;
+			}
+		}
+
+		for (int storyIndex = 0; storyIndex < corpus.size(); ++storyIndex) {
+			for (int wordIndex = 0; wordIndex < corpus.get(storyIndex).getWords().size(); ++wordIndex) {
+				int word = corpus.get(storyIndex).getWords().get(wordIndex);
+				wordPosition[word][storyIndex] = wordIndex;
+			}
+		}
+
+		for (int i = 0; i < corpus.size(); i++) {
+			double[] pros = randomProbilities(numOfTopics);
+			for (int j = 0; j < numOfTopics; j++) {
+				docTopicPros[i][j] = pros[j];
+			}
+		}
+		// init p(w|z),for each topic the constraint is sum(p(w|z))=1.0
+		for (int i = 0; i < numOfTopics; i++) {
+			double[] pros = randomProbilities(glossary.size());
+			for (int j = 0; j < glossary.size(); j++) {
+				topicTermPros[i][j] = pros[j];
+			}
+		}
+
+		for (int storyIndex = 0; storyIndex < corpus.size(); ++storyIndex) {
+			Vector<Integer> words = corpus.get(storyIndex).getWords();
+			int[] tf = new int[words.size()];
+
+			Iterator<Entry<Integer, Double>> it = corpus.get(storyIndex).getTfidf().entrySet().iterator();
+			int index = 0;
+			while (it.hasNext()) {
+				Entry<Integer, Double> entry = (Entry<Integer, Double>) it.next();
+				tf[index] = entry.getKey();
+				++index;
+			}
+
+			// index = 0;
+			// for (Integer wordIndex: words) {
+			// docTermMatrix[storyIndex][wordIndex] += tf[index];
+			// ++index;
+			// }
+
+			docTermTopicPros[storyIndex] = new double[words.size()][numOfTopics];
+
+			docTermMatrix[storyIndex] = new int[words.size()];
+			docTermMatrix[storyIndex] = tf;
+
+			// double[] tfidf = new double[words.size()];
+			//
+			// Iterator<Entry<Integer, Double>> it =
+			// corpus.get(storyIndex).getTfidf().entrySet().iterator();
+			// int index = 0;
+			// while (it.hasNext()) {
+			// Entry<Integer, Double> entry = (Entry<Integer, Double>)
+			// it.next();
+			// tfidf[index] = entry.getKey() * entry.getValue();
+			// ++index;
+			// }
+		}
+
+		System.out.println("Initialization finished.");
+
+		// use em to estimate params
+		for (int i = 0; i < maxIter; i++) {
+			System.out.println("em:" + i + "/" + maxIter);
+			em();
+		}
+		System.out.println("done");
+
+		// Set Story.probOfTopics
+		for (int storyIndex = 0; storyIndex < corpus.size(); ++storyIndex) {
+			ArrayList<Double> probOfTopics = new ArrayList<Double>();
+			for (int topicIndex = 0; topicIndex < numOfTopics; ++topicIndex) {
+				probOfTopics.add(docTopicPros[storyIndex][topicIndex]);
+			}
+			corpus.get(storyIndex).setProbOfTopics(probOfTopics);
+		}
+
+		// free memory
+		docTermMatrix = null;
+		topicTermPros = null;
+		docTermTopicPros = null;
+		System.gc();
 	}
 
 }

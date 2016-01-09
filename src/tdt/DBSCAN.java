@@ -10,11 +10,18 @@ public class DBSCAN implements ClusteringInterface {
 	private double minSimilarity = 0.0;
 	private int minPts = 0;
 
-	DBSCAN(Vector<Story> corpus, StoryLinkDetector storyLinkDetector, HashMap<String, String> parameters) {
+	public DBSCAN(Vector<Story> corpus, StoryLinkDetector storyLinkDetector) {
 		this.corpus = corpus;
 		this.storyLinkDetector = storyLinkDetector;
-		this.minSimilarity = Double.parseDouble(parameters.get("minSimilarity"));
-		this.minPts = Integer.parseInt(parameters.get("minPts"));
+	}
+
+	@Override
+	public void train(HashMap<String, String> parameters) {
+		double minSimilarity = Double.parseDouble(parameters.get("minSimilarity"));
+		int minPts = Integer.parseInt(parameters.get("minPts"));
+		System.out.println("Parameters: ");
+		System.out.println("> minSimilarity = " + minSimilarity);
+		System.out.println("> minPts = " + minPts);
 	}
 
 	/**
@@ -124,4 +131,5 @@ public class DBSCAN implements ClusteringInterface {
 			}
 		}
 	}
+
 }

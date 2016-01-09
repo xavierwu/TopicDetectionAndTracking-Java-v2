@@ -9,10 +9,16 @@ public class Aggregation implements ClusteringInterface {
 	private StoryLinkDetector storyLinkDetector = null;
 	double threshold = 0.0;
 
-	Aggregation(Vector<Story> corpus, StoryLinkDetector storyLinkDetector, HashMap<String, String> parameters) {
+	public Aggregation(Vector<Story> corpus, StoryLinkDetector storyLinkDetector) {
 		this.corpus = corpus;
 		this.storyLinkDetector = storyLinkDetector;
-		this.threshold = Double.parseDouble(parameters.get("threshold"));
+	}
+
+	@Override
+	public void train(HashMap<String, String> parameters) {
+		double threshold = Double.parseDouble(parameters.get("threshold"));
+		System.out.println("Parameters: ");
+		System.out.println("> threshold = " + threshold);
 	}
 
 	/**
@@ -62,4 +68,5 @@ public class Aggregation implements ClusteringInterface {
 		return partition;
 
 	}
+
 }
