@@ -41,7 +41,8 @@ public class Main {
 	 * @param tfidfFile
 	 * @param ansFile
 	 */
-	public Main(String dataFilesdir, String glossaryFile, String tfidfFile, String matrixFile, String ansFile, String contentDir) {
+	public Main(String dataFilesdir, String glossaryFile, String tfidfFile, String matrixFile, String ansFile,
+			String contentDir) {
 		this.dataFilesdir = dataFilesdir;
 		System.out.println("\n====== Start initializing ======");
 
@@ -51,11 +52,8 @@ public class Main {
 		DataPreprocessor.readAnswer_v2(actualFirstStories, ansFile);
 
 		System.out.println("corpus: " + corpus.size());
-		assert(corpus.size() > 0);
 		System.out.println("glossary: " + glossary.size());
-		assert(glossary.size() > 0);
 		System.out.println("actualFirstStories: " + actualFirstStories.size());
-		assert(actualFirstStories.size() > 0);
 
 		System.out.println("====== Done initializing ======\n");
 	}
@@ -63,6 +61,7 @@ public class Main {
 	/**
 	 * Deal with a get request. Currently, it just print a short message.
 	 * 
+	 * @deprecated Post request is preferred.
 	 * @param request
 	 * @param response
 	 */
@@ -166,9 +165,9 @@ public class Main {
 		int methodID = Integer.parseInt(request.getParameter("methodID"));
 		MethodName methodName = MethodName.valueOf(methodID);
 		if (methodName == MethodName.Original_Subtopic || methodName == MethodName.Original_Subtopic_Weight
-		|| methodName == MethodName.Improved_Subtopic || methodName == MethodName.Improved_Subtopic_Weight
-		|| methodName == MethodName.Improved_Subtopic_Weight_Agg || methodName == MethodName.Improved_Agg
-		|| methodName == MethodName.Original_Subtopic_Time) {
+				|| methodName == MethodName.Improved_Subtopic || methodName == MethodName.Improved_Subtopic_Weight
+				|| methodName == MethodName.Improved_Subtopic_Weight_Agg || methodName == MethodName.Improved_Agg
+				|| methodName == MethodName.Original_Subtopic_Time) {
 			normCdet = methodName.getBestNormCdet();
 			PMiss = methodName.getBestPMiss();
 			PFa = methodName.getBestPFa();
@@ -183,7 +182,8 @@ public class Main {
 			responseJSONObject.put("PFa", PFa);
 
 			try {
-				BufferedReader reader = new BufferedReader(new FileReader(this.dataFilesdir + "/../" + methodName.getName() + ".dat"));
+				BufferedReader reader = new BufferedReader(
+						new FileReader(this.dataFilesdir + "/../" + methodName.getName() + ".dat"));
 				String line = null;
 				int myRow = 0;
 				while ((line = reader.readLine()) != null) {
@@ -292,7 +292,6 @@ public class Main {
 		for (int i = 0; i < storyNum; ++i) {
 			tmp = new JSONObject();
 			tmp.put("storyID", stories.get(i)); // the story id in corpus
-			// TODO how to get a reasonable title?
 			tmp.put("title", firstStories.get(i).getOriginalContent().subSequence(0, 30) + "...");
 			tmp.put("source", corpus.get(stories.get(i)).getSource());
 			tmp.put("date", corpus.get(stories.get(i)).getTimeStamp());
@@ -311,9 +310,7 @@ public class Main {
 	private JSONObject do_getContent(HttpServletRequest request) {
 		JSONObject responseJSONObject = new JSONObject();
 		int storyID = Integer.parseInt(request.getParameter("storyID"));
-		// TODO how to get a reasonable content, that is not stemmed?
 		responseJSONObject.put("content", corpus.get(storyID).getOriginalContent());
 		return responseJSONObject;
 	}
-
 }

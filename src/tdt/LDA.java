@@ -4,12 +4,13 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Random;
 import java.util.Vector;
 
-public class LDA {
+public class LDA implements SimilarityInterface {
 
 	private Vector<Story> corpus = null;
 	private Glossary glossary = null;
@@ -96,27 +97,27 @@ public class LDA {
 		System.out.println("Calculating POT done.");
 
 		System.out.println("Start Calculating Matrix...");
-//		printMatrix();
+		// printMatrix();
 		System.out.println("Done Calculating Matrix...");
 
 		System.out.println("Extracting topics done.");
 	}
 
 	public double getSimilarity(Story story1, Story story2) {
-//		double sim = 0.0;
+		// double sim = 0.0;
 
-//		for (int i = 0; i < numOfTopics; i++)
-//			sim += SimilarityOnEachTopic(story1, story2, i) * prob_of_topics[i];
-		
-//		return sim;
-		
+		// for (int i = 0; i < numOfTopics; i++)
+		// sim += SimilarityOnEachTopic(story1, story2, i) * prob_of_topics[i];
+
+		// return sim;
+
 		double[] A = new double[numOfTopics];
 		double[] B = new double[numOfTopics];
-		
+
 		for (int i = 0; i < story1.getProbOfTopics().size(); ++i) {
 			A[i] = story1.getProbOfTopics().get(i).doubleValue();
 		}
-		
+
 		for (int i = 0; i < story2.getProbOfTopics().size(); ++i) {
 			B[i] = story2.getProbOfTopics().get(i).doubleValue();
 		}
@@ -125,30 +126,31 @@ public class LDA {
 	}
 
 	// compute the similarity between two documents over one topic
-//	public double SimilarityOnEachTopic(Story story1, Story story2, int topicIndex) {
-//		double[] A = new double[glossary.size()];
-//		double[] B = new double[glossary.size()];
-//
-//		for (int i = 0; i < story1.getWords().size(); i++) {
-//			int i_word = story1.getWords().get(i);
-//
-//			if (i_word > -1) {
-//				A[i_word] += prob_topic_word_matrix[topicIndex][i_word];
-//			}
-//		}
-//
-//		for (int i = 0; i < story2.getWords().size(); i++) {
-//			int i_word = story2.getWords().get(i);
-//
-//			if (i_word > -1) {
-//				B[i_word] += prob_topic_word_matrix[topicIndex][i_word];
-//			}
-//		}
-//
-//		return Cosine(A, B);
-//	}
+	// public double SimilarityOnEachTopic(Story story1, Story story2, int
+	// topicIndex) {
+	// double[] A = new double[glossary.size()];
+	// double[] B = new double[glossary.size()];
+	//
+	// for (int i = 0; i < story1.getWords().size(); i++) {
+	// int i_word = story1.getWords().get(i);
+	//
+	// if (i_word > -1) {
+	// A[i_word] += prob_topic_word_matrix[topicIndex][i_word];
+	// }
+	// }
+	//
+	// for (int i = 0; i < story2.getWords().size(); i++) {
+	// int i_word = story2.getWords().get(i);
+	//
+	// if (i_word > -1) {
+	// B[i_word] += prob_topic_word_matrix[topicIndex][i_word];
+	// }
+	// }
+	//
+	// return Cosine(A, B);
+	// }
 
-	public double Cosine(double[] a, double[] b) {
+	private double Cosine(double[] a, double[] b) {
 		double innerProduct = 0.0;
 		for (int i = 0; i < a.length; i++)
 			innerProduct += a[i] * b[i];
@@ -268,12 +270,12 @@ public class LDA {
 		}
 
 		// calculate prob_topic_word_matrix
-//		for (int i = 0; i < numOfTopics; i++) {
-//			for (int j = 0; j < num_of_unique_words; j++) {
-//				prob_topic_word_matrix[i][j] = (word_topic_matrix[j][i] + BETA)
-//						/ (num_of_every_topic[i] + num_of_unique_words * BETA);
-//			}
-//		}
+		// for (int i = 0; i < numOfTopics; i++) {
+		// for (int j = 0; j < num_of_unique_words; j++) {
+		// prob_topic_word_matrix[i][j] = (word_topic_matrix[j][i] + BETA)
+		// / (num_of_every_topic[i] + num_of_unique_words * BETA);
+		// }
+		// }
 
 		for (int wordIndex = 0; wordIndex < num_of_unique_words; ++wordIndex) {
 			for (int topicIndex = 0; topicIndex < numOfTopics; ++topicIndex) {
@@ -302,17 +304,18 @@ public class LDA {
 				Iterator<Integer> it = wordSet.iterator();
 				while (it.hasNext()) {
 					Integer wordIndex = it.next();
-					prob_story_topic_matrix[storyIndex][topicIndex] *= prob_word_topic_matrix[wordIndex][topicIndex];				}
+					prob_story_topic_matrix[storyIndex][topicIndex] *= prob_word_topic_matrix[wordIndex][topicIndex];
+				}
 			}
-			
+
 			// set probOfTopics to story
 			ArrayList<Double> probOfTopics = new ArrayList<Double>();
-			
+
 			double total = 0;
 			for (int i = 0; i < prob_story_topic_matrix[storyIndex].length; ++i) {
 				total += prob_story_topic_matrix[storyIndex][i];
 			}
-			
+
 			for (int i = 0; i < prob_story_topic_matrix[storyIndex].length; ++i) {
 				probOfTopics.add(prob_story_topic_matrix[storyIndex][i] / total);
 			}
@@ -327,13 +330,14 @@ public class LDA {
 			FileOutputStream fos = new FileOutputStream(matrixFile);
 			OutputStreamWriter osw = new OutputStreamWriter(fos);
 
-//			for (int curTopic = 0; curTopic < numOfTopics; ++curTopic) {
-//				for (int j = 0; j < glossary.size(); j++) {
-//					osw.append(Double.toString(prob_topic_word_matrix[curTopic][j]) + " ");
-//				}
-//				osw.append('\n');
-//			}
-			
+			// for (int curTopic = 0; curTopic < numOfTopics; ++curTopic) {
+			// for (int j = 0; j < glossary.size(); j++) {
+			// osw.append(Double.toString(prob_topic_word_matrix[curTopic][j]) +
+			// " ");
+			// }
+			// osw.append('\n');
+			// }
+
 			for (int storyIndex = 0; storyIndex < corpus.size(); ++storyIndex) {
 				for (int topicIndex = 0; topicIndex < numOfTopics; ++topicIndex) {
 					osw.append(Double.toString(prob_story_topic_matrix[storyIndex][topicIndex]) + " ");
@@ -346,5 +350,11 @@ public class LDA {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	@Override
+	public void train(HashMap<String, String> parameters) {
+		// TODO Auto-generated method stub
+
 	}
 }

@@ -9,10 +9,13 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map.Entry;
 import java.util.Vector;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * This class is used to calculate the similarity between two stories. After
@@ -23,18 +26,35 @@ import java.util.Vector;
  * @author Zewei Wu
  */
 public class StoryLinkDetector {
-	private Plsa plsa = null;
+	private PLSA plsa = null;
 	private LDA lda = null;
 	private boolean isPlsaEnabled = false;
 	private boolean isPlsaTrained = false;
 	private boolean isLDAEnabled = false;
 	private boolean isLDATrained = false;
+	private boolean isTrained = false;
+	private Vector<Story> corpus = null;
+	private Glossary glossary = null;
+	private SimilarityInterface similarityInterface = null;
 
-	public StoryLinkDetector() {
+	public StoryLinkDetector(SimilarityName similarityName, Vector<Story> corpus, Glossary glossary) {
+		this.similarityInterface = similarityName.getSimilarityInterface(corpus, glossary);
+		this.corpus = corpus;
+		this.glossary = glossary;
 	}
 
-	public void enablePlsa(Vector<Story> corpus, Glossary glossary) {
-		this.plsa = new Plsa(corpus, glossary);
+	/**
+	 * @deprecated
+	 * @param corpus
+	 * @param glossary
+	 */
+	public StoryLinkDetector(Vector<Story> corpus, Glossary glossary) {
+		this.corpus = corpus;
+		this.glossary = glossary;
+	}
+
+	private void enablePlsa() {
+		this.plsa = new PLSA(corpus, glossary);
 		this.isPlsaEnabled = true;
 	}
 
@@ -44,14 +64,14 @@ public class StoryLinkDetector {
 		this.isPlsaTrained = false;
 	}
 
-	public void trainPlsa(int plsaNumOfTopics, int plsaMaxIter) {
+	private void trainPlsa(int plsaNumOfTopics, int plsaMaxIter) {
 		if (isPlsaEnabled) {
 			plsa.train(plsaNumOfTopics, plsaMaxIter);
 			this.isPlsaTrained = true;
 		}
 	}
 
-	public void enableLDA(Vector<Story> corpus, Glossary glossary) {
+	private void enableLDA() {
 		this.lda = new LDA(corpus, glossary);
 		this.isLDAEnabled = true;
 	}
@@ -62,7 +82,7 @@ public class StoryLinkDetector {
 		this.isLDATrained = false;
 	}
 
-	public void trainLDA(int ldaNumOfTopics, int ldaNumOfIterations, double ldaLAMBDA, double ldaALPHA,
+	private void trainLDA(int ldaNumOfTopics, int ldaNumOfIterations, double ldaLAMBDA, double ldaALPHA,
 			double ldaBETA) {
 		if (isLDAEnabled) {
 			lda.train(ldaNumOfTopics, ldaNumOfIterations, ldaLAMBDA, ldaALPHA, ldaBETA);
@@ -70,13 +90,66 @@ public class StoryLinkDetector {
 		}
 	}
 
+	/**
+	 * @deprecated
+	 * @param methodName
+	 * @param request
+	 */
+	public void train(MethodName methodName, HttpServletRequest request) {
+		switch (methodName) {
+		/* LDA */
+		case LDA_KMeans:
+		case LDA_DBSCAN:
+		case LDA_AggDetection:
+		case LDA_VotingKMeans:
+			int ldaNumOfTopics = Integer.parseInt(request.getParameter("lda.numOfTopics"));
+			int ldaNumOfIterations = Integer.parseInt(request.getParameter("lda.numOfIterations"));
+			double ldaLAMBDA = Double.parseDouble(request.getParameter("lda.lambda"));
+			double ldaALPHA = Double.parseDouble(request.getParameter("lda.alpha"));
+			double ldaBETA = Double.parseDouble(request.getParameter("lda.beta"));
+			this.enableLDA();
+			this.trainLDA(ldaNumOfTopics, ldaNumOfIterations, ldaLAMBDA, ldaALPHA, ldaBETA);
+			break;
+		/* pLSA */
+		case pLSA_KMeans:
+		case pLSA_DBSCAN:
+		case pLSA_AggDetection:
+		case pLSA_VotingKMeans:
+			int plsaNumOfTopics = Integer.parseInt(request.getParameter("plsa.numOfTopics"));
+			int plsaNumOfIterations = Integer.parseInt(request.getParameter("plsa.numOfIterations"));
+			this.enablePlsa();
+			this.trainPlsa(plsaNumOfTopics, plsaNumOfIterations);
+			break;
+		/* TFIDF */
+		default:
+			break;
+		}
+
+	}
+
+	public void train(HttpServletRequest request) {
+		HashMap<String, String> parameters = new HashMap<String, String>();
+		Enumeration<String> names = request.getParameterNames();
+		while (names.hasMoreElements()) {
+			String name = names.nextElement();
+			parameters.put(name, request.getParameter(name));
+		}
+		this.similarityInterface.train(parameters);
+		this.isTrained = true;
+	}
+
 	public double getSimilarity(Story story1, Story story2) {
-		if (isPlsaTrained)
-			return plsa.getSimilarity(story1, story2);
-		else if (isLDATrained)
-			return lda.getSimilarity(story1, story2);
-		else 	
-			return getCosineSimilarity(story1, story2);
+		if (this.isTrained) {
+			return this.similarityInterface.getSimilarity(story1, story2);
+		} else {
+			return 0.0;
+		}
+		// if (isPlsaTrained)
+		// return plsa.getSimilarity(story1, story2);
+		// else if (isLDATrained)
+		// return lda.getSimilarity(story1, story2);
+		// else
+		// return getCosineSimilarity(story1, story2);
 	}
 
 	/**
@@ -115,9 +188,38 @@ public class StoryLinkDetector {
 	public boolean isUsingLDA() {
 		return this.isLDATrained;
 	}
-	
+
 	public boolean isUsingPLSA() {
 		return this.isPlsaTrained;
+	}
+
+	/**
+	 * 
+	 * 
+	 * 
+	 * @param story1
+	 * @param story2
+	 * @return
+	 */
+	public static double getJaccardSimilarity(Story story1, Story story2) {
+		double similarity = 0.0;
+		double commonWords = 0.0;
+
+		Vector<Integer> words1 = story1.getWords();
+		Vector<Integer> words2 = story2.getWords();
+
+		for (int i = 0; i < words1.size(); ++i) {
+			for (int j = 0; j < words2.size(); ++j) {
+				if (words1.get(i).equals(words2.get(j))) {
+					commonWords += 2;
+					break;
+				}
+			}
+		}
+
+		similarity = commonWords / ((double) (words1.size() + words2.size()));
+
+		return similarity;
 	}
 
 	/**
@@ -244,35 +346,6 @@ public class StoryLinkDetector {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-	}
-	
-	/**
-	 * 
-	 * 
-	 * 
-	 * @param story1
-	 * @param story2
-	 * @return
-	 */
-	public static double getJaccardSimilarity(Story story1, Story story2) {
-		double similarity = 0.0;
-		double commonWords = 0.0;
-		
-		Vector<Integer> words1 = story1.getWords();
-		Vector<Integer> words2 = story2.getWords();
-		
-		for (int i = 0; i < words1.size(); ++i) {
-			for (int j = 0; j < words2.size(); ++j) {
-				if (words1.get(i).equals(words2.get(j))) {
-					commonWords += 2;
-					break;
-				}
-			}
-		}
-		
-		similarity = commonWords / ((double) (words1.size() + words2.size()));
-		
-		return similarity;
 	}
 
 }

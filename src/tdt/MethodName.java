@@ -30,10 +30,20 @@ public enum MethodName {
 	Improved_Subtopic_Weight_Agg("Improved_Subtopic_Weight_Agg", 0.41, 0.30, 0.02),
 	Improved_Agg("Improved_Agg", 0.19, 0.19, 0);
 
+	private SimilarityName similarityName = null;
+	private ClusteringName clusteringName = null;
+	private EnsemblerName ensemblerName = null;
 	private String name;
 	private double bestNormCdet;
 	private double bestPMiss;
 	private double bestPFa;
+
+	private MethodName(SimilarityName similarityName, ClusteringName clusteringName, EnsemblerName ensemblerName) {
+		this.similarityName = similarityName;
+		this.clusteringName = clusteringName;
+		this.ensemblerName = ensemblerName;
+		// TODO
+	}
 
 	private MethodName(String name, double bestNormCdet, double bestPMiss, double bestPFa) {
 		this.name = name;
@@ -114,12 +124,12 @@ public enum MethodName {
 			parameters.put("theta", String.valueOf(4.0));
 			parameters.put("firstWeight", String.valueOf(0.6));
 			parameters.put("lastWeight", String.valueOf(0.8));
-			break;	
+			break;
 		case Original_Subtopic_Time:
 			parameters.put("lemda", String.valueOf(0.18));
 			parameters.put("theta", String.valueOf(5.0));
 			parameters.put("timeWeight", String.valueOf(1.1));
-			break;	
+			break;
 		case Improved_Subtopic:
 			parameters.put("lemda", String.valueOf(0.67));
 			parameters.put("theta", String.valueOf(8.0));
@@ -129,13 +139,13 @@ public enum MethodName {
 			parameters.put("theta", String.valueOf(9.0));
 			parameters.put("firstWeight", String.valueOf(0.9));
 			parameters.put("lastWeight", String.valueOf(0.8));
-			break;	
+			break;
 		case Improved_Subtopic_Weight_Agg:
 			parameters.put("lemda", String.valueOf(0.66));
 			parameters.put("theta", String.valueOf(9.0));
 			parameters.put("firstWeight", String.valueOf(0.9));
 			parameters.put("lastWeight", String.valueOf(0.8));
-			break;	
+			break;
 		case Improved_Agg:
 			parameters.put("theta", String.valueOf(0.12));
 			parameters.put("threshold", String.valueOf(0.14));
@@ -164,6 +174,18 @@ public enum MethodName {
 
 	public double getBestPFa() {
 		return this.bestPFa;
+	}
+
+	public SimilarityName getSimilarityName() {
+		return this.similarityName;
+	}
+
+	public ClusteringName getClusteringName() {
+		return this.clusteringName;
+	}
+
+	public EnsemblerName getEnsemblerName() {
+		return this.ensemblerName;
 	}
 
 }

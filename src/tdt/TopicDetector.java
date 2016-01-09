@@ -66,11 +66,16 @@ class TopicDetector {
 		return responseJSONObject;
 	}
 
+	/**
+	 * 
+	 * @param request
+	 * @return
+	 */
 	public int doTopicDetection(HttpServletRequest request) {
 		for (Story story : corpus)
 			story.setTopicID(-1);
 
-		StoryLinkDetector storyLinkDetector = new StoryLinkDetector();
+		StoryLinkDetector storyLinkDetector = new StoryLinkDetector(corpus, glossary);
 		int numOfTopics = 0;
 		HashMap<String, String> parameters = new HashMap<String, String>();
 		Clustering clustering = null;
@@ -80,34 +85,8 @@ class TopicDetector {
 		int methodID = Integer.parseInt(request.getParameter("methodID"));
 		System.out.println("methodID = " + methodID);
 		MethodName methodName = MethodName.valueOf(methodID);
-		switch (methodName) {
-		/* LDA */
-		case LDA_KMeans:
-		case LDA_DBSCAN:
-		case LDA_AggDetection:
-		case LDA_VotingKMeans:
-			int ldaNumOfTopics = Integer.parseInt(request.getParameter("lda.numOfTopics"));
-			int ldaNumOfIterations = Integer.parseInt(request.getParameter("lda.numOfIterations"));
-			double ldaLAMBDA = Double.parseDouble(request.getParameter("lda.lambda"));
-			double ldaALPHA = Double.parseDouble(request.getParameter("lda.alpha"));
-			double ldaBETA = Double.parseDouble(request.getParameter("lda.beta"));
-			storyLinkDetector.enableLDA(corpus, glossary);
-			storyLinkDetector.trainLDA(ldaNumOfTopics, ldaNumOfIterations, ldaLAMBDA, ldaALPHA, ldaBETA);
-			break;
-		/* pLSA */
-		case pLSA_KMeans:
-		case pLSA_DBSCAN:
-		case pLSA_AggDetection:
-		case pLSA_VotingKMeans:
-			int plsaNumOfTopics = Integer.parseInt(request.getParameter("plsa.numOfTopics"));
-			int plsaNumOfIterations = Integer.parseInt(request.getParameter("plsa.numOfIterations"));
-			storyLinkDetector.enablePlsa(corpus, glossary);
-			storyLinkDetector.trainPlsa(plsaNumOfTopics, plsaNumOfIterations);
-			break;
-		/* TFIDF */
-		default:
-			break;
-		}
+		
+		storyLinkDetector.train(methodName, request);
 
 		switch (methodName) {
 		case TFIDF_KMeans:
@@ -193,4 +172,5 @@ class TopicDetector {
 		++numOfTopics;
 		return numOfTopics;
 	}
+	
 }

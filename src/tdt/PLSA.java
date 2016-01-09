@@ -1,6 +1,7 @@
 package tdt;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.Random;
@@ -11,7 +12,7 @@ import java.util.Vector;
  * 
  * @author Zewei Wu
  */
-public class Plsa {
+public class PLSA implements SimilarityInterface {
 	private Vector<Story> corpus = null;
 	private Glossary glossary = null;
 	private int numOfTopics = 0;
@@ -31,7 +32,7 @@ public class Plsa {
 	 * @param corpus
 	 * @param glossary
 	 */
-	public Plsa(Vector<Story> corpus, Glossary glossary) {
+	public PLSA(Vector<Story> corpus, Glossary glossary) {
 		this.corpus = corpus;
 		this.glossary = glossary;
 	}
@@ -172,7 +173,7 @@ public class Plsa {
 	 * @param b
 	 * @return
 	 */
-	public double Cosine(double[] a, double[] b) {
+	private double Cosine(double[] a, double[] b) {
 		double innerProduct = 0.0;
 		for (int i = 0; i < a.length; i++)
 			innerProduct += a[i] * b[i];
@@ -324,7 +325,7 @@ public class Plsa {
 	 * @param size
 	 * @return
 	 */
-	public double[] randomProbilities(int size) {
+	private double[] randomProbilities(int size) {
 		if (size < 1) {
 			throw new IllegalArgumentException("The size param must be greate than zero");
 		}
@@ -385,6 +386,12 @@ public class Plsa {
 
 	public void clear() {
 
+	}
+
+	@Override
+	public void train(HashMap<String, String> parameters) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }
