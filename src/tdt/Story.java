@@ -17,7 +17,6 @@ import java.util.Vector;
  * @author Zewei Wu
  */
 public class Story {
-	// ---------- FIELDS ------------------------------------------------------
 	/**
 	 * Default value of 'topicID', meaning the story is clustered.
 	 */
@@ -26,6 +25,16 @@ public class Story {
 	 * Default value of 'storyID', meaning the story is just a tmp story.
 	 */
 	private final static int DEFAULT_STORY_ID = -1;
+
+	/**
+	 * 
+	 * @param corpus
+	 */
+	public static void sort(Vector<Story> corpus) {
+		StoryComparator comparator = new StoryComparator();
+		corpus.sort(comparator);
+	}
+
 	/**
 	 * The position of this story, in the corpus.
 	 */
@@ -33,12 +42,15 @@ public class Story {
 	/**
 	 * the index of each plain word, refer to the glossary
 	 */
-	private Vector<Integer> words;
+	private Vector<Integer> words = null;
+	/**
+	 * 
+	 */
 	private String source = "unknown";
 	/**
 	 * yyyymmdd.hhmm.XXXX
 	 */
-	private String timeStamp;
+	private String timeStamp = "";
 	/**
 	 * Indicate the topicID of this story.
 	 */
@@ -46,28 +58,30 @@ public class Story {
 	/**
 	 * Before using, make sure setWordsCount is invoked.
 	 */
-	private HashMap<Integer, Integer> wordsCount;
+	private HashMap<Integer, Integer> wordsCount = null;
 	/**
 	 * Before using, make sure setTermFrequency() is invoked.
 	 */
-	private HashMap<Integer, Double> termFrequency;
+	private HashMap<Integer, Double> termFrequency = null;
 	/**
 	 * <word id, tfidf>. Before using, make sure setTFIDFBasedOnCorpus() is
 	 * invoked
 	 */
-	private HashMap<Integer, Double> tfidf;
-	
+	private HashMap<Integer, Double> tfidf = null;
 	/**
-	 * 
+	 * Mainly used in LDA
 	 */
-	private ArrayList<Double> probOfTopics;
-	
+	private ArrayList<Double> probOfTopics = null;
+	/**
+	 * No matter what similarity measurement is used, use this as feature
+	 * vector.
+	 */
+	private HashMap<Integer, Double> featureVector = null;
 	/**
 	 * original content
 	 */
-	private String originalContent;
-	
-	// ---------- CONSTRUCTORS ------------------------------------------------
+	private String originalContent = "";
+
 	/**
 	 * UNSUGGESTED: Default constructor, used only for temporary story.
 	 */
@@ -84,6 +98,11 @@ public class Story {
 		this.timeStamp = timestamp;
 	}
 
+	/**
+	 * 
+	 * @param source
+	 * @param timestamp
+	 */
 	public Story(String source, String timestamp) {
 		this.words = new Vector<Integer>();
 		this.source = source;
@@ -91,16 +110,72 @@ public class Story {
 	}
 
 	/**
-	 * @param words
-	 * @param timeStamp
+	 * Add a word to the words
 	 */
-	public Story(Vector<Integer> words, String timeStamp) {
-		// this.storyID = storyID;
-		this.words = words;
-		this.timeStamp = timeStamp;
+	public void addWord(int wordID) {
+		this.words.add(wordID);
 	}
 
-	// ---------- GETTERS & SETTERS--------------------------------------------
+	/**
+	 * 
+	 */
+	public void clearProbOfTopics() {
+		this.probOfTopics.clear();
+	}
+
+	/**
+	 * @param wordID
+	 * @return true if this story contains a certain word.
+	 */
+	public boolean containsWordID(int wordID) {
+		if (!this.wordsCount.isEmpty()) {
+			return this.wordsCount.containsKey(wordID);
+		} else {
+			for (int curWordID : this.words) {
+				if (curWordID == wordID)
+					return true;
+			}
+			return false;
+		}
+	}
+
+	/**
+	 * 
+	 * @param glossary
+	 * @return
+	 */
+	public String getContent(Glossary glossary) {
+		String result = "";
+		for (int wordID : this.words)
+			if (glossary.containsWordID(wordID))
+				result += " " + glossary.getWord(wordID);
+		return result;
+	}
+
+	/**
+	 * 
+	 * @return originalContent
+	 */
+	public String getOriginalContent() {
+		return this.originalContent;
+	}
+
+	/**
+	 * 
+	 * @return probability of every topics
+	 */
+	public ArrayList<Double> getProbOfTopics() {
+		return probOfTopics;
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	public String getSource() {
+		return source;
+	}
+
 	/**
 	 * @return the storyID
 	 */
@@ -109,53 +184,18 @@ public class Story {
 	}
 
 	/**
-	 * @param storyID
-	 *            the storyID to set
+	 * @return the termFrequency
 	 */
-	public void setStoryID(int storyID) {
-		this.storyID = storyID;
+	public HashMap<Integer, Double> getTermFrequency() {
+		return termFrequency;
 	}
 
 	/**
-	 * @return the words
+	 * @return the tfidf
 	 */
-	public Vector<Integer> getWords() {
-		return words;
+	public HashMap<Integer, Double> getTfidf() {
+		return tfidf;
 	}
-
-	/**
-	 * @param words
-	 *            the words to set
-	 */
-	// public void setWords(Vector<Integer> words) {
-	// this.words = words;
-	// }
-
-	/**
-	 * @param index
-	 * @return a word in 'words'
-	 */
-	public int getWord(int index) {
-		return this.words.get(index);
-	}
-
-	public String getSource() {
-		return source;
-	}
-
-	public void setSource(String source) {
-		this.source = source;
-	}
-
-	/**
-	 * Set a word in words
-	 * 
-	 * @param index
-	 * @param value
-	 */
-	// public void setWord(int index, int value) {
-	// this.words.set(index, value);
-	// }
 
 	/**
 	 * @return the timeStamp
@@ -165,11 +205,44 @@ public class Story {
 	}
 
 	/**
-	 * @param timeStamp
-	 *            the timeStamp to set
+	 * 
+	 * @param glossary
+	 * @return
 	 */
-	public void setTimeStamp(String timeStamp) {
-		this.timeStamp = timeStamp;
+	public String getTitle(Glossary glossary) {
+		String result = "";
+		for (int i = 0; i < this.words.size() && i < 15; ++i) {
+			int wordID = this.words.get(i);
+			if (glossary.containsWordID(wordID))
+				result += " " + glossary.getWord(wordID);
+		}
+		return result;
+	}
+
+	/**
+	 * 
+	 * @param dataFilesDir
+	 * @return
+	 */
+	public String getTitle(String dataFilesDir) {
+		String result = "";
+		String file = dataFilesDir + this.getTimeStamp() + "_"
+				+ this.getSource();
+		try {
+			BufferedReader reader = new BufferedReader(new FileReader(file));
+			String line = null;
+			int counter = 0;
+			while ((line = reader.readLine()) != null) {
+				result += line + " ";
+				counter++;
+				if (counter == 15)
+					break;
+			}
+			reader.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return result;
 	}
 
 	/**
@@ -180,11 +253,18 @@ public class Story {
 	}
 
 	/**
-	 * @param topicID
-	 *            the topicID to set
+	 * @param index
+	 * @return a word in 'words'
 	 */
-	public void setTopicID(int topicID) {
-		this.topicID = topicID;
+	public int getWord(int index) {
+		return this.words.get(index);
+	}
+
+	/**
+	 * @return the words
+	 */
+	public Vector<Integer> getWords() {
+		return words;
 	}
 
 	/**
@@ -197,120 +277,10 @@ public class Story {
 	}
 
 	/**
-	 * USE initWordsCount() INSTEAD. Set the wordsCount directly.
-	 * 
-	 * @param wordsCount
-	 *            the wordsCount to set
+	 * Initialize probOfTopics.
 	 */
-	public void setWordsCount(HashMap<Integer, Integer> wordsCount) {
-		this.wordsCount = wordsCount;
-	}
-
-	/**
-	 * @return the termFrequency
-	 */
-	public HashMap<Integer, Double> getTermFrequency() {
-		return termFrequency;
-	}
-
-	/**
-	 * WARNING: USE initTermFrequency() INSTEAD.
-	 * 
-	 * @param termFrequency
-	 *            the termFrequency to set
-	 */
-	public void setTermFrequency(HashMap<Integer, Double> termFrequency) {
-		this.termFrequency = termFrequency;
-	}
-
-	/**
-	 * @return the tfidf
-	 */
-	public HashMap<Integer, Double> getTfidf() {
-		return tfidf;
-	}
-
-	/**
-	 * @param tfidf
-	 *            the tfidf to set
-	 */
-	public void setTfidf(HashMap<Integer, Double> tfidf) {
-		this.tfidf = tfidf;
-	}
-	
-	/**
-	 * 
-	 * @return probability of every topics
-	 */
-	public ArrayList<Double> getProbOfTopics() {
-		return probOfTopics;
-	}
-	
-	/**
-	 * 
-	 * @param probOfTopics
-	 */
-	public void setProbOfTopics(ArrayList<Double> probOfTopics) {
-		this.probOfTopics = probOfTopics;
-	}
-	
-	/** 
-	 * 
-	 * @param originalContent
-	 */
-	public void setOriginalContent(String originalContent) {
-		this.originalContent = originalContent;
-	}
-	
-	/**
-	 * 
-	 * @return originalContent
-	 */
-	public String getOriginalContent() {
-		return this.originalContent;
-	}
-
-	// ---------- BOOLEAN -----------------------------------------------------
-	/**
-	 * @param wordID
-	 * @return true if this story contains a certain word.
-	 */
-	public boolean containsWordID(int wordID) {
-		if (!this.wordsCount.isEmpty()) {
-			return this.wordsCount.containsKey(wordID);
-		} else {
-			// Option 1: first build up the wordsCount, then use
-			// wordsCount.find()
-			// Option 2: sort the words, then find (using the binary search)
-			for (int curWordID : this.words) {
-				if (curWordID == wordID)
-					return true;
-			}
-			return false;
-		}
-	}
-
-	/**
-	 * @return true if the story is already clustered.
-	 */
-	public boolean isClustered() {
-		return this.topicID != Story.DEFAULT_TOPIC_ID;
-	}
-
-	// ---------- INITIALIZATION ----------------------------------------------
-	/**
-	 * Initialize the wordsCount
-	 */
-	public void initWordsCount() {
-		this.wordsCount = new HashMap<Integer, Integer>();
-		for (int curWordID : this.words) {
-			if (this.wordsCount.containsKey(curWordID)) {
-				this.wordsCount.put(curWordID, this.wordsCount.get(curWordID) + 1);
-			} else {
-				this.wordsCount.put(curWordID, 1);
-			}
-		}
-
+	public void initProbOfTopics() {
+		this.probOfTopics = new ArrayList<Double>();
 	}
 
 	/**
@@ -334,24 +304,77 @@ public class Story {
 	public void initTfidf() {
 		this.tfidf = new HashMap<Integer, Double>();
 	}
-	
+
 	/**
-	 * Initialize probOfTopics.
+	 * Initialize the wordsCount
 	 */
-	public void initProbOfTopics() {
-		this.probOfTopics = new ArrayList<Double>();
+	public void initWordsCount() {
+		this.wordsCount = new HashMap<Integer, Integer>();
+		for (int curWordID : this.words) {
+			if (this.wordsCount.containsKey(curWordID)) {
+				this.wordsCount.put(curWordID,
+						this.wordsCount.get(curWordID) + 1);
+			} else {
+				this.wordsCount.put(curWordID, 1);
+			}
+		}
 	}
-	
-	// ---------- OTHERS ------------------------------------------------------
-	
-	public void clearProbOfTopics(){
-		this.probOfTopics.clear();
-	}
+
 	/**
-	 * Add a word to the words
+	 * @return true if the story is already clustered.
 	 */
-	public void addWord(int wordID) {
-		this.words.add(wordID);
+	public boolean isClustered() {
+		return this.topicID != Story.DEFAULT_TOPIC_ID;
+	}
+
+	/**
+	 * 
+	 * @param originalContent
+	 */
+	public void setOriginalContent(String originalContent) {
+		this.originalContent = originalContent;
+	}
+
+	/**
+	 * 
+	 * @param probOfTopics
+	 */
+	public void setProbOfTopics(ArrayList<Double> probOfTopics) {
+		this.probOfTopics = probOfTopics;
+	}
+
+	/**
+	 * 
+	 * @param source
+	 */
+	public void setSource(String source) {
+		this.source = source;
+	}
+
+	/**
+	 * @param storyID
+	 *            the storyID to set
+	 */
+	public void setStoryID(int storyID) {
+		this.storyID = storyID;
+	}
+
+	/**
+	 * WARNING: USE initTermFrequency() INSTEAD.
+	 * 
+	 * @param termFrequency
+	 *            the termFrequency to set
+	 */
+	public void setTermFrequency(HashMap<Integer, Double> termFrequency) {
+		this.termFrequency = termFrequency;
+	}
+
+	/**
+	 * @param tfidf
+	 *            the tfidf to set
+	 */
+	public void setTfidf(HashMap<Integer, Double> tfidf) {
+		this.tfidf = tfidf;
 	}
 
 	/**
@@ -360,7 +383,8 @@ public class Story {
 	 * @param corpus
 	 * @param wordIDToStoryIndices
 	 */
-	public void setTfidfBasedOnCorpus(Vector<Story> corpus, HashMap<Integer, HashSet<Integer>> wordIDToStoryIndices) {
+	public void setTfidfBasedOnCorpus(Vector<Story> corpus,
+			HashMap<Integer, HashSet<Integer>> wordIDToStoryIndices) {
 		if (this.termFrequency == null || this.termFrequency.isEmpty())
 			this.initTermFrequency();
 
@@ -379,42 +403,30 @@ public class Story {
 		}
 	}
 
-	public String getTitle(Glossary glossary) {
-		String result = "";
-		for (int i = 0; i < this.words.size() && i < 15; ++i) {
-			int wordID = this.words.get(i);
-			if (glossary.containsWordID(wordID))
-				result += " " + glossary.getWord(wordID);
-		}
-		return result;
+	/**
+	 * @param timeStamp
+	 *            the timeStamp to set
+	 */
+	public void setTimeStamp(String timeStamp) {
+		this.timeStamp = timeStamp;
 	}
 
-	public String getTitle(String dataFilesDir) {
-		String result = "";
-		String file = dataFilesDir + this.getTimeStamp() + "_" + this.getSource();
-		try {
-			BufferedReader reader = new BufferedReader(new FileReader(file));
-			String line = null;
-			int counter = 0;
-			while ((line = reader.readLine()) != null) {
-				result += line + " ";
-				counter++;
-				if (counter == 15)
-					break;
-			}
-			reader.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return result;
+	/**
+	 * @param topicID
+	 *            the topicID to set
+	 */
+	public void setTopicID(int topicID) {
+		this.topicID = topicID;
 	}
 
-	public String getContent(Glossary glossary) {
-		String result = "";
-		for (int wordID : this.words)
-			if (glossary.containsWordID(wordID))
-				result += " " + glossary.getWord(wordID);
-		return result;
+	/**
+	 * USE initWordsCount() INSTEAD. Set the wordsCount directly.
+	 * 
+	 * @param wordsCount
+	 *            the wordsCount to set
+	 */
+	public void setWordsCount(HashMap<Integer, Integer> wordsCount) {
+		this.wordsCount = wordsCount;
 	}
 
 	/**
@@ -429,10 +441,5 @@ public class Story {
 			}
 		}
 		return result;
-	}
-
-	public static void sort(Vector<Story> corpus) {
-		StoryComparator comparator = new StoryComparator();
-		corpus.sort(comparator);
 	}
 }

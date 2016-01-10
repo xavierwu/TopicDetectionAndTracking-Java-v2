@@ -41,8 +41,8 @@ public class Main {
 	 * @param tfidfFile
 	 * @param ansFile
 	 */
-	public Main(String dataFilesdir, String glossaryFile, String tfidfFile, String matrixFile, String ansFile,
-			String contentDir) {
+	public Main(String dataFilesdir, String glossaryFile, String tfidfFile,
+			String matrixFile, String ansFile, String contentDir) {
 		this.dataFilesdir = dataFilesdir;
 		System.out.println("\n====== Start initializing ======");
 
@@ -59,37 +59,13 @@ public class Main {
 	}
 
 	/**
-	 * Deal with a get request. Currently, it just print a short message.
-	 * 
-	 * @deprecated Post request is preferred.
-	 * @param request
-	 * @param response
-	 */
-	public void doGet(HttpServletRequest request, HttpServletResponse response) {
-		System.out.println("doGet");
-
-		response.setCharacterEncoding("UTF-8");
-		response.setContentType("application/json; charset=utf-8");
-		// response.setContentType("text/html; charset=utf-8");
-		PrintWriter out = null;
-		try {
-			out = response.getWriter();
-			out.println("doGet");
-		} catch (IOException e) {
-			e.printStackTrace();
-		} finally {
-			if (out != null)
-				out.close();
-		}
-	}
-
-	/**
 	 * Deal with a post request.
 	 * 
 	 * @param request
 	 * @param response
 	 */
-	public void doPost(HttpServletRequest request, HttpServletResponse response) {
+	public void doPost(HttpServletRequest request,
+			HttpServletResponse response) {
 		String action = request.getParameter("action");
 		System.out.println("doPost: " + action);
 
@@ -124,33 +100,6 @@ public class Main {
 	}
 
 	/**
-	 * Response with the evaluations of different algorithms.
-	 * 
-	 * @return {algorithmCount:, 0:{methodID:, algorithm:, overall:, normCdet:,
-	 *         PMiss:, PFa:}, 1:{...}, ...}
-	 */
-	private JSONObject do_getEvaluation() {
-		JSONObject responseJSONObject = topicDetector.getMethodList();
-		return responseJSONObject;
-	}
-
-	/**
-	 * Help doPost() to deal with the "setParameters" request.
-	 * 
-	 * @param request
-	 *            It should contain a JSON with a key "methodID". And it should
-	 *            have a key-value pair <"action":"setParameters">, though in
-	 *            this method we don't check it.
-	 * @return {numOfParameters:, 0:{parameter:, value:}, 1{...}, ...}
-	 */
-	private JSONObject do_setParameters(HttpServletRequest request) {
-		int methodID = Integer.parseInt(request.getParameter("methodID"));
-		System.out.println("methodID = " + methodID);
-		JSONObject responseJSONObject = topicDetector.prepareTopicDetection(methodID);
-		return responseJSONObject;
-	}
-
-	/**
 	 * Help doPost() to deal with the "commitParameters" request.
 	 * 
 	 * @param request
@@ -164,9 +113,12 @@ public class Main {
 
 		int methodID = Integer.parseInt(request.getParameter("methodID"));
 		MethodName methodName = MethodName.valueOf(methodID);
-		if (methodName == MethodName.Original_Subtopic || methodName == MethodName.Original_Subtopic_Weight
-				|| methodName == MethodName.Improved_Subtopic || methodName == MethodName.Improved_Subtopic_Weight
-				|| methodName == MethodName.Improved_Subtopic_Weight_Agg || methodName == MethodName.Improved_Agg
+		if (methodName == MethodName.Original_Subtopic
+				|| methodName == MethodName.Original_Subtopic_Weight
+				|| methodName == MethodName.Improved_Subtopic
+				|| methodName == MethodName.Improved_Subtopic_Weight
+				|| methodName == MethodName.Improved_Subtopic_Weight_Agg
+				|| methodName == MethodName.Improved_Agg
 				|| methodName == MethodName.Original_Subtopic_Time) {
 			normCdet = methodName.getBestNormCdet();
 			PMiss = methodName.getBestPMiss();
@@ -183,7 +135,8 @@ public class Main {
 
 			try {
 				BufferedReader reader = new BufferedReader(
-						new FileReader(this.dataFilesdir + "/../" + methodName.getName() + ".dat"));
+						new FileReader(this.dataFilesdir + "/../"
+								+ methodName.getName() + ".dat"));
 				String line = null;
 				int myRow = 0;
 				while ((line = reader.readLine()) != null) {
@@ -194,7 +147,8 @@ public class Main {
 					firstStories.add(corpus.get(Integer.parseInt(parts[1])));
 					for (int i = 2; i < parts.length - 1; ++i) {
 						// corpus.get(storyCount).addWord(Integer.parseInt(parts[i]));
-						corpus.get(Integer.parseInt(parts[i])).setTopicID(myRow);
+						corpus.get(Integer.parseInt(parts[i]))
+								.setTopicID(myRow);
 					}
 					myRow++;
 				}
@@ -211,7 +165,8 @@ public class Main {
 			for (int i = 0; i < topicNum; ++i) {
 				tmp = new JSONObject();
 				tmp.put("topicID", firstStories.get(i).getTopicID());
-				tmp.put("title", firstStories.get(i).getOriginalContent().subSequence(0, 30) + "...");
+				tmp.put("title", firstStories.get(i).getOriginalContent()
+						.subSequence(0, 30) + "...");
 				tmp.put("source", firstStories.get(i).getSource());
 				tmp.put("date", firstStories.get(i).getTimeStamp());
 				responseJSONObject.put(i, tmp);
@@ -226,10 +181,13 @@ public class Main {
 
 			System.out.println();
 			System.out.println("=== First Story Detection Start");
-			FirstStoryDetector firstStoryDetector = new FirstStoryDetector(corpus);
-			firstStories = firstStoryDetector.doFirstStoryDetection(numOfTopics);
+			FirstStoryDetector firstStoryDetector = new FirstStoryDetector(
+					corpus);
+			firstStories = firstStoryDetector
+					.doFirstStoryDetection(numOfTopics);
 			System.out.println("firstStories: " + firstStories.size());
-			System.out.println("actualFirstStories: " + actualFirstStories.size());
+			System.out.println(
+					"actualFirstStories: " + actualFirstStories.size());
 			System.out.println("=== First Story Detection End");
 			System.out.println();
 
@@ -258,12 +216,39 @@ public class Main {
 			for (int i = 0; i < topicNum; ++i) {
 				tmp = new JSONObject();
 				tmp.put("topicID", firstStories.get(i).getTopicID());
-				tmp.put("title", firstStories.get(i).getOriginalContent().subSequence(0, 30) + "...");
+				tmp.put("title", firstStories.get(i).getOriginalContent()
+						.subSequence(0, 30) + "...");
 				tmp.put("source", firstStories.get(i).getSource());
 				tmp.put("date", firstStories.get(i).getTimeStamp());
 				responseJSONObject.put(i, tmp);
 			}
 		}
+		return responseJSONObject;
+	}
+
+	/**
+	 * Help doPost() to deal with the "getContent" request.
+	 * 
+	 * @param request
+	 *            It's required to have a JSON with a key "storyID".
+	 * @return {content:}
+	 */
+	private JSONObject do_getContent(HttpServletRequest request) {
+		JSONObject responseJSONObject = new JSONObject();
+		int storyID = Integer.parseInt(request.getParameter("storyID"));
+		responseJSONObject.put("content",
+				corpus.get(storyID).getOriginalContent());
+		return responseJSONObject;
+	}
+
+	/**
+	 * Response with the evaluations of different algorithms.
+	 * 
+	 * @return {algorithmCount:, 0:{methodID:, algorithm:, overall:, normCdet:,
+	 *         PMiss:, PFa:}, 1:{...}, ...}
+	 */
+	private JSONObject do_getEvaluation() {
+		JSONObject responseJSONObject = topicDetector.getMethodList();
 		return responseJSONObject;
 	}
 
@@ -292,7 +277,9 @@ public class Main {
 		for (int i = 0; i < storyNum; ++i) {
 			tmp = new JSONObject();
 			tmp.put("storyID", stories.get(i)); // the story id in corpus
-			tmp.put("title", firstStories.get(i).getOriginalContent().subSequence(0, 30) + "...");
+			tmp.put("title",
+					firstStories.get(i).getOriginalContent().subSequence(0, 30)
+							+ "...");
 			tmp.put("source", corpus.get(stories.get(i)).getSource());
 			tmp.put("date", corpus.get(stories.get(i)).getTimeStamp());
 			responseJSONObject.put(i, tmp);
@@ -301,16 +288,46 @@ public class Main {
 	}
 
 	/**
-	 * Help doPost() to deal with the "getContent" request.
+	 * Help doPost() to deal with the "setParameters" request.
 	 * 
 	 * @param request
-	 *            It's required to have a JSON with a key "storyID".
-	 * @return {content:}
+	 *            It should contain a JSON with a key "methodID". And it should
+	 *            have a key-value pair <"action":"setParameters">, though in
+	 *            this method we don't check it.
+	 * @return {numOfParameters:, 0:{parameter:, value:}, 1{...}, ...}
 	 */
-	private JSONObject do_getContent(HttpServletRequest request) {
-		JSONObject responseJSONObject = new JSONObject();
-		int storyID = Integer.parseInt(request.getParameter("storyID"));
-		responseJSONObject.put("content", corpus.get(storyID).getOriginalContent());
+	private JSONObject do_setParameters(HttpServletRequest request) {
+		int methodID = Integer.parseInt(request.getParameter("methodID"));
+		System.out.println("methodID = " + methodID);
+		JSONObject responseJSONObject = topicDetector
+				.prepareTopicDetection(methodID);
 		return responseJSONObject;
 	}
+
+	/**
+	 * Deal with a get request. Currently, it just print a short message.
+	 * 
+	 * @deprecated Post request is preferred.
+	 * @param request
+	 * @param response
+	 */
+	public void doGet(HttpServletRequest request,
+			HttpServletResponse response) {
+		System.out.println("doGet");
+
+		response.setCharacterEncoding("UTF-8");
+		response.setContentType("application/json; charset=utf-8");
+		// response.setContentType("text/html; charset=utf-8");
+		PrintWriter out = null;
+		try {
+			out = response.getWriter();
+			out.println("doGet");
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			if (out != null)
+				out.close();
+		}
+	}
+
 }
