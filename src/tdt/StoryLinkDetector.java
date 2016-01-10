@@ -21,9 +21,11 @@ public class StoryLinkDetector {
 	private boolean isTrained = false;
 	private SimilarityInterface similarityInterface = null;
 
-	public StoryLinkDetector(SimilarityName similarityName, Vector<Story> corpus, Glossary glossary) {
+	public StoryLinkDetector(SimilarityName similarityName,
+			Vector<Story> corpus, Glossary glossary) {
 		this.isTrained = false;
-		this.similarityInterface = similarityName.getSimilarityInterface(corpus, glossary);
+		this.similarityInterface = similarityName.getSimilarityInterface(corpus,
+				glossary);
 	}
 
 	public void train(HttpServletRequest request) {
@@ -69,6 +71,22 @@ public class StoryLinkDetector {
 		similarity = commonWords / ((double) (words1.size() + words2.size()));
 
 		return similarity;
+	}
+
+	/**
+	 * @deprecated TODO
+	 * @return
+	 */
+	public boolean isUsingLDA() {
+		return false;
+	}
+
+	/**
+	 * @deprecated TODO
+	 * @return
+	 */
+	public boolean isUsingPLSA() {
+		return false;
 	}
 
 }

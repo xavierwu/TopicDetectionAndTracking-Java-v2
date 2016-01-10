@@ -51,7 +51,8 @@ class TopicDetector {
 		JSONObject responseJSONObject = new JSONObject();
 		JSONObject tmp = null;
 
-		HashMap<String, String> parameters = MethodName.valueOf(methodID).getBestParameters();
+		HashMap<String, String> parameters = MethodName.valueOf(methodID)
+				.getBestParameters();
 		responseJSONObject.put("numOfParameters", parameters.size());
 		int ctr = 0;
 		for (Entry<String, String> entry : parameters.entrySet()) {
@@ -76,69 +77,38 @@ class TopicDetector {
 		for (Story story : corpus)
 			story.setTopicID(-1);
 
-		int numOfTopics = 0;
-
-		ArrayList<Integer> resultPartition = null;
-
 		int methodID = Integer.parseInt(request.getParameter("methodID"));
 		System.out.println("methodID = " + methodID);
 
 		MethodName methodName = MethodName.valueOf(methodID);
-		StoryLinkDetector storyLinkDetector = new StoryLinkDetector(methodName.getSimilarityName(), corpus, glossary);
+
+		StoryLinkDetector storyLinkDetector = new StoryLinkDetector(
+				methodName.getSimilarityName(), corpus, glossary);
 		storyLinkDetector.train(request);
-		
+
 		HashMap<String, String> parameters = new HashMap<String, String>();
 		Enumeration<String> names = request.getParameterNames();
 		while (names.hasMoreElements()) {
 			String name = names.nextElement();
 			parameters.put(name, request.getParameter(name));
-		}		
-		Clustering clustering = new Clustering(methodName.getClusteringName(), corpus, storyLinkDetector);
-		clustering.train(parameters);
-		resultPartition = clustering.doClustering();
-		
-		switch (methodName) {
-		case TFIDF_VotingKMeans:
-		case LDA_VotingKMeans:
-		case pLSA_VotingKMeans:
-			int numOfPartitions = Integer.parseInt(request.getParameter("numOfPartitions"));
-			numOfTopics = Integer.parseInt(request.getParameter("numOfTopics"));
-			numOfLoops = Integer.parseInt(request.getParameter("numOfLoops"));
-			System.out.println("Parameters: ");
-			System.out.println("> numOfPartitions = " + numOfPartitions);
-			System.out.println("> numOfTopics = " + numOfTopics);
-			System.out.println("> numOfLoops = " + numOfLoops);
-			parameters.put("numOfPartitions", String.valueOf(numOfPartitions));
-			parameters.put("numOfTopics", String.valueOf(numOfTopics));
-			parameters.put("numOfLoops", String.valueOf(numOfLoops));
-			System.out.println("parameters: " + parameters.size());
-			ensembler = new ClusteringEnsembler(corpus, storyLinkDetector);
-			resultPartition = ensembler.doClustering(methodName, parameters);
-			break;
-		case TFIDF_EA_SL:
-		case LDA_EA_SL:
-		case pLSA_EA_SL:
-			numOfPartitions = Integer.parseInt(request.getParameter("numOfPartitions"));
-			numOfTopics = Integer.parseInt(request.getParameter("numOfTopics"));
-			numOfLoops = Integer.parseInt(request.getParameter("numOfLoops"));
-			threshold = Double.parseDouble(request.getParameter("threshold"));
-			System.out.println("Parameters: ");
-			System.out.println("> numOfPartitions = " + numOfPartitions);
-			System.out.println("> numOfTopics = " + numOfTopics);
-			System.out.println("> numOfLoops = " + numOfLoops);
-			System.out.println("> threshold = " + threshold);
-			parameters.put("numOfPartitions", String.valueOf(numOfPartitions));
-			parameters.put("numOfTopics", String.valueOf(numOfTopics));
-			parameters.put("numOfLoops", String.valueOf(numOfLoops));
-			parameters.put("threshold", String.valueOf(threshold));
-			ensembler = new ClusteringEnsembler(corpus, storyLinkDetector);
-			resultPartition = ensembler.doClustering(methodName, parameters);
-			break;
-		default:
-			break;
 		}
 
-		numOfTopics = 0;
+		ArrayList<Integer> resultPartition = null;
+		if (methodName.getEnsemblerName() != null) {
+			ClusteringEnsembler ensembler = new ClusteringEnsembler(
+					methodName.getEnsemblerName(), corpus, storyLinkDetector);
+			ensembler.train(parameters);
+			resultPartition = ensembler.doClustering();
+		} else if (methodName.getClusteringName() != null) {
+			Clustering clustering = new Clustering(
+					methodName.getClusteringName(), corpus, storyLinkDetector);
+			clustering.train(parameters);
+			resultPartition = clustering.doClustering();
+		} else {
+			return 0;
+		}
+
+		int numOfTopics = 0;
 		for (int i = 0; i < resultPartition.size(); ++i)
 			if (resultPartition.get(i) > numOfTopics)
 				numOfTopics = resultPartition.get(i);

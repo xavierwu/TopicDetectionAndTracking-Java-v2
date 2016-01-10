@@ -46,6 +46,7 @@ public class KMeans implements ClusteringInterface {
 			while (set.contains(randInt))
 				randInt = r.nextInt(corpus.size());
 			set.add(randInt);
+			// TODO consider adding a special vector in Story
 			if (storyLinkDetector.isUsingLDA() || storyLinkDetector.isUsingPLSA())
 				tmp.setProbOfTopics(corpus.get(randInt).getProbOfTopics());
 			else

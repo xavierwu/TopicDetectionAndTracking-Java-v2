@@ -5,7 +5,7 @@ package tdt;
 
 /**
  * @author Zewei Wu
- *
+ * @deprecated
  */
 class Utilities {
 
